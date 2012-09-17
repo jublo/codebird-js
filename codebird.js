@@ -46,7 +46,7 @@ var Codebird = function () {
     /**
      * The API endpoint to use
      */
-    var _endpoint = 'https://api.twitter.com/1/';
+    var _endpoint = 'https://api.twitter.com/1.1/';
 
     /**
      * The API endpoint to use for OAuth requests
@@ -57,7 +57,7 @@ var Codebird = function () {
      * The API endpoint to use for uploading tweets with media
      * see https://dev.twitter.com/discussions/1059
      */
-    var _endpoint_upload = 'https://upload.twitter.com/1/';
+    var _endpoint_upload = 'https://upload.twitter.com/1.1/';
 
     /**
      * The Request or access token. Used to sign requests
@@ -85,7 +85,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.2.0';
+    var _version = '2.2.1';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -297,10 +297,9 @@ var Codebird = function () {
         }
 
         var httpmethod = _detectMethod(method_template);
-        var sign = _detectSign(method_template);
         var multipart = _detectMultipart(method_template);
 
-        return _callApi(httpmethod, method, method_template, apiparams, sign, multipart, callback);
+        return _callApi(httpmethod, method, method_template, apiparams, multipart, callback);
     };
 
     /**
@@ -592,20 +591,6 @@ var Codebird = function () {
     };
 
     /**
-     * Detects if API call should be signed
-     *
-     * @param string method The API method to call
-     *
-     * @return bool Whether the API call should be signed
-     */
-    var _detectSign = function (method) {
-        var unsignedmethods = [
-        // OAuth
-        'oauth/request_token'];
-        return unsignedmethods.join(' ').indexOf(method) < 0;
-    };
-
-    /**
      * Detects if API call should use multipart/form-data
      *
      * @param string method The API method to call
@@ -649,19 +634,15 @@ var Codebird = function () {
      * @param string          method          The API method to call
      * @param string          method_template The templated API method to call
      * @param array  optional params          The parameters to send along
-     * @param bool   optional sign            Whether to sign the API call
      * @param bool   optional multipart       Whether to use multipart/form-data
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, sign, multipart, callback) {
+    var _callApi = function (httpmethod, method, method_template, params, multipart, callback) {
         if (typeof params == 'undefined') {
             var params = {};
-        }
-        if (typeof sign == 'undefined') {
-            var sign = true;
         }
         if (typeof multipart == 'undefined') {
             var multipart = false;
@@ -669,7 +650,7 @@ var Codebird = function () {
         if (typeof callback != 'function') {
             var callback = function (reply) {};
         }
-        if (sign && _oauth_token == null) {
+        if (_oauth_token == null) {
             c('To make a signed API request, the OAuth token must be set.');
         }
         url = _getEndpoint(method);
