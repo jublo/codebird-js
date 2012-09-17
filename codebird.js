@@ -1,566 +1,752 @@
-/*  codebird-js
- *  Copyright (C) 2011 Jo Michael <me@mynetx.net>
+/**
+ * A simple wrapper for the Twitter API
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * @package codebird
+ * @author J.M. <me@mynetx.net>
+ * @copyright 2010-2012 J.M. <me@mynetx.net>
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Define constants
+ */
+var IMAGETYPE_GIF = 1,
+    IMAGETYPE_JPEG = 2,
+    IMAGETYPE_PNG = 3;
 
-var Codebird = (function () {
-    var _version = "1.1.2816.2016",
-        endpoint = "https://api.twitter.com/1/",
-        key = {},
-        token = {},
-        ReturnFormats = {
-            Object: 1,
-            String: 2
-        },
-        ReturnFormat = null,
-        Init = function () {
-            ReturnFormat = ReturnFormats.Object
-        },
-        Url = function (a) {
-            return encodeURIComponent(a).replace(/\!/g, "%21").replace(/\*/g, "%2A").replace(/\'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29")
-        },
-        SortArray = function (a) {
-            var b = {},
-                f = [],
-                c, d, e = [];
-            for (d in a) a.hasOwnProperty && f.push(d);
-            f.sort(function (g, h) {
-                if (g > h) return 1;
-                if (g < h) return -1;
-                return 0
-            });
-            for (c = 0; c < f.length; c++) {
-                d = f[c];
-                b[d] = a[d]
-            }
-            for (c in b) if (b.hasOwnProperty) e[c] = b[c];
-            return e
-        },
-        SHA1 = function (a) {
-            b64pad = "=";
-            return b64_hmac_sha1(key.s + "&" + (token.s ? token.s : ""), a)
-        },
-        Timestamp = function () {
-            return Math.floor((new Date).getTime() / 1E3)
-        },
-        Nonce = function (a) {
-            for (var b = "", f = 0; f < a; ++f) {
-                var c = Math.floor(Math.random() * 61);
-                b += "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz".substring(c, c + 1)
-            }
-            return b
-        },
-        Sign = function (a, b, f) {
-            var c = {
-                consumer_key: key.k,
-                version: "1.0",
-                timestamp: Timestamp(),
-                nonce: Nonce(6),
-                signature_method: "HMAC-SHA1"
-            },
-                d = {};
-            for (var e in c) d["oauth_" + e] = Url(c[e]);
-            if (token.k) d.oauth_token = Url(token.k);
-            for (e in f) d[e] = Url(f[e]);
-            var c = "";
-            d = SortArray(d);
-            for (e in d) {
-                c += e + "=" + d[e] + "&";
-            }
-            f = SHA1(a + "&" + Url(b) + "&" + Url(c.substring(0, c.length - 1)));
-            return ((a == "GET" ? b + "?" : "") + c + "oauth_signature=" + Url(f));
-        },
-        CallApi = function (x, a, b, f, c) {
-            if (c && !token.k) f(401, {});
-            else {
-                a = a.substring(0, 6) == "oauth/" ? "https://api.twitter.com/" + a : endpoint + a + ".json";
-                var e = new ActiveXObject("Microsoft.XMLHTTP");
-                if (x == "GET") e.open("GET", Sign("GET", a, b), true);
-                else {
-                    e.open("POST", a, true);
-                    e.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                }
-                e.onreadystatechange = function () {
-                    if (!(e.readyState < 4)) {
-                        var g = 12027;
-                        try {
-                            g = e.status
-                        } catch (h) {}
-                        ReturnFormat == ReturnFormats.Object ? (f ||
-                        function () {})(g, ParseApiReply(e.responsetext)) : (f ||
-                        function () {})(g, e.responsetext)
-                    }
-                };
-                e.send(x == "GET" ? null : Sign("POST", a, b))
-            }
-        },
-        CallApiGet = function (a, b, f, c) {
-            CallApi("GET", a, b, f, c);
-        },
-        CallApiPost = function (a, b, f, c) {
-            CallApi("POST", a, b, f, c);
-        },
-        ParseApiReply = function (a) {
-            var b = {};
-            try {
-                b = eval("(" + a + ")")
-            } catch (f) {
-                if (a) {
-                    a = a.split("&");
-                    for (var c = 0; c < a.length; c++) {
-                        var d = a[c].split("=");
-                        b[d[0]] = d[1]
-                    }
-                }
-            }
-            return b
-        },
-        PublicTimelineCache = {
-            timestamp: null,
-            data: null
-        };
-    Init();
-    var objPublic = {
-        Init: Init,
-        ReturnFormats: ReturnFormats,
-        Url: Url,
-        SetReturnFormat: function (a) {
-            ReturnFormat = a
-        },
-        SetKey: function (a) {
-            key = a
-        },
-        SetToken: function (a) {
-            token = a
-        },
-        SetEndpoint: function (a) {
-            endpoint = a
-        },
-        Account: {
-            EndSession: function () {
-                token = {}
-            },
-            RateLimitStatus: function (a) {
-                CallApiGet("account/rate_limit_status", {}, a, true)
-            },
-            UpdateDeliveryDevice: function (a, b) {
-                CallApiPost("account/update_delivery_device", a, b, true)
-            },
-            UpdateProfile: function (a, b) {
-                CallApiPost("account/update_profile", a, b, true)
-            },
-            UpdateProfileColors: function (a, b) {
-                CallApiPost("account/update_profile_colors", a, b, true)
-            },
-            UpdateProfileBackgroundImage: function (a, b) {
-                throw new Exception("Account.UpdateProfileBackgroundImage: Requires OAuth with multipart POST. You know how? Tell me.");
-            },
-            UpdateProfileImage: function (a, b) {
-                throw new Exception("Account.UpdateProfileImage: Requires OAuth with multipart POST. You know how? Tell me.");
-            },
-            VerifyCredentials: function (a) {
-                CallApiGet("account/verify_credentials", {
-                    suppress_response_codes: true
-                }, a, true)
-            }
-        },
-        Blocks: {
-            Blocking: function (a, b) {
-                CallApiGet("blocks/blocking", a, b, true)
-            },
-            BlockingIds: function (a, b) {
-                CallApiGet("blocks/blocking/ids", a, b, true)
-            },
-            Create: function (a, b) {
-                if (!a.id) throw new Exception("Blocks.Create: Missing parameter id.");
-                CallApiPost("blocks/create/" + a.id, a, b, true)
-            },
-            Destroy: function (a, b) {
-                if (!a.id) throw new Exception("Blocks.Destroy: Missing parameter id.");
-                CallApiPost("blocks/destroy/" + a.id, a, b, true)
-            },
-            Exists: function (a, b) {
-                if (!a.id) throw new Exception("Blocks.Exists: Missing parameter id.");
-                CallApiGet("blocks/exists/" + a.id, a, b, true)
-            }
-        },
-        DirectMessages: function (a, b) {
-            CallApiGet("direct_messages", a, b, true)
-        },
-        Favorites: function (a, b) {
-            CallApiGet("favorites", a, b, true)
-        },
-        Followers: {
-            Ids: function (a, b) {
-                CallApiGet("followers/ids", a, b, true)
-            }
-        },
-        Friends: {
-            Ids: function (a, b) {
-                CallApiGet("friends/ids", a, b, true)
-            }
-        },
-        Friendships: {
-            Create: function (a, b) {
-                if (!a.id) throw new Exception("Friendships.Create: Missing parameter id.");
-                CallApiPost("friendships/create/" + a.id, a, b, true)
-            },
-            Destroy: function (a, b) {
-                if (!a.id) throw new Exception("Friendships.Destroy: Missing parameter id.");
-                CallApiPost("friendships/destroy/" + a.id, a, b, true)
-            },
-            Exists: function (a, b) {
-                CallApiGet("friendships/exists", a, b, true)
-            },
-            Show: function (a, b) {
-                CallApiGet("friendships/show", a, b, true)
-            }
-        },
-        Geo: {
-            Id: function (a, b) {
-                if (!a.id) throw new Exception("Geo.Id: Missing parameter id.");
-                CallApiGet("geo/id" + a.id, a, b, false)
-            },
-            NearbyPlaces: function (a, b) {
-                CallApiGet("geo/nearby_places", a, b, true)
-            },
-            Place: function (a, b) {
-                CallApiPost("geo/place", a, b, true)
-            },
-            ReverseGeocode: function (a, b) {
-                CallApiGet("geo/reverse_geocode", a, b, false)
-            },
-            Search: function (a, b) {
-                CallApiGet("geo/search", a, b, false)
-            },
-            SimilarPlaces: function (a, b) {
-                CallApiGet("geo/similar_places", a, b, false)
-            }
-        },
-        Help: {
-            Test: function (a) {
-                CallApiGet("help/test", {}, a, false)
-            }
-        },
-        Legal: {
-            Privacy: function (a) {
-                CallApiGet("legal/privacy", {}, a, false)
-            },
-            Tos: function (a) {
-                CallApiGet("legal/tos", {}, a, false)
-            }
-        },
-        Notifications: {
-            Follow: function (a, b) {
-                if (!a.id) throw new Exception("Notifications.Follow: Missing parameter id.");
-                CallApiPost("notifications/follow/" + a.id, a, b, true)
-            },
-            Leave: function (a, b) {
-                if (!a.id) throw new Exception("Notifications.Leave: Missing parameter id.");
-                CallApiPost("notifications/leave/" + a.id, a, b, true)
-            }
-        },
-        Oauth: {
-            RequestToken: function (a) {
-                CallApiGet("oauth/request_token", {}, a, false)
-            },
-            Authorize: function () {
-                return "https://twitter.com/oauth/authorize?oauth_token=" + token.k;
-            },
-            AccessToken: function (a, b) {
-                CallApiPost("oauth/access_token", a, b, true)
-            }
-        },
-        ReportSpam: function (a, b) {
-            CallApiPost("report_spam", a, b, true)
-        },
-        SavedSearches: function (a, b) {
-            CallApiGet("saved_searches", a, b, true)
-        },
-        Statuses: {
-            DestroyId: function (a, b) {
-                if (!a.id) throw new Exception("Statuses.DestroyId: Missing parameter id.");
-                CallApiPost("statuses/destroy/" + a.id, {}, b, true)
-            },
-            Followers: function (a, b) {
-                CallApiGet("statuses/followers", a, b, true)
-            },
-            Friends: function (a, b) {
-                CallApiGet("statuses/friends", a, b, true)
-            },
-            FriendsTimeline: function (a, b) {
-                CallApiGet("statuses/friends_timeline", a, b, true)
-            },
-            HomeTimeline: function (a, b) {
-                CallApiGet("statuses/home_timeline", a, b, true)
-            },
-            Id: {
-                RetweetedBy: function (a, b) {
-                    if (!a.id) throw new Exception("Statuses.Id.RetweetedBy: Missing parameter id.");
-                    CallApiGet("statuses/" + a.id + "/retweeted_by", a, b, true)
-                },
-                RetweetedByIds: function (a, b) {
-                    if (!a.id) throw new Exception("Statuses.Id.RetweetedByIds: Missing parameter id.");
-                    CallApiGet("statuses/" + a.id + "/retweeted_by/ids", a, b, true)
-                }
-            },
-            Mentions: function (a, b) {
-                CallApiGet("statuses/mentions", a, b, true)
-            },
-            PublicTimeline: function (a) {
-                PublicTimelineCache.timestamp && PublicTimelineCache.timestamp + 60 > Timestamp() ? a(200, PublicTimelineCache.data) : CallApiGet("statuses/public_timeline", {},
+/**
+ * A simple wrapper for the Twitter API
+ *
+ * @package codebird
+ * @subpackage codebird-js
+ */
+var Codebird = function () {
 
-                function (b, f) {
-                    if (b == 200) PublicTimelineCache = {
-                        timestamp: Timestamp(),
-                        data: f
-                    };
-                    a(b, f)
-                }, true)
-            },
-            Retweet: {
-                Id: function (a, b) {
-                    if (!a.id) throw new Exception("Statuses.Retweet.Id: Missing parameter id.");
-                    CallApiPost("statuses/retweet/" + a.id, {}, b, true)
-                }
-            },
-            Retweets: {
-                Id: function (a, b) {
-                    if (!a.id) throw new Exception("Statuses.Retweets.Id: Missing parameter id.");
-                    CallApiGet("statuses/retweets/" + a.id, a, b, true)
-                }
-            },
-            RetweetedByMe: function (a, b) {
-                CallApiGet("statuses/retweeted_by_me", a, b, true)
-            },
-            RetweetedToMe: function (a, b) {
-                CallApiGet("statuses/retweeted_to_me", a, b, true)
-            },
-            RetweetsOfMe: function (a, b) {
-                CallApiGet("statuses/retweets_of_me", a, b, true)
-            },
-            Show: {
-                Id: function (a, b) {
-                    if (!a.id) throw new Exception("Statuses.Show.Id: Missing parameter id.");
-                    CallApiGet("statuses/show/" + a.id, {}, b, true)
-                }
-            },
-            Update: function (a, b) {
-                CallApiPost("statuses/update", a, b, true)
-            },
-            UserTimeline: function (a, b) {
-                CallApiGet("statuses/user_timeline", a, b, true)
-            }
-        },
-        ReportSpam: function (a, b) {
-            CallApiPost("report_spam", a, b, true)
-        },
-        Trends: function (a, b) {
-            CallApiGet("trends", a, b, false)
-        },
-        User: {
-            ListId: {
-                Members: {
-                    Delete: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Members: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Members: Missing parameter list_id.");
-                        a._method = "DELETE";
-                        CallApiPost(a.user + "/" + a.list_id + "/members", a, b, true)
-                    },
-                    Get: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Members: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Members: Missing parameter list_id.");
-                        CallApiGet(a.user + "/" + a.list_id + "/members", a, b, true)
-                    },
-                    Post: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Members: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Members: Missing parameter list_id.");
-                        CallApiPost(a.user + "/" + a.list_id + "/members", a, b, true)
-                    },
-                    Id: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Members.Id: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Members.Id: Missing parameter list_id.");
-                        if (!a.id) throw new Exception("User.ListId.Members.Id: Missing parameter id.");
-                        CallApiGet(a.user + "/" + a.list_id + "/members/" + a.id, a, b, true)
-                    }
-                },
-                CreateAll: function (a, b) {
-                    if (!a.user) throw new Exception("User.ListId.CreateAll: Missing parameter user.");
-                    if (!a.list_id) throw new Exception("User.ListId.CreateAll: Missing parameter list_id.");
-                    CallApiPost(a.user + "/" + a.list_id + "/create_all", a, b, true)
-                },
-                Subscribers: {
-                    Delete: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Subscribers: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Subscribers: Missing parameter list_id.");
-                        a._method = "DELETE";
-                        CallApiPost(a.user + "/" + a.list_id + "/subscribers", a, b, true)
-                    },
-                    Get: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Subscribers: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Subscribers: Missing parameter list_id.");
-                        CallApiGet(a.user + "/" + a.list_id + "/subscribers", a, b, true)
-                    },
-                    Post: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Subscribers: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Subscribers: Missing parameter list_id.");
-                        CallApiPost(a.user + "/" + a.list_id + "/subscribers", a, b, true)
-                    },
-                    Id: function (a, b) {
-                        if (!a.user) throw new Exception("User.ListId.Subscribers.Id: Missing parameter user.");
-                        if (!a.list_id) throw new Exception("User.ListId.Subscribers.Id: Missing parameter list_id.");
-                        if (!a.id) throw new Exception("User.ListId.Subscribers.Id: Missing parameter id.");
-                        CallApiGet(a.user + "/" + a.list_id + "/subscribers/" + a.id, a, b, true)
-                    }
-                }
-            },
-            Lists: {
-                Get: function (a, b) {
-                    if (!a.user) throw new Exception("User.Lists: Missing parameter user.");
-                    CallApiGet(a.user + "/lists", a, b, true)
-                },
-                Post: function (a, b) {
-                    if (!a.user) throw new Exception("User.Lists: Missing parameter user.");
-                    CallApiPost(a.user + "/lists", a, b, true)
-                },
-                Id: {
-                    Delete: function (a, b) {
-                        if (!a.user) throw new Exception("User.Lists.Id: Missing parameter user.");
-                        if (!a.id) throw new Exception("User.Lists.Id: Missing parameter id.");
-                        a._method = "DELETE";
-                        CallApiPost(a.user + "/lists/" + a.id, a, b, true)
-                    },
-                    Get: function (a, b) {
-                        if (!a.user) throw new Exception("User.Lists.Id: Missing parameter user.");
-                        if (!a.id) throw new Exception("User.Lists.Id: Missing parameter id.");
-                        CallApiGet(a.user + "/lists/" + a.id, a, b, true)
-                    },
-                    Post: function (a, b) {
-                        if (!a.user) throw new Exception("User.Lists.Id: Missing parameter user.");
-                        if (!a.id) throw new Exception("User.Lists.Id: Missing parameter id.");
-                        CallApiPost(a.user + "/lists/" + a.id, a, b, true)
-                    },
-                    Statuses: function (a, b) {
-                        if (!a.user) throw new Exception("User.Lists.Id.Statuses: Missing parameter user.");
-                        if (!a.id) throw new Exception("User.Lists.Id.Statuses: Missing parameter id.");
-                        CallApiGet(a.user + "/lists/" + a.id + "/statuses", a, b, false)
-                    }
-                },
-                Memberships: function (a, b) {
-                    if (!a.user) throw new Exception("User.Lists.Memberships: Missing parameter user.");
-                    CallApiGet(a.user + "/lists/memberships", a, b, true)
-                },
-                Subscriptions: function (a, b) {
-                    if (!a.user) throw new Exception("User.Lists.Subscriptions: Missing parameter user.");
-                    CallApiGet(a.user + "/lists/subscriptions", a, b, true)
-                }
-            }
-        },
-        Users: {
-            Lookup: function (a, b) {
-                CallApiGet("users/lookup", a, b, true)
-            },
-            ProfileImage: {
-                ScreenName: function (a, b) { /* TODO: This API call returns a 302 redirect. We need to find out how to handle. */
-                    if (!a.screen_name) throw new Exception("Users.ProfileImage.ScreenName: Missing parameter screen_name.");
-                    CallApiGet("users/profile_image/" + a.screen_name, a, b, false)
-                }
-            },
-            Search: function (a, b) {
-                CallApiGet("users/search", a, b, true)
-            },
-            Show: function (a, b) {
-                CallApiGet("users/show", a, b, true)
-            },
-            Suggestions_: function (a, b) {
-                CallApiGet("users/suggestions", a, b, true)
-            },
-            Suggestions: {
-                Slug: function (a, b) {
-                    if (!a.slug) throw new Exception("Users.Suggestions.Slug: Missing parameter slug.");
-                    CallApiGet("users/suggestions/" + a.slug, a, b, false)
-                }
-            }
-        }
+    /**
+     * The OAuth consumer key of your registered app
+     */
+    var _oauth_consumer_key = null;
+
+    /**
+     * The corresponding consumer secret
+     */
+    var _oauth_consumer_secret = null;
+
+    /**
+     * The API endpoint to use
+     */
+    var _endpoint = 'https://api.twitter.com/1/';
+
+    /**
+     * The API endpoint to use for OAuth requests
+     */
+    var _endpoint_oauth = 'https://api.twitter.com/';
+
+    /**
+     * The API endpoint to use for uploading tweets with media
+     * see https://dev.twitter.com/discussions/1059
+     */
+    var _endpoint_upload = 'https://upload.twitter.com/1/';
+
+    /**
+     * The Request or access token. Used to sign requests
+     */
+    var _oauth_token = null;
+
+    /**
+     * The corresponding request or access token secret
+     */
+    var _oauth_token_secret = null;
+
+    /**
+     * The cache to use for the public timeline
+     */
+    var _statuses_public_timeline_cache = {
+        timestamp: false,
+        data: false
     };
-    var objPublic2 = {
-        DirectMessages: {
-            Destroy: function (a, b) {
-                if (!a.id) throw new Exception("DirectMessages.Destroy: Missing parameter id.");
-                CallApiPost("direct_messages/destroy/" + a.id, {}, b, true)
-            },
-            New: function (a, b) {
-                CallApiPost("direct_messages/new", a, b, true)
-            },
-            Sent: function (a, b) {
-                CallApiGet("direct_messages/sent", a, b, true)
-            }
-        },
-        Favorites: {
-            Create: function (a, b) {
-                if (!a.id) throw new Exception("Favorites.Create: Missing parameter id.");
-                CallApiPost("favorites/create/" + a.id, a, b, true)
-            },
-            Destroy: function (a, b) {
-                if (!a.id) throw new Exception("Favorites.Destroy: Missing parameter id.");
-                CallApiPost("favorites/destroy/" + a.id, a, b, true)
-            },
-            Favorites: function (a, b) {
-                CallApiGet("favorites", a, b, true)
-            }
-        },
-        SavedSearches: {
-            Destroy: function (a, b) {
-                if (!a.id) throw new Exception("SavedSearches.Destroy: Missing parameter id.");
-                CallApiPost("saved_searches/destroy/" + a.id, {}, b, true)
-            },
-            Create: function (a, b) {
-                CallApiPost("saved_searches/create", a, b, true)
-            },
-            SavedSearches: function (a, b) {
-                CallApiGet("saved_searches", a, b, true)
-            },
-            Show: function (a, b) {
-                if (!a.id) throw new Exception("SavedSearches.Show: Missing parameter id.");
-                CallApiGet("saved_searches/show/" + a.id, {}, b, true)
-            }
-        },
-        Trends: {
-            Available: function (a, b) {
-                CallApiGet("trends/available", a, b, false)
-            },
-            Current: function (a, b) {
-                CallApiGet("trends/current", a, b, false)
-            },
-            Daily: function (a, b) {
-                CallApiGet("trends/daily", a, b, false)
-            },
-            Weekly: function (a, b) {
-                CallApiGet("trends/weekly", a, b, false)
-            },
-            Woeid: function (a, b) {
-                if (!a.woeid) throw new Exception("Trends.Woeid: Missing parameter woeid.");
-                CallApiGet("trends/" + a.woeid, a, b, false)
-            }
-        }
+
+    /**
+     * The file formats that Twitter accepts as image uploads
+     */
+    var _supported_media_files = [IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG];
+
+    /**
+     * The current Codebird version
+     */
+    var _version = '2.2.0';
+
+    /**
+     * Sets the OAuth consumer key and secret (App key)
+     *
+     * @param string key    OAuth consumer key
+     * @param string secret OAuth consumer secret
+     *
+     * @return void
+     */
+    var setConsumerKey = function (key, secret) {
+        _oauth_consumer_key = key;
+        _oauth_consumer_secret = secret;
     };
-    for (var strMergeNode in objPublic2) {
-        for (var strMergeFn in objPublic2[strMergeNode]) {
-            objPublic[strMergeNode][strMergeFn] = objPublic2[strMergeNode][strMergeFn];
+
+    /**
+     * Gets the current Codebird version
+     *
+     * @return string The version number
+     */
+    var getVersion = function () {
+        return _version;
+    };
+
+    /**
+     * Sets the OAuth request or access token and secret (User key)
+     *
+     * @param string token  OAuth request or access token
+     * @param string secret OAuth request or access token secret
+     *
+     * @return void
+     */
+    var setToken = function (token, secret) {
+        _oauth_token = token;
+        _oauth_token_secret = secret;
+    };
+
+    /**
+     * Parse URL-style parameters into object
+     *
+     * @param string str String to parse
+     * @param array array to load data into
+     *
+     * @return object
+     */
+    function parse_str(str, array) {
+        // Parses GET/POST/COOKIE data and sets global variables  
+        // 
+        // version: 1109.2015
+        // discuss at: http://phpjs.org/functions/parse_str    // +   original by: Cagri Ekin
+        // +   improved by: Michael White (http://getsprink.com)
+        // +    tweaked by: Jack
+        // +   bugfixed by: Onno Marsman
+        // +   reimplemented by: stag019    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+        // +   bugfixed by: stag019
+        // -    depends on: urldecode
+        // +   input by: Dreamer
+        // +   bugfixed by: Brett Zamir (http://brett-zamir.me)    // %        note 1: When no argument is specified, will put variables in global scope.
+        // *     example 1: var arr = {};
+        // *     example 1: parse_str('first=foo&second=bar', arr);
+        // *     results 1: arr == { first: 'foo', second: 'bar' }
+        // *     example 2: var arr = {};    // *     example 2: parse_str('str_a=Jack+and+Jill+didn%27t+see+the+well.', arr);
+        // *     results 2: arr == { str_a: "Jack and Jill didn't see the well." }
+        var glue1 = '=',
+            glue2 = '&',
+            array2 = String(str).replace(/^&?([\s\S]*?)&?$/, '$1').split(glue2),
+            i, j, chr, tmp, key, value, bracket, keys, evalStr, that = this,
+            fixStr = function (str) {
+                return that.urldecode(str).replace(/([\\"'])/g, '\\$1').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+            };
+        if (!array) {
+            array = this.window;
+        }
+
+        for (i = 0; i < array2.length; i++) {
+            tmp = array2[i].split(glue1);
+            if (tmp.length < 2) {
+                tmp = [tmp, ''];
+            }
+            key = fixStr(tmp[0]);
+            value = fixStr(tmp[1]);
+            while (key.charAt(0) === ' ') {
+                key = key.substr(1);
+            }
+            if (key.indexOf('\0') !== -1) {
+                key = key.substr(0, key.indexOf('\0'));
+            }
+            if (key && key.charAt(0) !== '[') {
+                keys = [];
+                bracket = 0;
+                for (j = 0; j < key.length; j++) {
+                    if (key.charAt(j) === '[' && !bracket) {
+                        bracket = j + 1;
+                    } else if (key.charAt(j) === ']') {
+                        if (bracket) {
+                            if (!keys.length) {
+                                keys.push(key.substr(0, bracket - 1));
+                            }
+                            keys.push(key.substr(bracket, j - bracket));
+                            bracket = 0;
+                            if (key.charAt(j + 1) !== '[') {
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!keys.length) {
+                    keys = [key];
+                }
+                for (j = 0; j < keys[0].length; j++) {
+                    chr = keys[0].charAt(j);
+                    if (chr === ' ' || chr === '.' || chr === '[') {
+                        keys[0] = keys[0].substr(0, j) + '_' + keys[0].substr(j + 1);
+                    }
+                    if (chr === '[') {
+                        break;
+                    }
+                }
+                evalStr = 'array';
+                for (j = 0; j < keys.length; j++) {
+                    key = keys[j];
+                    if ((key !== '' && key !== ' ') || j === 0) {
+                        key = "'" + key + "'";
+                    } else {
+                        key = eval(evalStr + '.push([]);') - 1;
+                    }
+                    evalStr += '[' + key + ']';
+                    if (j !== keys.length - 1 && eval('typeof ' + evalStr) === 'undefined') {
+                        eval(evalStr + ' = [];');
+                    }
+                }
+                evalStr += " = '" + value + "';\n";
+                eval(evalStr);
+            }
         }
     }
 
-    return objPublic;
-})();
+    /**
+     * Main API handler working on any requests you issue
+     *
+     * @param string fn    The member function you called
+     * @param array params The parameters you sent along
+     *
+     * @return mixed The API reply encoded in the set return_format
+     */
+
+    var __call = function (fn, params, callback) {
+        if (typeof params == 'undefined') {
+            var params = {};
+        }
+        if (typeof this[fn] == 'function') {
+            return this[fn](params);
+        }
+        if (typeof callback == 'undefined' && typeof params == 'function') {
+            callback = params;
+            params = {};
+        } else if (typeof callback == 'undefined') {
+            callback = function (reply) {};
+        }
+        // parse parameters
+        var apiparams = {};
+        if (typeof params == 'object') {
+            apiparams = params;
+        } else {
+            parse_str(params, apiparams); //TODO
+        }
+
+        // map function name to API method
+        var method = '';
+
+        // replace _ by /
+        var path = fn.split('_');
+        for (var i = 0; i < path.length; i++) {
+            if (i > 0) {
+                method += '/';
+            }
+            method += path[i];
+        }
+        // undo replacement for URL parameters
+        var url_parameters_with_underscore = ['screen_name'];
+        for (i = 0; i < url_parameters_with_underscore.length; i++) {
+            var param = url_parameters_with_underscore[i].toUpperCase();
+            var replacement_was = param.split('_').join('/');
+            method = method.split(replacement_was).join(param);
+        }
+
+        // replace AA by URL parameters
+        var method_template = method;
+        var match = [];
+        if (match = method.match('/[A-Z_]{2,}/')) {
+            for (var i = 0; i < match.length; i++) {
+                var param = match[i];
+                var param_l = param.toLowerCase();
+                method_template = method_template.split(param).join(':' + param_l);
+                if (typeof apiparams[param_l] != 'undefined') {
+                    for (j = 0; j < 26; j++) {
+                        method_template = method_template.split(String.fromCharCode(65 + j)).join('_' + String.fromCharCode(97 + j));
+                    }
+                    c('To call the templated method "' + method_template + '", specify the parameter value for "' + param_l + '".');
+                }
+                method = method.split(param).join(apiparams[param_l]);
+                delete apiparams[param_l];
+            }
+        }
+
+        // replace A-Z by _a-z
+        for (i = 0; i < 26; i++) {
+            method = method.split(String.fromCharCode(65 + i)).join('_' + String.fromCharCode(97 + i));
+            method_template = method_template.split(String.fromCharCode(65 + i)).join('_' + String.fromCharCode(97 + i));
+        }
+
+        var httpmethod = _detectMethod(method_template);
+        var sign = _detectSign(method_template);
+        var multipart = _detectMultipart(method_template);
+
+        return _callApi(httpmethod, method, method_template, apiparams, sign, multipart, callback);
+    };
+
+    /**
+     * Uncommon API methods
+     */
+
+    /**
+     * The public timeline is cached for 1 minute
+     * API method wrapper
+     *
+     * @param mixed Any parameters are sent to __call, untouched
+     *
+     * @return mixed The API reply
+     */
+    var statuses_publicTimeline = function (mixed) {
+        if (typeof mixed == 'undefined') {
+            var mixed = null;
+        }
+        if (_statuses_public_timeline_cache['timestamp'] && _statuses_public_timeline_cache['timestamp'] + 60 > Math.round(new Date().getTime() / 1000)) {
+            return _statuses_public_timeline_cache['data'];
+        }
+        var reply = __call('statuses_publicTimeline', arguments);
+        if (reply.httpstatus == 200) {
+            _statuses_public_timeline_cache = {
+                timestamp: Math.round(new Date().getTime() / 1000),
+                data: reply
+            };
+        }
+        return reply;
+    };
+
+    /**
+     * Gets the OAuth authenticate URL for the current request token
+     *
+     * @return string The OAuth authenticate URL
+     */
+    var oauth_authenticate = function () {
+        if (_oauth_token == null) {
+            c('To get the authenticate URL, the OAuth token must be set.');
+        }
+        return _endpoint_oauth + 'oauth/authenticate?oauth_token=' + _url(_oauth_token);
+    };
+
+    /**
+     * Gets the OAuth authorize URL for the current request token
+     *
+     * @return string The OAuth authorize URL
+     */
+    var oauth_authorize = function () {
+        if (_oauth_token == null) {
+            c('To get the authorize URL, the OAuth token must be set.');
+        }
+        return _endpoint_oauth + 'oauth/authorize?oauth_token=' + _url(_oauth_token);
+    };
+
+    /**
+     * Signing helpers
+     */
+
+    /**
+     * URL-encodes the given data
+     *
+     * @param mixed data
+     *
+     * @return mixed The encoded data
+     */
+    var _url = function (data) {
+        if (typeof data == 'array') {
+            return array_map([ // TODO
+            this, '_url'], data);
+        } else if ((/boolean|number|string/).test(typeof data)) {
+            return encodeURIComponent(data).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * Gets the base64-encoded SHA1 hash for the given data
+     *
+     * @param string data The data to calculate the hash from
+     *
+     * @return string The hash
+     */
+    var _sha1 = function (data) {
+        if (_oauth_consumer_secret == null) {
+            c('To generate a hash, the consumer secret must be set.');
+        }
+        if (typeof b64_hmac_sha1 != 'function') {
+            c('To generate a hash, the Javascript SHA1.js must be available.');
+        }
+        b64pad = '=';
+        return b64_hmac_sha1(_oauth_consumer_secret + '&' + (_oauth_token_secret != null ? _oauth_token_secret : ''), data);
+    };
+
+    /**
+     * Generates a (hopefully) unique random string
+     *
+     * @param int optional length The length of the string to generate
+     *
+     * @return string The random string
+     */
+    var _nonce = function (length) {
+        if (typeof length == 'undefined') {
+            var length = 8;
+        }
+        if (length < 1) {
+            c('Invalid nonce length.');
+        }
+        var nonce = '';
+        for (var i = 0; i < length; i++) {
+            var character = Math.floor(Math.random() * 61);
+            nonce += '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.substring(character, character + 1);
+        }
+        return nonce;
+    };
+
+    /**
+     * Sort an array by key
+     *
+     * @param array a The array to sort
+     * @return array The sorted array
+     */
+    var _ksort = function (a) {
+        var b = {},
+        f = [],
+            c, d, e = [];
+        for (d in a) a.hasOwnProperty && f.push(d);
+        f.sort(function (g, h) {
+            if (g > h) return 1;
+            if (g < h) return -1;
+            return 0
+        });
+        for (c = 0; c < f.length; c++) {
+            d = f[c];
+            b[d] = a[d]
+        }
+        for (c in b) if (b.hasOwnProperty) e[c] = b[c];
+        return e
+    };
+
+    /**
+     * Generates an OAuth signature
+     *
+     * @param string          httpmethod Usually either 'GET' or 'POST' or 'DELETE'
+     * @param string          method     The API method to call
+     * @param array  optional params     The API call parameters, associative
+     * @param bool   optional multipart  Whether the request is going to be multipart/form-data
+     *
+     * @return string The API call parameters including the signature
+     *                If multipart, the Authorization HTTP header is returned
+     */
+    var _sign = function (httpmethod, method, params, multipart) {
+        if (typeof params == 'undefined') {
+            var params = {};
+        }
+        if (typeof multipart == 'undefined') {
+            var multipart = false;
+        }
+        if (_oauth_consumer_key == null) {
+            c('To generate a signature, the consumer key must be set.');
+        }
+        var sign_params = {
+            consumer_key: _oauth_consumer_key,
+            version: '1.0',
+            timestamp: Math.round(new Date().getTime() / 1000),
+            nonce: _nonce(),
+            signature_method: 'HMAC-SHA1'
+        };
+        var sign_base_params = {};
+        for (var key in sign_params) {
+            var value = sign_params[key];
+            sign_base_params['oauth_' + key] = _url(value);
+        }
+        if (_oauth_token != null) {
+            sign_base_params['oauth_token'] = _url(_oauth_token);
+        }
+        for (var key in params) {
+            var value = params[key];
+            sign_base_params[key] = _url(value);
+        }
+        sign_base_params = _ksort(sign_base_params);
+        var sign_base_string = '';
+        for (var key in sign_base_params) {
+            var value = sign_base_params[key];
+            sign_base_string += key + '=' + value + '&';
+        }
+        sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
+        var signature = _sha1(httpmethod + '&' + _url(method) + '&' + _url(sign_base_string));
+        if (multipart) {
+            params = sign_base_params;
+            params['oauth_signature'] = signature;
+            params = _ksort(params);
+            var authorization = 'Authorization: OAuth ';
+            for (var key in params) {
+                var value = params[key];
+                authorization += key + '="' + _url(value) + '", ';
+            }
+            return authorization.substring(0, authorization.length - 2);
+        }
+        return (httpmethod == 'GET' ? method + '?' : '') + sign_base_string + '&oauth_signature=' + _url(signature);
+    };
+
+    /**
+     * Detects HTTP method to use for API call
+     *
+     * @param string method The API method to call
+     *
+     * @return string The HTTP method that should be used
+     */
+    var _detectMethod = function (method) {
+        var httpmethods = {};
+        httpmethods['GET'] = [
+        // Timeline
+        'statuses/home_timeline', 'statuses/mentions', 'statuses/retweeted_by_me', 'statuses/retweeted_to_me', 'statuses/retweets_of_me', 'statuses/user_timeline', 'statuses/retweeted_to_user', 'statuses/retweeted_by_user',
+        // Tweets
+        'statuses/:id/retweeted_by', 'statuses/:id/retweeted_by/ids', 'statuses/retweets/:id', 'statuses/show/:id', 'statuses/oembed',
+        // Direct Messages
+        'direct_messages', 'direct_messages/sent', 'direct_messages/show/:id',
+        // Friends & Followers
+        'followers/ids', 'friends/ids', 'friendships/exists', 'friendships/incoming', 'friendships/outgoing', 'friendships/show', 'friendships/lookup', 'friendships/no_retweet_ids',
+        // Users
+        'users/lookup', 'users/profile_image/:screen_name', 'users/search', 'users/show', 'users/contributees', 'users/contributors',
+        // Suggested Users
+        'users/suggestions', 'users/suggestions/:slug', 'users/suggestions/:slug/members',
+        // Favorites
+        'favorites',
+        // Lists
+        'lists/all', 'lists/statuses', 'lists/memberships', 'lists/subscribers', 'lists/subscribers/show', 'lists/members/show', 'lists/members', 'lists', 'lists/show', 'lists/subscriptions',
+        // Accounts
+        'account/rate_limit_status', 'account/verify_credentials', 'account/totals', 'account/settings',
+        // Saved searches
+        'saved_searches', 'saved_searches/show/:id',
+        // Places & Geo
+        'geo/id/:place_id', 'geo/reverse_geocode', 'geo/search', 'geo/similar_places',
+        // Trends
+        'trends/:woeid', 'trends/available', 'trends/daily', 'trends/weekly',
+        // Block
+        'blocks/blocking', 'blocks/blocking/ids', 'blocks/exists',
+        // OAuth
+        'oauth/authenticate', 'oauth/authorize',
+        // Help
+        'help/test', 'help/configuration', 'help/languages',
+        // Legal
+        'legal/privacy', 'legal/tos'];
+        httpmethods['POST'] = [
+        // Timeline
+        'statuses/destroy/:id', 'statuses/retweet/:id', 'statuses/update', 'statuses/update_with_media',
+        // Direct Messages
+        'direct_messages/new',
+        // Friends & Followers
+        'friendships/create', 'friendships/update',
+        // Favorites
+        'favorites/create/:id',
+        // Lists
+        'lists/destroy', 'lists/update', 'lists/create', 'lists/members/destroy', 'lists/members/create_all', 'lists/members/create', 'lists/subscribers/create', 'lists/subscribers/destroy',
+        // Accounts
+        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/settings',
+        // Notifications
+        'notifications/follow', 'notifications/leave',
+        // Saved Searches
+        'saved_searches/create',
+        // Places & Geo
+        'geo/place',
+        // Block
+        'blocks/create',
+        // Spam Reporting
+        'report_spam',
+        // OAuth
+        'oauth/access_token', 'oauth/request_token'];
+        httpmethods['DELETE'] = [
+        // Direct Messages
+        'direct_messages/destroy/:id',
+        // Friends & Followers
+        'friendships/destroy',
+        // Favorites
+        'favorites/destroy/:id',
+        // Saved Searches
+        'saved_searches/destroy/:id',
+        // Block
+        'blocks/destroy'];
+        for (var httpmethod in httpmethods) {
+            var methods = httpmethods[httpmethod].join(' ');
+            if (methods.indexOf(method) > -1) {
+                return httpmethod;
+            }
+        }
+        c('Can\'t find HTTP method to use for "' + method + '".');
+    };
+
+    /**
+     * Detects if API call should be signed
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the API call should be signed
+     */
+    var _detectSign = function (method) {
+        var unsignedmethods = [
+        // OAuth
+        'oauth/request_token'];
+        return unsignedmethods.join(' ').indexOf(method) < 0;
+    };
+
+    /**
+     * Detects if API call should use multipart/form-data
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method should be sent as multipart
+     */
+    var _detectMultipart = function (method) {
+        var multiparts = [
+        // Tweets
+        'statuses/update_with_media',
+        // Accounts
+        'account/update_profile_background_image', 'account/update_profile_image'];
+        return multiparts.join(' ').indexOf(method) > -1;
+    };
+
+    /**
+     * Builds the complete API endpoint url
+     *
+     * @param string method The API method to call
+     *
+     * @return string The URL to send the request to
+     */
+    var _getEndpoint = function (method) {
+        var upload_methods = [
+        // Tweets
+        'statuses/update_with_media'];
+        if (method.substring(0, 6) == 'oauth/') {
+            url = _endpoint_oauth + method;
+        } else if (upload_methods.join(' ').indexOf(method) > -1) {
+            url = _endpoint_upload + method + '.json';
+        } else {
+            url = _endpoint + method + '.json';
+        }
+        return url;
+    };
+
+    /**
+     * Calls the API using cURL
+     *
+     * @param string          httpmethod      The HTTP method to use for making the request
+     * @param string          method          The API method to call
+     * @param string          method_template The templated API method to call
+     * @param array  optional params          The parameters to send along
+     * @param bool   optional sign            Whether to sign the API call
+     * @param bool   optional multipart       Whether to use multipart/form-data
+     * @param function        callback        The function to call with the API call result
+     *
+     * @return mixed The API reply, encoded in the set return_format
+     */
+
+    var _callApi = function (httpmethod, method, method_template, params, sign, multipart, callback) {
+        if (typeof params == 'undefined') {
+            var params = {};
+        }
+        if (typeof sign == 'undefined') {
+            var sign = true;
+        }
+        if (typeof multipart == 'undefined') {
+            var multipart = false;
+        }
+        if (typeof callback != 'function') {
+            var callback = function (reply) {};
+        }
+        if (sign && _oauth_token == null) {
+            c('To make a signed API request, the OAuth token must be set.');
+        }
+        url = _getEndpoint(method);
+
+        var xml;
+        try {
+            xml = new XMLHttpRequest();
+        } catch (e) {
+            xml = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        if (httpmethod == 'GET') {
+            xml.open(httpmethod, _sign(httpmethod, url, params), true);
+        } else {
+            xml.open(httpmethod, url, true);
+            if (multipart) {
+                xml.setRequestHeader("Content-Type", "multipart/form-data");
+                var authorization = _sign('POST', url, {}, true);
+                xml.setRequestHeader("Authorization", authorization);
+                xml.setRequestHeader("Expect", '');
+                var post_fields = params;
+            } else {
+                xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                var post_fields = _sign('POST', url, params);
+            }
+        }
+        xml.onreadystatechange = function () {
+            if (xml.readyState >= 4) {
+                var httpstatus = 12027;
+                try {
+                    httpstatus = xml.status;
+                } catch (e) {}
+                var reply = _parseApiReply(method_template, xml.responseText);
+                reply.httpstatus = httpstatus;
+                callback(reply);
+            }
+        };
+        xml.send(httpmethod == "GET" ? null : post_fields);
+        return true;
+    };
+
+    /**
+     * Parses the API reply to encode it in the set return_format
+     *
+     * @param string method The method that has been called
+     * @param string reply  The actual reply, JSON-encoded or URL-encoded
+     *
+     * @return array|object The parsed reply
+     */
+    var _parseApiReply = function (method, reply) {
+        if (reply == '[]') {
+            return [];
+        }
+        var parsed = false;
+        try {
+            parsed = JSON.parse(reply);
+        } catch (e) {
+            var elements = reply.split("&");
+            parsed = {};
+            for (var i = 0; i < elements.length; i++) {
+                var element = elements[i].split("=", 2);
+                if (element.length > 1) {
+                    parsed[element[0]] = unescape(element[1]);
+                } else {
+                    parsed[element[0]] = null;
+                }
+            }
+        }
+        return parsed;
+    };
+
+    return {
+        setConsumerKey: setConsumerKey,
+        getVersion: getVersion,
+        setToken: setToken,
+        __call: __call,
+        statuses_publicTimeline: statuses_publicTimeline,
+        oauth_authenticate: oauth_authenticate,
+        oauth_authorize: oauth_authorize
+    };
+};
