@@ -530,7 +530,7 @@ var Codebird = function () {
         // Lists
         'lists/all', 'lists/statuses', 'lists/memberships', 'lists/subscribers', 'lists/subscribers/show', 'lists/members/show', 'lists/members', 'lists', 'lists/show', 'lists/subscriptions',
         // Accounts
-        'account/rate_limit_status', 'account/verify_credentials', 'account/totals', 'account/settings',
+        'account/verify_credentials', 'account/totals', 'account/settings',
         // Saved searches
         'saved_searches', 'saved_searches/show/:id',
         // Places & Geo
@@ -557,7 +557,7 @@ var Codebird = function () {
         // Lists
         'lists/destroy', 'lists/update', 'lists/create', 'lists/members/destroy', 'lists/members/create_all', 'lists/members/create', 'lists/subscribers/create', 'lists/subscribers/destroy',
         // Accounts
-        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/settings',
+        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/settings', 'account/update_delivery_device',
         // Notifications
         'notifications/follow', 'notifications/leave',
         // Saved Searches
