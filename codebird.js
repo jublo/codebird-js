@@ -557,7 +557,7 @@ var Codebird = function () {
         // Lists
         'lists/destroy', 'lists/update', 'lists/create', 'lists/members/destroy', 'lists/members/create_all', 'lists/members/create', 'lists/subscribers/create', 'lists/subscribers/destroy',
         // Accounts
-        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/settings', 'account/update_delivery_device',
+        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/update_profile_banner', 'account/remove_profile_banner', 'account/settings', 'account/update_delivery_device',
         // Notifications
         'notifications/follow', 'notifications/leave',
         // Saved Searches
@@ -602,7 +602,7 @@ var Codebird = function () {
         // Tweets
         'statuses/update_with_media',
         // Accounts
-        'account/update_profile_background_image', 'account/update_profile_image'];
+        'account/update_profile_background_image', 'account/update_profile_image', 'account/update_profile_banner'];
         return multiparts.join(' ').indexOf(method) > -1;
     };
 
