@@ -54,12 +54,6 @@ var Codebird = function () {
     var _endpoint_oauth = 'https://api.twitter.com/';
 
     /**
-     * The API endpoint to use for uploading tweets with media
-     * see https://dev.twitter.com/discussions/1059
-     */
-    var _endpoint_upload = 'https://upload.twitter.com/1.1/';
-
-    /**
      * The Request or access token. Used to sign requests
      */
     var _oauth_token = null;
@@ -614,13 +608,8 @@ var Codebird = function () {
      * @return string The URL to send the request to
      */
     var _getEndpoint = function (method) {
-        var upload_methods = [
-        // Tweets
-        'statuses/update_with_media'];
         if (method.substring(0, 6) == 'oauth/') {
             url = _endpoint_oauth + method;
-        } else if (upload_methods.join(' ').indexOf(method) > -1) {
-            url = _endpoint_upload + method + '.json';
         } else {
             url = _endpoint + method + '.json';
         }
