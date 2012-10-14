@@ -639,9 +639,6 @@ var Codebird = function () {
         if (typeof callback != 'function') {
             var callback = function (reply) {};
         }
-        if (_oauth_token == null) {
-            c('To make a signed API request, the OAuth token must be set.');
-        }
         url = _getEndpoint(method);
 
         var xml;
