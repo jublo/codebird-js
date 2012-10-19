@@ -54,6 +54,11 @@ var Codebird = function () {
     var _endpoint_oauth = 'https://api.twitter.com/';
 
     /**
+     * The API endpoint to use for untransitioned methods
+     */
+    var _endpoint_old = 'https://api.twitter.com/1/';
+
+    /**
      * The API endpoint to use for internal requests
      */
     var _endpoint_internal = 'https://api.twitter.com/i/';
@@ -693,6 +698,23 @@ var Codebird = function () {
     };
 
     /**
+     * Detects if API call should use the old endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in old API
+     */
+    var _detectOld = function (method) {
+        var olds = [
+            // Users
+            'account/update_profile_banner',
+            'account/remove_profile_banner',
+            'users/recommendations'
+        ];
+        return olds.join(' ').indexOf(method) > -1;
+    };
+
+    /**
      * Detects if API call should use internal endpoint
      *
      * @param string method The API method to call
@@ -715,14 +737,17 @@ var Codebird = function () {
     /**
      * Builds the complete API endpoint url
      *
-     * @param string method The API method to call
+     * @param string method           The API method to call
+     * @param string method_template  The API method template to call
      *
      * @return string The URL to send the request to
      */
-    var _getEndpoint = function (method) {
+    var _getEndpoint = function (method, method_template) {
         if (method.substring(0, 6) == 'oauth/') {
             url = _endpoint_oauth + method;
-        } else if (_detectInternal(method)) {
+        } else if (_detectOld(method_template)) {
+            url = _endpoint_old + method + '.json';
+        } else if (_detectInternal(method_template)) {
             url = _endpoint_internal + method + '.json';
         } else {
             url = _endpoint + method + '.json';
@@ -762,7 +787,7 @@ var Codebird = function () {
             params['application_id'] = 333903271;
         }
 
-        url = _getEndpoint(method);
+        url = _getEndpoint(method, method_template);
 
         var xml;
         try {
