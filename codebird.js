@@ -54,6 +54,11 @@ var Codebird = function () {
     var _endpoint_oauth = 'https://api.twitter.com/';
 
     /**
+     * The API endpoint to use for untransitioned methods
+     */
+    var _endpoint_old = 'https://api.twitter.com/1/';
+
+    /**
      * The Request or access token. Used to sign requests
      */
     var _oauth_token = null;
@@ -79,7 +84,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.2.1';
+    var _version = '2.2.2';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -507,74 +512,146 @@ var Codebird = function () {
     var _detectMethod = function (method) {
         var httpmethods = {};
         httpmethods['GET'] = [
-        // Timeline
-        'statuses/home_timeline', 'statuses/mentions', 'statuses/retweeted_by_me', 'statuses/retweeted_to_me', 'statuses/retweets_of_me', 'statuses/user_timeline', 'statuses/retweeted_to_user', 'statuses/retweeted_by_user',
-        // Tweets
-        'statuses/:id/retweeted_by', 'statuses/:id/retweeted_by/ids', 'statuses/retweets/:id', 'statuses/show/:id', 'statuses/oembed',
-        // Direct Messages
-        'direct_messages', 'direct_messages/sent', 'direct_messages/show/:id',
-        // Friends & Followers
-        'followers/ids', 'friends/ids', 'friendships/exists', 'friendships/incoming', 'friendships/outgoing', 'friendships/show', 'friendships/lookup', 'friendships/no_retweet_ids',
-        // Users
-        'users/lookup', 'users/profile_image/:screen_name', 'users/search', 'users/show', 'users/contributees', 'users/contributors',
-        // Suggested Users
-        'users/suggestions', 'users/suggestions/:slug', 'users/suggestions/:slug/members',
-        // Favorites
-        'favorites',
-        // Lists
-        'lists/all', 'lists/statuses', 'lists/memberships', 'lists/subscribers', 'lists/subscribers/show', 'lists/members/show', 'lists/members', 'lists', 'lists/show', 'lists/subscriptions',
-        // Accounts
-        'account/verify_credentials', 'account/totals', 'account/settings',
-        // Saved searches
-        'saved_searches', 'saved_searches/show/:id',
-        // Places & Geo
-        'geo/id/:place_id', 'geo/reverse_geocode', 'geo/search', 'geo/similar_places',
-        // Trends
-        'trends/:woeid', 'trends/available', 'trends/daily', 'trends/weekly',
-        // Block
-        'blocks/blocking', 'blocks/blocking/ids', 'blocks/exists',
-        // OAuth
-        'oauth/authenticate', 'oauth/authorize',
-        // Help
-        'help/test', 'help/configuration', 'help/languages',
-        // Legal
-        'legal/privacy', 'legal/tos'];
+            // Timelines
+            'statuses/mentions_timeline',
+            'statuses/user_timeline',
+            'statuses/home_timeline',
+
+            // Tweets
+            'statuses/retweets/:id',
+            'statuses/show/:id',
+            'statuses/oembed',
+
+            // Search
+            'search/tweets',
+
+            // Direct Messages
+            'direct_messages',
+            'direct_messages/sent',
+            'direct_messages/show',
+
+            // Friends & Followers
+            'friends/ids',
+            'followers/ids',
+            'friendships/lookup',
+            'friendships/incoming',
+            'friendships/outgoing',
+            'friendships/show',
+
+            // Users
+            'account/settings',
+            'account/verify_credentials',
+            'blocks/list',
+            'blocks/ids',
+            'users/lookup',
+            'users/show',
+            'users/search',
+            'users/contributees',
+            'users/contributors',
+            'users/recommendations',
+
+            // Suggested Users
+            'users/suggestions/:slug',
+            'users/suggestions',
+            'users/suggestions/:slug/members',
+
+            // Favorites
+            'favorites/list',
+
+            // Lists
+            'lists/list',
+            'lists/statuses',
+            'lists/memberships',
+            'lists/subscribers',
+            'lists/subscribers/show',
+            'lists/members/show',
+            'lists/members',
+            'lists/show',
+            'lists/subscriptions',
+
+            // Saved searches
+            'saved_searches/list',
+            'saved_searches/show/:id',
+
+            // Places & Geo
+            'geo/id/:place_id',
+            'geo/reverse_geocode',
+            'geo/search',
+            'geo/similar_places',
+
+            // Trends
+            'trends/place',
+            'trends/available',
+            'trends/closest',
+
+            // OAuth
+            'oauth/authenticate',
+            'oauth/authorize',
+
+            // Help
+            'help/configuration',
+            'help/languages',
+            'help/privacy',
+            'help/tos',
+            'application/rate_limit_status'
+        ];
         httpmethods['POST'] = [
-        // Timeline
-        'statuses/destroy/:id', 'statuses/retweet/:id', 'statuses/update', 'statuses/update_with_media',
-        // Direct Messages
-        'direct_messages/new',
-        // Friends & Followers
-        'friendships/create', 'friendships/update',
-        // Favorites
-        'favorites/create/:id',
-        // Lists
-        'lists/destroy', 'lists/update', 'lists/create', 'lists/members/destroy', 'lists/members/create_all', 'lists/members/create', 'lists/subscribers/create', 'lists/subscribers/destroy',
-        // Accounts
-        'account/end_session', 'account/update_profile', 'account/update_profile_background_image', 'account/update_profile_colors', 'account/update_profile_image', 'account/update_profile_banner', 'account/remove_profile_banner', 'account/settings', 'account/update_delivery_device',
-        // Notifications
-        'notifications/follow', 'notifications/leave',
-        // Saved Searches
-        'saved_searches/create',
-        // Places & Geo
-        'geo/place',
-        // Block
-        'blocks/create',
-        // Spam Reporting
-        'report_spam',
-        // OAuth
-        'oauth/access_token', 'oauth/request_token'];
-        httpmethods['DELETE'] = [
-        // Direct Messages
-        'direct_messages/destroy/:id',
-        // Friends & Followers
-        'friendships/destroy',
-        // Favorites
-        'favorites/destroy/:id',
-        // Saved Searches
-        'saved_searches/destroy/:id',
-        // Block
-        'blocks/destroy'];
+            // Tweets
+            'statuses/destroy/:id',
+            'statuses/update',
+            'statuses/retweet/:id',
+            'statuses/update_with_media',
+
+            // Direct Messages
+            'direct_messages/destroy',
+            'direct_messages/new',
+
+            // Friends & Followers
+            'friendships/create',
+            'friendships/destroy',
+            'friendships/update',
+
+            // Users
+            'account/settings__post',
+            'account/update_delivery_device',
+            'account/update_profile',
+            'account/update_profile_background_image',
+            'account/update_profile_colors',
+            'account/update_profile_image',
+            'account/update_profile_banner',
+            'account/remove_profile_banner',
+            'blocks/create',
+            'blocks/destroy',
+
+            // Favorites
+            'favorites/destroy',
+            'favorites/create',
+
+            // Lists
+            'lists/members/destroy',
+            'lists/subscribers/create',
+            'lists/subscribers/destroy',
+            'lists/members/create_all',
+            'lists/members/create',
+            'lists/destroy',
+            'lists/update',
+            'lists/create',
+            'lists/members/destroy_all',
+
+            // Saved Searches
+            'saved_searches/create',
+            'saved_searches/destroy/:id',
+
+            // Places & Geo
+            'geo/place',
+
+            // Spam Reporting
+            'report_spam',
+
+            // OAuth
+            'oauth/access_token',
+            'oauth/request_token'
+        ];
         for (var httpmethod in httpmethods) {
             var methods = httpmethods[httpmethod].join(' ');
             if (methods.indexOf(method) > -1) {
@@ -593,23 +670,47 @@ var Codebird = function () {
      */
     var _detectMultipart = function (method) {
         var multiparts = [
-        // Tweets
-        'statuses/update_with_media',
-        // Accounts
-        'account/update_profile_background_image', 'account/update_profile_image', 'account/update_profile_banner'];
+            // Tweets
+            'statuses/update_with_media',
+
+            // Users
+            'account/update_profile_background_image',
+            'account/update_profile_image',
+            'account/update_profile_banner'
+        ];
         return multiparts.join(' ').indexOf(method) > -1;
+    };
+
+    /**
+     * Detects if API call should use the old endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in old API
+     */
+    var _detectOld = function (method) {
+        var olds = [
+            // Users
+            'account/update_profile_banner',
+            'account/remove_profile_banner',
+            'users/recommendations'
+        ];
+        return olds.join(' ').indexOf(method) > -1;
     };
 
     /**
      * Builds the complete API endpoint url
      *
-     * @param string method The API method to call
+     * @param string method           The API method to call
+     * @param string method_template  The API method template to call
      *
      * @return string The URL to send the request to
      */
-    var _getEndpoint = function (method) {
+    var _getEndpoint = function (method, method_template) {
         if (method.substring(0, 6) == 'oauth/') {
             url = _endpoint_oauth + method;
+        } else if (_detectOld(method_template)) {
+            url = _endpoint_old + method + '.json';
         } else {
             url = _endpoint + method + '.json';
         }
@@ -639,7 +740,8 @@ var Codebird = function () {
         if (typeof callback != 'function') {
             var callback = function (reply) {};
         }
-        url = _getEndpoint(method);
+
+        url = _getEndpoint(method, method_template);
 
         var xml;
         try {
