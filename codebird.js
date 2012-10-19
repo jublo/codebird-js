@@ -295,7 +295,7 @@ var Codebird = function () {
             method_template = method_template.split(String.fromCharCode(65 + i)).join('_' + String.fromCharCode(97 + i));
         }
 
-        var httpmethod = _detectMethod(method_template);
+        var httpmethod = _detectMethod(method_template, apiparams);
         var multipart = _detectMultipart(method_template);
 
         return _callApi(httpmethod, method, method_template, apiparams, multipart, callback);
@@ -506,10 +506,18 @@ var Codebird = function () {
      * Detects HTTP method to use for API call
      *
      * @param string method The API method to call
+     * @param array  params The parameters to send along
      *
      * @return string The HTTP method that should be used
      */
-    var _detectMethod = function (method) {
+    var _detectMethod = function (method, params) {
+        // multi-HTTP method endpoints
+        switch(method) {
+            case 'account/settings':
+                method = params.length ? method + '__post' : method;
+                break;
+        }
+
         var httpmethods = {};
         httpmethods['GET'] = [
             // Timelines
