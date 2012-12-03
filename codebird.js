@@ -604,7 +604,10 @@ var Codebird = function () {
             'help/languages',
             'help/privacy',
             'help/tos',
-            'application/rate_limit_status'
+            'application/rate_limit_status',
+
+            // Old
+            'users/recommendations'
         ];
         httpmethods['POST'] = [
             // Tweets
@@ -661,10 +664,7 @@ var Codebird = function () {
 
             // OAuth
             'oauth/access_token',
-            'oauth/request_token',
-
-            // Old
-            'users/recommendations'
+            'oauth/request_token'
         ];
         for (var httpmethod in httpmethods) {
             var methods = httpmethods[httpmethod].join(' ');
