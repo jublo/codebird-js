@@ -84,7 +84,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.2.2';
+    var _version = '2.2.3';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -524,6 +524,7 @@ var Codebird = function () {
             'statuses/mentions_timeline',
             'statuses/user_timeline',
             'statuses/home_timeline',
+            'statuses/retweets_of_me',
 
             // Tweets
             'statuses/retweets/:id',
@@ -545,6 +546,8 @@ var Codebird = function () {
             'friendships/incoming',
             'friendships/outgoing',
             'friendships/show',
+            'friends/list',
+            'followers/list',
 
             // Users
             'account/settings',
@@ -556,7 +559,7 @@ var Codebird = function () {
             'users/search',
             'users/contributees',
             'users/contributors',
-            'users/recommendations',
+            'users/profile_banner',
 
             // Suggested Users
             'users/suggestions/:slug',
@@ -626,10 +629,10 @@ var Codebird = function () {
             'account/update_profile_background_image',
             'account/update_profile_colors',
             'account/update_profile_image',
-            'account/update_profile_banner',
-            'account/remove_profile_banner',
             'blocks/create',
             'blocks/destroy',
+            'account/update_profile_banner',
+            'account/remove_profile_banner',
 
             // Favorites
             'favorites/destroy',
@@ -654,11 +657,14 @@ var Codebird = function () {
             'geo/place',
 
             // Spam Reporting
-            'report_spam',
+            'users/report_spam',
 
             // OAuth
             'oauth/access_token',
-            'oauth/request_token'
+            'oauth/request_token',
+
+            // Old
+            'users/recommendations'
         ];
         for (var httpmethod in httpmethods) {
             var methods = httpmethods[httpmethod].join(' ');
@@ -699,8 +705,6 @@ var Codebird = function () {
     var _detectOld = function (method) {
         var olds = [
             // Users
-            'account/update_profile_banner',
-            'account/remove_profile_banner',
             'users/recommendations'
         ];
         return olds.join(' ').indexOf(method) > -1;
