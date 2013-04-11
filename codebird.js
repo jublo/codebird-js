@@ -130,8 +130,8 @@ var Codebird = function () {
      * @return object
      */
     function parse_str(str, array) {
-        // Parses GET/POST/COOKIE data and sets global variables  
-        // 
+        // Parses GET/POST/COOKIE data and sets global variables
+        //
         // version: 1109.2015
         // discuss at: http://phpjs.org/functions/parse_str    // +   original by: Cagri Ekin
         // +   improved by: Michael White (http://getsprink.com)
@@ -692,7 +692,7 @@ var Codebird = function () {
             'account/update_profile_image',
             'account/update_profile_banner'
         ];
-        return multiparts.join(' ').indexOf(method) > -1;
+        return multiparts.indexOf(method) > -1;
     };
 
     /**
