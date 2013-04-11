@@ -2,8 +2,9 @@
  * A simple wrapper for the Twitter API
  *
  * @package codebird
+ * @version 2.3.0-dev
  * @author J.M. <me@mynetx.net>
- * @copyright 2010-2012 J.M. <me@mynetx.net>
+ * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,20 @@
 var IMAGETYPE_GIF = 1,
     IMAGETYPE_JPEG = 2,
     IMAGETYPE_PNG = 3;
+
+/**
+ * Array.indexOf polyfill
+ */
+if (! Array.indexOf) {
+    Array.prototype.indexOf = function (obj, start) {
+        for (var i = (start || 0); i < this.length; i++) {
+            if (this[i] == obj) {
+                return i;
+            }
+        }
+      return -1;
+    };
+}
 
 /**
  * A simple wrapper for the Twitter API
@@ -84,7 +99,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.2.3';
+    var _version = '2.3.0-dev';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -707,7 +722,7 @@ var Codebird = function () {
             // Users
             'users/recommendations'
         ];
-        return olds.join(' ').indexOf(method) > -1;
+        return olds.indexOf(method) > -1;
     };
 
     /**
