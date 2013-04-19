@@ -20,3 +20,29 @@ It was originally introduced in the Tweet2PSM Messenger Plus! script.
 When using in other JScript environments (such as node.js),
 you should modify the way how calls to external servers are done.
 
+Quick setup for read-only apps
+==============================
+
+Here is a quick setup for JavaScript. Check the functions to find out the fill-ins.
+
+```javascript
+var cb = new Codebird();
+cb.setConsumerKey("<fill in>","<fill in>");
+cb.setToken('<fill in>','<fill in>');  
+	
+cb.__call('statuses/userTimeline', {
+    'screen_name' : '<fill in>',
+    'callback' : 'tweets_callback',
+    'count': '3'
+    }
+);
+
+function tweets_callback (result)
+{
+ 	// do something with the result 
+}
+```
+
+**Heads up** 
+Because the Consumer Key and Token Secret are available in the code 
+it is important that you configure your app as read-only at Twitter.
