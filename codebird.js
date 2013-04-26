@@ -1,5 +1,5 @@
 /**
- * A simple wrapper for the Twitter API
+ * A Twitter library in JavaScript
  *
  * @package codebird
  * @version 2.3.0-dev
@@ -41,7 +41,7 @@ if (! Array.indexOf) {
 }
 
 /**
- * A simple wrapper for the Twitter API
+ * A Twitter library in JavaScript
  *
  * @package codebird
  * @subpackage codebird-js
@@ -59,19 +59,34 @@ var Codebird = function () {
     var _oauth_consumer_secret = null;
 
     /**
+     * The app-only bearer token. Used to authorize app-only requests
+     */
+    var _oauth_bearer_token = null;
+
+    /**
+     * The API endpoint base to use
+     */
+    var _endpoint_base = 'https://api.twitter.com/';
+
+    /**
      * The API endpoint to use
      */
-    var _endpoint = 'https://api.twitter.com/1.1/';
+    var _endpoint = _endpoint_base + '1.1/';
 
     /**
      * The API endpoint to use for OAuth requests
      */
-    var _endpoint_oauth = 'https://api.twitter.com/';
+    var _endpoint_oauth = _endpoint_base;
 
     /**
-     * The API endpoint to use for untransitioned methods
+     * API proxy endpoint
      */
-    var _endpoint_old = 'https://api.twitter.com/1/';
+    var _endpoint_proxy = 'https://api.jublo.net/codebird/';
+
+    /**
+     * Whether to access the API via a proxy that is allowed by CORS
+     */
+    var _use_proxy = true;
 
     /**
      * The Request or access token. Used to sign requests
@@ -82,14 +97,6 @@ var Codebird = function () {
      * The corresponding request or access token secret
      */
     var _oauth_token_secret = null;
-
-    /**
-     * The cache to use for the public timeline
-     */
-    var _statuses_public_timeline_cache = {
-        timestamp: false,
-        data: false
-    };
 
     /**
      * The file formats that Twitter accepts as image uploads
@@ -112,6 +119,17 @@ var Codebird = function () {
     var setConsumerKey = function (key, secret) {
         _oauth_consumer_key = key;
         _oauth_consumer_secret = secret;
+    };
+
+    /**
+     * Sets the OAuth2 app-only auth bearer token
+     *
+     * @param string token OAuth2 bearer token
+     *
+     * @return void
+     */
+    var setBearerToken = function (token) {
+        _oauth_bearer_token = token;
     };
 
     /**
@@ -239,24 +257,33 @@ var Codebird = function () {
     /**
      * Main API handler working on any requests you issue
      *
-     * @param string fn    The member function you called
-     * @param array params The parameters you sent along
+     * @param string   fn            The member function you called
+     * @param array    params        The parameters you sent along
+     * @param function callback      The callback to call with the reply
+     * @param bool     app_only_auth Whether to use app-only auth
      *
      * @return mixed The API reply encoded in the set return_format
      */
 
-    var __call = function (fn, params, callback) {
+    var __call = function (fn, params, callback, app_only_auth) {
         if (typeof params == 'undefined') {
             var params = {};
         }
-        if (typeof this[fn] == 'function') {
-            return this[fn](params);
+        if (typeof app_only_auth == 'undefined') {
+            var app_only_auth = false;
         }
-        if (typeof callback == 'undefined' && typeof params == 'function') {
+        if (typeof callback != 'function' && typeof params == 'function') {
             callback = params;
             params = {};
+            if (typeof callback == 'bool') {
+                app_only_auth = callback;
+            }
         } else if (typeof callback == 'undefined') {
-            callback = function (reply) {};
+            var callback = function (reply) {};
+        }
+        switch (fn) {
+            case "oauth2_token":
+                return this[fn](function(reply) {callback(reply)});
         }
         // parse parameters
         var apiparams = {};
@@ -313,36 +340,15 @@ var Codebird = function () {
         var httpmethod = _detectMethod(method_template, apiparams);
         var multipart = _detectMultipart(method_template);
 
-        return _callApi(httpmethod, method, method_template, apiparams, multipart, callback);
-    };
-
-    /**
-     * Uncommon API methods
-     */
-
-    /**
-     * The public timeline is cached for 1 minute
-     * API method wrapper
-     *
-     * @param mixed Any parameters are sent to __call, untouched
-     *
-     * @return mixed The API reply
-     */
-    var statuses_publicTimeline = function (mixed) {
-        if (typeof mixed == 'undefined') {
-            var mixed = null;
-        }
-        if (_statuses_public_timeline_cache['timestamp'] && _statuses_public_timeline_cache['timestamp'] + 60 > Math.round(new Date().getTime() / 1000)) {
-            return _statuses_public_timeline_cache['data'];
-        }
-        var reply = __call('statuses_publicTimeline', arguments);
-        if (reply.httpstatus == 200) {
-            _statuses_public_timeline_cache = {
-                timestamp: Math.round(new Date().getTime() / 1000),
-                data: reply
-            };
-        }
-        return reply;
+        return _callApi(
+            httpmethod,
+            method,
+            method_template,
+            apiparams,
+            multipart,
+            app_only_auth,
+            callback
+        );
     };
 
     /**
@@ -350,11 +356,24 @@ var Codebird = function () {
      *
      * @return string The OAuth authenticate URL
      */
-    var oauth_authenticate = function () {
+    var oauth_authenticate = function (force_login, screen_name) {
+        if (typeof force_login == "undefined") {
+            var force_login = null;
+        }
+        if (typeof screen_name == "undefined") {
+            var screen_name = null;
+        }
         if (_oauth_token == null) {
             c('To get the authenticate URL, the OAuth token must be set.');
         }
-        return _endpoint_oauth + 'oauth/authenticate?oauth_token=' + _url(_oauth_token);
+        var url = _endpoint_oauth + 'oauth/authenticate?oauth_token=' + _url(_oauth_token);
+        if (force_login === true) {
+            url += "?force_login=1";
+            if (screen_name !== null) {
+                url += "&screen_name=" + screen_name;
+            }
+        }
+        return url;
     };
 
     /**
@@ -362,11 +381,73 @@ var Codebird = function () {
      *
      * @return string The OAuth authorize URL
      */
-    var oauth_authorize = function () {
+    var oauth_authorize = function (force_login, screen_name) {
+        if (typeof force_login == "undefined") {
+            var force_login = null;
+        }
+        if (typeof screen_name == "undefined") {
+            var screen_name = null;
+        }
         if (_oauth_token == null) {
             c('To get the authorize URL, the OAuth token must be set.');
         }
-        return _endpoint_oauth + 'oauth/authorize?oauth_token=' + _url(_oauth_token);
+        var url = _endpoint_oauth + 'oauth/authorize?oauth_token=' + _url(_oauth_token);
+        if (force_login === true) {
+            url += "?force_login=1";
+            if (screen_name !== null) {
+                url += "&screen_name=" + screen_name;
+            }
+        }
+        return url;
+    };
+
+    /**
+     * Gets the OAuth bearer token
+     *
+     * @return string The OAuth bearer token
+     */
+
+    var oauth2_token = function (callback) {
+        if (_oauth_consumer_key == null) {
+            c('To obtain a bearer token, the consumer key must be set.');
+        }
+
+        if (typeof callback == "undefined") {
+            var callback = function (reply) {};
+        }
+
+        var post_fields = "grant_type=client_credentials";
+        var url = _endpoint_oauth + "oauth2/token";
+
+        var xml;
+        try {
+            xml = new XMLHttpRequest();
+        } catch (e) {
+            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xml.open("POST", url, true);
+        xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xml.setRequestHeader(
+            "Authorization",
+            "Basic " + base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
+        );
+
+        xml.onreadystatechange = function () {
+            if (xml.readyState >= 4) {
+                var httpstatus = 12027;
+                try {
+                    httpstatus = xml.status;
+                } catch (e) {}
+                var reply = _parseApiReply("oauth2/token", xml.responseText);
+                reply.httpstatus = httpstatus;
+                if (httpstatus == 200) {
+                    setBearerToken(reply.access_token);
+                }
+                callback(reply);
+            }
+        };
+        xml.send(post_fields);
+
     };
 
     /**
@@ -407,6 +488,112 @@ var Codebird = function () {
         }
         b64pad = '=';
         return b64_hmac_sha1(_oauth_consumer_secret + '&' + (_oauth_token_secret != null ? _oauth_token_secret : ''), data);
+    };
+
+    var base64_encode = function (data) {
+        // http://kevin.vanzonneveld.net
+        // +   original by: Tyler Akins (http://rumkin.com)
+        // +   improved by: Bayron Guevara
+        // +   improved by: Thunder.m
+        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +   bugfixed by: Pellentesque Malesuada
+        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +   improved by: Rafał Kukawski (http://kukawski.pl)
+        // *     example 1: base64_encode('Kevin van Zonneveld');
+        // *     returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
+        // mozilla has this native
+        // - but breaks in 2.0.0.12!
+        //if (typeof this.window['btoa'] == 'function') {
+        //    return btoa(data);
+        //}
+        var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
+            ac = 0,
+            enc = "",
+            tmp_arr = [];
+
+        if (! data) {
+            return data;
+        }
+
+        do { // pack three octets into four hexets
+            o1 = data.charCodeAt(i++);
+            o2 = data.charCodeAt(i++);
+            o3 = data.charCodeAt(i++);
+
+            bits = o1 << 16 | o2 << 8 | o3;
+
+            h1 = bits >> 18 & 0x3f;
+            h2 = bits >> 12 & 0x3f;
+            h3 = bits >> 6 & 0x3f;
+            h4 = bits & 0x3f;
+
+            // use hexets to index into b64, and append result to encoded string
+            tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
+        } while (i < data.length);
+
+        enc = tmp_arr.join('');
+
+        var r = data.length % 3;
+
+        return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
+    };
+
+    var http_build_query = function (formdata, numeric_prefix, arg_separator) {
+        // http://kevin.vanzonneveld.net
+        // +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +     improved by: Legaev Andrey
+        // +     improved by: Michael White (http://getsprink.com)
+        // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +     improved by: Brett Zamir (http://brett-zamir.me)
+        // +        revised by: stag019
+        // +     input by: Dreamer
+        // +     bugfixed by: Brett Zamir (http://brett-zamir.me)
+        // +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
+        // %                note 1: If the value is null, key and value is skipped in http_build_query of PHP. But, phpjs is not.
+        var value, key, tmp = [],
+            that = http_build_query;
+
+        var _http_build_query_helper = function (key, val, arg_separator) {
+            var k, tmp = [];
+            if (val === true) {
+                val = "1";
+            } else if (val === false) {
+                val = "0";
+            }
+            if (val != null) {
+                if(typeof(val) === "object") {
+                    for (k in val) {
+                        if (val[k] != null) {
+                            tmp.push(_http_build_query_helper(key + "[" + k + "]", val[k], arg_separator));
+                        }
+                    }
+                    return tmp.join(arg_separator);
+                } else if (typeof(val) !== "function") {
+                    return _url(key) + "=" + _url(val);
+                } else {
+                    throw new Error('There was an error processing for http_build_query().');
+                }
+            } else {
+                return '';
+            }
+        };
+
+        if (!arg_separator) {
+            arg_separator = "&";
+        }
+        for (key in formdata) {
+            value = formdata[key];
+            if (numeric_prefix && !isNaN(key)) {
+                key = String(numeric_prefix) + key;
+            }
+            var query=_http_build_query_helper(key, value, arg_separator);
+            if(query != '') {
+                tmp.push(query);
+            }
+        }
+
+        return tmp.join(arg_separator);
     };
 
     /**
@@ -461,17 +648,12 @@ var Codebird = function () {
      * @param string          httpmethod Usually either 'GET' or 'POST' or 'DELETE'
      * @param string          method     The API method to call
      * @param array  optional params     The API call parameters, associative
-     * @param bool   optional multipart  Whether the request is going to be multipart/form-data
      *
-     * @return string The API call parameters including the signature
-     *                If multipart, the Authorization HTTP header is returned
+     * @return string Authorization HTTP header
      */
-    var _sign = function (httpmethod, method, params, multipart) {
+    var _sign = function (httpmethod, method, params) {
         if (typeof params == 'undefined') {
             var params = {};
-        }
-        if (typeof multipart == 'undefined') {
-            var multipart = false;
         }
         if (_oauth_consumer_key == null) {
             c('To generate a signature, the consumer key must be set.');
@@ -491,6 +673,7 @@ var Codebird = function () {
         if (_oauth_token != null) {
             sign_base_params['oauth_token'] = _url(_oauth_token);
         }
+        oauth_params = sign_base_params;
         for (var key in params) {
             var value = params[key];
             sign_base_params[key] = _url(value);
@@ -503,18 +686,16 @@ var Codebird = function () {
         }
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
         var signature = _sha1(httpmethod + '&' + _url(method) + '&' + _url(sign_base_string));
-        if (multipart) {
-            params = sign_base_params;
-            params['oauth_signature'] = signature;
-            params = _ksort(params);
-            var authorization = 'Authorization: OAuth ';
-            for (var key in params) {
-                var value = params[key];
-                authorization += key + '="' + _url(value) + '", ';
-            }
-            return authorization.substring(0, authorization.length - 2);
+
+        params = oauth_params;
+        params['oauth_signature'] = signature;
+        params = _ksort(params);
+        var authorization = 'OAuth ';
+        for (var key in params) {
+            var value = params[key];
+            authorization += key + '="' + _url(value) + '", ';
         }
-        return (httpmethod == 'GET' ? method + '?' : '') + sign_base_string + '&oauth_signature=' + _url(signature);
+        return authorization.substring(0, authorization.length - 2);
     };
 
     /**
@@ -555,6 +736,7 @@ var Codebird = function () {
             'direct_messages/show',
 
             // Friends & Followers
+            'friendships/no_retweets/ids',
             'friends/ids',
             'followers/ids',
             'friendships/lookup',
@@ -619,10 +801,7 @@ var Codebird = function () {
             'help/languages',
             'help/privacy',
             'help/tos',
-            'application/rate_limit_status',
-
-            // Old
-            'users/recommendations'
+            'application/rate_limit_status'
         ];
         httpmethods['POST'] = [
             // Tweets
@@ -679,11 +858,12 @@ var Codebird = function () {
 
             // OAuth
             'oauth/access_token',
-            'oauth/request_token'
+            'oauth/request_token',
+            'oauth2/token',
+            'oauth2/invalidate_token'
         ];
         for (var httpmethod in httpmethods) {
-            var methods = httpmethods[httpmethod].join(' ');
-            if (methods.indexOf(method) > -1) {
+            if (httpmethods[httpmethod].indexOf(method) > -1) {
                 return httpmethod;
             }
         }
@@ -711,21 +891,6 @@ var Codebird = function () {
     };
 
     /**
-     * Detects if API call should use the old endpoint
-     *
-     * @param string method The API method to call
-     *
-     * @return bool Whether the method is defined in old API
-     */
-    var _detectOld = function (method) {
-        var olds = [
-            // Users
-            'users/recommendations'
-        ];
-        return olds.indexOf(method) > -1;
-    };
-
-    /**
      * Builds the complete API endpoint url
      *
      * @param string method           The API method to call
@@ -734,10 +899,8 @@ var Codebird = function () {
      * @return string The URL to send the request to
      */
     var _getEndpoint = function (method, method_template) {
-        if (method.substring(0, 6) == 'oauth/') {
+        if (method.substring(0, 5) == 'oauth') {
             url = _endpoint_oauth + method;
-        } else if (_detectOld(method_template)) {
-            url = _endpoint_old + method + '.json';
         } else {
             url = _endpoint + method + '.json';
         }
@@ -752,23 +915,28 @@ var Codebird = function () {
      * @param string          method_template The templated API method to call
      * @param array  optional params          The parameters to send along
      * @param bool   optional multipart       Whether to use multipart/form-data
+     * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, multipart, callback) {
+    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, callback) {
         if (typeof params == 'undefined') {
             var params = {};
         }
         if (typeof multipart == 'undefined') {
             var multipart = false;
         }
+        if (typeof app_only_auth == 'undefined') {
+            var app_only_auth = false;
+        }
         if (typeof callback != 'function') {
             var callback = function (reply) {};
         }
 
         url = _getEndpoint(method, method_template);
+        var authorization = null;
 
         var xml;
         try {
@@ -777,19 +945,52 @@ var Codebird = function () {
             xml = new ActiveXObject('Microsoft.XMLHTTP');
         }
         if (httpmethod == 'GET') {
-            xml.open(httpmethod, _sign(httpmethod, url, params), true);
+            var url_with_params = url;
+            if (params.length > 0) {
+                url_with_params += '?' + http_build_query(params);
+            }
+            authorization = _sign(httpmethod, url, params);
+            if (_use_proxy) {
+                url_with_params = url_with_params.replace(
+                    _endpoint_base,
+                    _endpoint_proxy
+                );
+            }
+            xml.open(httpmethod, url_with_params, true);
         } else {
+            authorization = _sign(httpmethod, url, {});
+            if (! multipart) {
+                authorization = _sign(httpmethod, url, params);
+                params        = http_build_query(params);
+            }
+            post_fields = params;
+            if (_use_proxy) {
+                url = url.replace(
+                    _endpoint_base,
+                    _endpoint_proxy
+                );
+            }
             xml.open(httpmethod, url, true);
             if (multipart) {
                 xml.setRequestHeader("Content-Type", "multipart/form-data");
-                var authorization = _sign('POST', url, {}, true);
-                xml.setRequestHeader("Authorization", authorization);
-                xml.setRequestHeader("Expect", '');
-                var post_fields = params;
             } else {
                 xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                var post_fields = _sign('POST', url, params);
             }
+        }
+        if (app_only_auth) {
+            if (_oauth_consumer_key == null) {
+                c('To make an app-only auth API request, the consumer key must be set.');
+            }
+            // automatically fetch bearer token, if necessary
+            if (_oauth_bearer_token == null) {
+                return oauth2_token(function (reply) {
+                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, callback);
+                });
+            }
+            authorization = 'Bearer ' + _oauth_bearer_token;
+        }
+        if (authorization !== null) {
+            xml.setRequestHeader((_use_proxy ? "X-" : "") + "Authorization", authorization);
         }
         xml.onreadystatechange = function () {
             if (xml.readyState >= 4) {
@@ -822,14 +1023,23 @@ var Codebird = function () {
         try {
             parsed = JSON.parse(reply);
         } catch (e) {
-            var elements = reply.split("&");
             parsed = {};
-            for (var i = 0; i < elements.length; i++) {
-                var element = elements[i].split("=", 2);
-                if (element.length > 1) {
-                    parsed[element[0]] = unescape(element[1]);
-                } else {
-                    parsed[element[0]] = null;
+            if (reply.indexOf('<' + '?xml version="1.0" encoding="UTF-8"?' + '>') === 0) {
+                // we received XML...
+                // since this only happens for errors,
+                // don't perform a full decoding
+                parsed["request"] = reply.match(/<request>(.*)<\/request>/)[1];
+                parsed["error"] = reply.match(/<error>(.*)<\/error>/)[1];
+            } else {
+                // assume query format
+                var elements = reply.split("&");
+                for (var i = 0; i < elements.length; i++) {
+                    var element = elements[i].split("=", 2);
+                    if (element.length > 1) {
+                        parsed[element[0]] = unescape(element[1]);
+                    } else {
+                        parsed[element[0]] = null;
+                    }
                 }
             }
         }
@@ -841,8 +1051,8 @@ var Codebird = function () {
         getVersion: getVersion,
         setToken: setToken,
         __call: __call,
-        statuses_publicTimeline: statuses_publicTimeline,
         oauth_authenticate: oauth_authenticate,
-        oauth_authorize: oauth_authorize
+        oauth_authorize: oauth_authorize,
+        oauth2_token: oauth2_token
     };
 };

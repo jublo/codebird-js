@@ -1,0 +1,25 @@
+codebird-js - changelog
+=======================
+
+2.3.0 (not yet released)
++ Fix _detectMultipart for statuses/update calls
++ Add Array.indexOf polyfill
++ Circumvent same-origin policy with CORS
+
+2.2.3 (2012-12-03)
++ Detect HTTP method properly when accessing multi HTTP method endpoint (account/settings)
++ Add friends/list, followers/list API methods
++ Move users/recommendations to GET list
+
+2.2.2 (2012-10-19)
++ Update methods list for API 1.1
++ Add profile banner methods
+- Drop separate media upload method
+- Remove OAuth token message. 1.1 is always signed.
++ Update endpoints to 1.1 endpoints, add support for old endpoints
+
+2.2.1 (2012-09-17)
++ Update to Twitter API v1.1
+
+2.2.0 (2012-09-17)
++ Port Codebird from PHP to JavaScript
