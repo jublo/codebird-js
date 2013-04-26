@@ -1,6 +1,10 @@
 codebird-js - changelog
 =======================
 
+2.3.1 (2013-04-26)
++ Fix OAuth signature generation for POST requests with oauth_callback
++ Fix _ksort implementation
+
 2.3.0 (2013-04-26)
 + Fix _detectMultipart for statuses/update calls
 + Add Array.indexOf polyfill

@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.3.0
+ * @version 2.3.1
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -117,7 +117,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.3.0';
+    var _version = '2.3.1';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -647,28 +647,74 @@ var Codebird = function () {
         return nonce;
     };
 
-    /**
-     * Sort an array by key
-     *
-     * @param array a The array to sort
-     * @return array The sorted array
-     */
-    var _ksort = function (a) {
-        var b = {},
-        f = [],
-            c, d, e = [];
-        for (d in a) a.hasOwnProperty && f.push(d);
-        f.sort(function (g, h) {
-            if (g > h) return 1;
-            if (g < h) return -1;
-            return 0
-        });
-        for (c = 0; c < f.length; c++) {
-            d = f[c];
-            b[d] = a[d]
+    var _ksort = function (inputArr) {
+        // http://kevin.vanzonneveld.net
+        // +   original by: GeekFG (http://geekfg.blogspot.com)
+        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +   improved by: Brett Zamir (http://brett-zamir.me)
+        var tmp_arr = {},
+        keys = [],
+        sorter, i, k, that = this,
+        strictForIn = false,
+        populateArr = {};
+
+        sorter = function (a, b) {
+            var aFloat = parseFloat(a),
+            bFloat = parseFloat(b),
+            aNumeric = aFloat + '' === a,
+            bNumeric = bFloat + '' === b;
+            if (aNumeric && bNumeric) {
+                return aFloat > bFloat ? 1 : aFloat < bFloat ? -1 : 0;
+            } else if (aNumeric && !bNumeric) {
+                return 1;
+            } else if (!aNumeric && bNumeric) {
+                return -1;
+            }
+            return a > b ? 1 : a < b ? -1 : 0;
+        };
+
+        // Make a list of key names
+        for (k in inputArr) {
+            if (inputArr.hasOwnProperty(k)) {
+                keys.push(k);
+            }
         }
-        for (c in b) if (b.hasOwnProperty) e[c] = b[c];
-        return e
+        keys.sort(sorter);
+
+        populateArr = inputArr;
+    
+        // Rebuild array with sorted key names
+        for (i = 0; i < keys.length; i++) {
+            k = keys[i];
+            tmp_arr[k] = inputArr[k];
+            delete inputArr[k];
+        }
+        for (i in tmp_arr) {
+            if (tmp_arr.hasOwnProperty(i)) {
+                populateArr[i] = tmp_arr[i];
+            }
+        }
+    
+        return strictForIn || populateArr;
+    };
+
+    /**
+     * Clone objects
+     * 
+     * @param object obj    The object to clone
+     *
+     * @return object clone The cloned object
+     */
+    var _clone = function (obj) {
+        var clone = {};
+        for (var i in obj) {
+            if (typeof(obj[i]) == "object") {
+                clone[i] = clone(obj[i]);
+            } else {
+                clone[i] = obj[i];
+            }
+        }
+        return clone;
     };
 
     /**
@@ -706,12 +752,12 @@ var Codebird = function () {
         if (_oauth_token != null) {
             sign_base_params['oauth_token'] = _url(_oauth_token);
         }
-        oauth_params = sign_base_params;
+        oauth_params = _clone(sign_base_params);
         for (var key in params) {
             var value = params[key];
             sign_base_params[key] = _url(value);
         }
-        sign_base_params = _ksort(sign_base_params);
+        _ksort(sign_base_params);
         var sign_base_string = '';
         for (var key in sign_base_params) {
             var value = sign_base_params[key];
@@ -722,7 +768,6 @@ var Codebird = function () {
 
         params = append_to_get ? sign_base_params : oauth_params;
         params['oauth_signature'] = signature;
-        params = _ksort(params);
         if (append_to_get) {
             var authorization = '';
             for(var key in params) {
@@ -1056,7 +1101,7 @@ var Codebird = function () {
             }
             authorization = 'Bearer ' + _oauth_bearer_token;
         }
-        if (authorization !== null) {
+        if (authorization !== null) {console.log("auth: " + authorization);
             xml.setRequestHeader((_use_proxy ? "X-" : "") + "Authorization", authorization);
         }
         xml.onreadystatechange = function () {
@@ -1064,7 +1109,7 @@ var Codebird = function () {
                 var httpstatus = 12027;
                 try {
                     httpstatus = xml.status;
-                } catch (e) {}
+                } catch (e) {}console.log(xml);
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
                 callback(reply);
