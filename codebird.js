@@ -84,6 +84,17 @@ var Codebird = function () {
     var _endpoint_proxy = 'https://api.jublo.net/codebird/';
 
     /**
+     * Use JSONP for GET requests in IE7-9
+     */
+    var _use_jsonp = (typeof navigator != "undefined"
+        && typeof navigator.userAgent != "undefined"
+        && (navigator.userAgent.indexOf("Trident/4") > -1
+            || navigator.userAgent.indexOf("Trident/5") > -1
+            || navigator.userAgent.indexOf("MSIE 7.0") > -1
+        )
+    );
+
+    /**
      * Whether to access the API via a proxy that is allowed by CORS
      */
     var _use_proxy = true;
@@ -196,7 +207,7 @@ var Codebird = function () {
             array2 = String(str).replace(/^&?([\s\S]*?)&?$/, '$1').split(glue2),
             i, j, chr, tmp, key, value, bracket, keys, evalStr, that = this,
             fixStr = function (str) {
-                return that.urldecode(str).replace(/([\\"'])/g, '\\$1').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+                return unescape(str).replace(/([\\"'])/g, '\\$1').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
             };
         if (!array) {
             array = this.window;
@@ -663,15 +674,19 @@ var Codebird = function () {
     /**
      * Generates an OAuth signature
      *
-     * @param string          httpmethod Usually either 'GET' or 'POST' or 'DELETE'
-     * @param string          method     The API method to call
-     * @param array  optional params     The API call parameters, associative
+     * @param string          httpmethod    Usually either 'GET' or 'POST' or 'DELETE'
+     * @param string          method        The API method to call
+     * @param array  optional params        The API call parameters, associative
+     * @param bool   optional append_to_get Whether to append the OAuth params to GET
      *
      * @return string Authorization HTTP header
      */
-    var _sign = function (httpmethod, method, params) {
+    var _sign = function (httpmethod, method, params, append_to_get) {
         if (typeof params == 'undefined') {
             var params = {};
+        }
+        if (typeof append_to_get == "undefined") {
+            var append_to_get = false;
         }
         if (_oauth_consumer_key == null) {
             c('To generate a signature, the consumer key must be set.');
@@ -705,9 +720,17 @@ var Codebird = function () {
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
         var signature = _sha1(httpmethod + '&' + _url(method) + '&' + _url(sign_base_string));
 
-        params = oauth_params;
+        params = append_to_get ? sign_base_params : oauth_params;
         params['oauth_signature'] = signature;
         params = _ksort(params);
+        if (append_to_get) {
+            var authorization = '';
+            for(var key in params) {
+                var value = params[key];
+                authorization += key + "=" + _url(value) + "&";
+            }
+            return authorization.substring(0, authorization.length - 1);
+        }
         var authorization = 'OAuth ';
         for (var key in params) {
             var value = params[key];
@@ -964,11 +987,33 @@ var Codebird = function () {
         }
         if (httpmethod == 'GET') {
             var url_with_params = url;
-            if (params.length > 0) {
+            if (JSON.stringify(params) != "{}") {
                 url_with_params += '?' + http_build_query(params);
             }
             authorization = _sign(httpmethod, url, params);
-            if (_use_proxy) {
+
+            // append auth params to GET url for IE7-9, to send via JSONP
+            if (_use_jsonp) {
+                if (JSON.stringify(params) != "{}") {
+                    url_with_params += '&';
+                } else {
+                    url_with_params += '?';
+                }
+                var callback_name = _nonce();
+                window[callback_name] = function (reply) {
+                    reply.httpstatus = 200;
+                    callback(reply);
+                };
+                params.callback = callback_name;
+                url_with_params = url + "?" + _sign(httpmethod, url, params, true);
+                var tag = document.createElement("script");
+                tag.type = "text/javascript";
+                tag.src = url_with_params;
+                var body = document.getElementsByTagName("body")[0];
+                body.appendChild(tag);
+                return;
+
+            } else if (_use_proxy) {
                 url_with_params = url_with_params.replace(
                     _endpoint_base,
                     _endpoint_proxy
@@ -976,6 +1021,10 @@ var Codebird = function () {
             }
             xml.open(httpmethod, url_with_params, true);
         } else {
+            if (_use_jsonp) {
+                c('Sending POST requests is not supported for IE7-9.');
+                return;
+            }
             authorization = _sign(httpmethod, url, {});
             if (! multipart) {
                 authorization = _sign(httpmethod, url, params);

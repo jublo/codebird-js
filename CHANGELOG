@@ -6,6 +6,7 @@ codebird-js - changelog
 + Add Array.indexOf polyfill
 + Circumvent same-origin policy with CORS
 + Make oauth_authenticate and oauth_authorize asynchronous
++ Send GET requests via JSONP for IE7-9 (don't support CORS)
 
 2.2.3 (2012-12-03)
 + Detect HTTP method properly when accessing multi HTTP method endpoint (account/settings)
