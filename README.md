@@ -233,6 +233,8 @@ the same base domain.  This is a security feature called the “same-origin
 policy.”  However, this policy is in your way when you try to access the
 (remote) Twitter API domain and its methods.
 
+### 6.1 Cross-domain requests
+
 With Codebird, don’t worry about this.  We automatically send cross-domain
 requests using a secured proxy that sends back the required headers to the
 user’s browser.
@@ -241,9 +243,6 @@ This CORS proxy is using an encrypted SSL connection.
 *We do not record data sent to or from the Twitter API. 
 Using Codebird’s CORS proxy is subject to the Acceptable use policy.*
 
-Cross-domain requests work well in any browser except for
-Internet Explorer 7-9.  Codebird cannot send POST requests in these browsers.
-
 If your JavaScript environment is not restricted under the same-origin policy
 (for example in node-js), it is recommended that you turn off the CORS
 compatibility like this:
@@ -251,6 +250,15 @@ compatibility like this:
 ```javascript
 cb.setUseProxy(false);
 ```
+
+### 6.2 Support for Internet Explorer 7 to 9
+
+Cross-domain requests work well in any browser except for
+Internet Explorer 7-9.  Codebird cannot send POST requests in these browsers.
+For IE7-9, Codebird works in limited operation mode:
+
+- Calls to GET methods work fine,
+- calling POST methods is impossible.
 
 7. Using multiple Codebird instances
 ------------------------------------

@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.3.0 (not yet released)
+2.3.0 (2013-04-26)
 + Fix _detectMultipart for statuses/update calls
 + Add Array.indexOf polyfill
 + Circumvent same-origin policy with CORS
