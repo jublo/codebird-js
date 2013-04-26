@@ -32,9 +32,9 @@ cb.setToken('<fill in>','<fill in>');
 	
 cb.__call('statuses/userTimeline', {
     'screen_name' : '<fill in>',
-    'callback' : 'tweets_callback',
     'count': '3'
-    }
+    },
+    tweets_callback
 );
 
 function tweets_callback (result)
