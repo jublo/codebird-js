@@ -155,6 +155,17 @@ var Codebird = function () {
     };
 
     /**
+     * Enables or disables CORS proxy
+     *
+     * @param bool use_proxy Whether to use CORS proxy or not
+     *
+     * @return void
+     */
+    var setUseProxy = function (use_proxy) {
+        _use_proxy = !! use_proxy;
+    };
+
+    /**
      * Parse URL-style parameters into object
      *
      * @param string str String to parse
@@ -282,8 +293,13 @@ var Codebird = function () {
             var callback = function (reply) {};
         }
         switch (fn) {
+            case "oauth_authenticate":
+            case "oauth_authorize":
+                return this[fn](params, callback);
+                break;
+
             case "oauth2_token":
-                return this[fn](function(reply) {callback(reply)});
+                return this[fn](callback);
         }
         // parse parameters
         var apiparams = {};
@@ -356,24 +372,25 @@ var Codebird = function () {
      *
      * @return string The OAuth authenticate URL
      */
-    var oauth_authenticate = function (force_login, screen_name) {
-        if (typeof force_login == "undefined") {
-            var force_login = null;
+    var oauth_authenticate = function (params, callback) {
+        if (typeof params.force_login == "undefined") {
+            params.force_login = null;
         }
-        if (typeof screen_name == "undefined") {
-            var screen_name = null;
+        if (typeof params.screen_name == "undefined") {
+            params.screen_name = null;
         }
         if (_oauth_token == null) {
             c('To get the authenticate URL, the OAuth token must be set.');
         }
         var url = _endpoint_oauth + 'oauth/authenticate?oauth_token=' + _url(_oauth_token);
-        if (force_login === true) {
+        if (params.force_login === true) {
             url += "?force_login=1";
-            if (screen_name !== null) {
-                url += "&screen_name=" + screen_name;
+            if (params.screen_name !== null) {
+                url += "&screen_name=" + params.screen_name;
             }
         }
-        return url;
+        callback(url);
+        return true;
     };
 
     /**
@@ -381,24 +398,25 @@ var Codebird = function () {
      *
      * @return string The OAuth authorize URL
      */
-    var oauth_authorize = function (force_login, screen_name) {
-        if (typeof force_login == "undefined") {
-            var force_login = null;
+    var oauth_authorize = function (params, callback) {
+        if (typeof params.force_login == "undefined") {
+            params.force_login = null;
         }
-        if (typeof screen_name == "undefined") {
-            var screen_name = null;
+        if (typeof params.screen_name == "undefined") {
+            params.screen_name = null;
         }
         if (_oauth_token == null) {
             c('To get the authorize URL, the OAuth token must be set.');
         }
         var url = _endpoint_oauth + 'oauth/authorize?oauth_token=' + _url(_oauth_token);
-        if (force_login === true) {
+        if (params.force_login === true) {
             url += "?force_login=1";
-            if (screen_name !== null) {
-                url += "&screen_name=" + screen_name;
+            if (params.screen_name !== null) {
+                url += "&screen_name=" + params.screen_name;
             }
         }
-        return url;
+        callback(url);
+        return true;
     };
 
     /**
@@ -1050,6 +1068,7 @@ var Codebird = function () {
         setConsumerKey: setConsumerKey,
         getVersion: getVersion,
         setToken: setToken,
+        setUseProxy: setUseProxy,
         __call: __call,
         oauth_authenticate: oauth_authenticate,
         oauth_authorize: oauth_authorize,
