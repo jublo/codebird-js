@@ -680,22 +680,7 @@ var Codebird = function () {
             }
         }
         keys.sort(sorter);
-
-        populateArr = inputArr;
-    
-        // Rebuild array with sorted key names
-        for (i = 0; i < keys.length; i++) {
-            k = keys[i];
-            tmp_arr[k] = inputArr[k];
-            delete inputArr[k];
-        }
-        for (i in tmp_arr) {
-            if (tmp_arr.hasOwnProperty(i)) {
-                populateArr[i] = tmp_arr[i];
-            }
-        }
-    
-        return strictForIn || populateArr;
+        return keys;
     };
 
     /**
@@ -757,9 +742,10 @@ var Codebird = function () {
             var value = params[key];
             sign_base_params[key] = _url(value);
         }
-        _ksort(sign_base_params);
+        var keys = _ksort(sign_base_params);
         var sign_base_string = '';
-        for (var key in sign_base_params) {
+        for (var i=0;i<keys.length;i++) {
+            var key = keys[i];
             var value = sign_base_params[key];
             sign_base_string += key + '=' + value + '&';
         }
