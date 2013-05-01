@@ -1,6 +1,8 @@
 codebird-js - changelog
 =======================
 
+2.3.2 (not yet released)
+
 2.3.1 (2013-04-26)
 + Fix OAuth signature generation for POST requests with oauth_callback
 + Fix _ksort implementation
