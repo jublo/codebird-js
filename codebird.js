@@ -977,6 +977,97 @@ var Codebird = function () {
     };
 
     /**
+     * Build multipart request from upload params
+     *
+     * @param string method  The API method to call
+     * @param array  params  The parameters to send along
+     *
+     * @return void
+     */
+    var _buildMultipart = function (method, params) {
+        // well, files will only work in multipart methods
+        if (! _detectMultipart(method)) {
+            return;
+        }
+
+        // only check specific parameters
+        var possible_methods = [
+            // Tweets
+            'statuses/update_with_media',
+            // Accounts
+            'account/update_profile_background_image',
+            'account/update_profile_image',
+            'account/update_profile_banner'
+        ];
+        var possible_files = {
+            // Tweets
+            'statuses/update_with_media': 'media[]',
+            // Accounts
+            'account/update_profile_background_image': 'image',
+            'account/update_profile_image': 'image',
+            'account/update_profile_banner': 'banner'
+        };
+        // method might have files?
+        if (possible_methods.indexOf(method) == -1) {
+            return;
+        }
+
+        // check for filenames
+        var possible_files = possible_files[method].split(" ");
+
+        var multipart_border = "--------------------" + _nonce();
+        var multipart_request = "";
+        for (var key in params) {
+            multipart_request +=
+                "--" + multipart_border + "\r\n"
+                + "Content-Disposition: form-data; name=\"" + key + "\"";
+            if (possible_files.indexOf(key) > -1) {
+                // detect format and MIME
+                var media_format = _detectMediaFormat(params[key]);
+                var media_mime = "application/octet-stream";
+                switch (media_format) {
+                    case "jpg":
+                        media_mime = "image/jpeg";
+                        break;
+                    case "png":
+                        media_mime = "image/png";
+                        break;
+                    case "gif":
+                        media_mime = "image/gif";
+                        break;
+                }
+
+                multipart_request +=
+                    "; filename=\"image."
+                    + media_format + "\"\r\n"
+                    + "Content-Type: " + media_mime;
+            }
+            multipart_request +=
+                "\r\n\r\n" + params[key] + "\r\n";
+        }
+        multipart_request += "--" + multipart_border + "--";
+        return multipart_request;
+    };
+
+    /**
+     * Detects the media format of given parameter
+     *
+     * @param string param    The parameter to check
+     *
+     * @return string format  The detected media format
+     */
+    var _detectMediaFormat = function (param) {
+        if (param.substring(0, 4) == "\xFF\xD8\xFF\xE0") {
+            return "jpg";
+        } else if (param.substring(0, 3) == "\x47\x49\x46\x38") {
+            return "gif";
+        } else if (param.substring(0, 8) == "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A") {
+            return "png";
+        }
+        return "unknown";
+    };
+
+    /**
      * Builds the complete API endpoint url
      *
      * @param string method           The API method to call
@@ -1070,8 +1161,10 @@ var Codebird = function () {
                 c('Sending POST requests is not supported for IE7-9.');
                 return;
             }
-            authorization = _sign(httpmethod, url, {});
-            if (! multipart) {
+            if (multipart) {
+                authorization = _sign(httpmethod, url, {});
+                params        = _buildMultipart(method, params);
+            } else {
                 authorization = _sign(httpmethod, url, params);
                 params        = http_build_query(params);
             }
@@ -1084,7 +1177,8 @@ var Codebird = function () {
             }
             xml.open(httpmethod, url, true);
             if (multipart) {
-                xml.setRequestHeader("Content-Type", "multipart/form-data");
+                xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
+                    + post_fields.split("\r\n")[0].substring(2));
             } else {
                 xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             }
