@@ -3,6 +3,7 @@ codebird-js - changelog
 
 2.3.2 (not yet released)
 + Fix sorting the OAuth parameter list in IE correctly
++ Fix undefined function c for debug logging
 
 2.3.1 (2013-04-26)
 + Fix OAuth signature generation for POST requests with oauth_callback
