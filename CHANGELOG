@@ -1,6 +1,8 @@
 codebird-js - changelog
 =======================
 
+2.3.3 (not yet released)
+
 2.3.2 (2013-05-21)
 + Fix sorting the OAuth parameter list in IE correctly
 + Fix undefined function c for debug logging
