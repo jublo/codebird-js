@@ -342,12 +342,12 @@ var Codebird = function () {
         // replace AA by URL parameters
         var method_template = method;
         var match = [];
-        if (match = method.match('/[A-Z_]{2,}/')) {
+        if (match = method.match(/[A-Z_]{2,}/)) {
             for (var i = 0; i < match.length; i++) {
                 var param = match[i];
                 var param_l = param.toLowerCase();
                 method_template = method_template.split(param).join(':' + param_l);
-                if (typeof apiparams[param_l] != 'undefined') {
+                if (typeof apiparams[param_l] == 'undefined') {
                     for (j = 0; j < 26; j++) {
                         method_template = method_template.split(String.fromCharCode(65 + j)).join('_' + String.fromCharCode(97 + j));
                     }
