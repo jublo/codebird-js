@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.3.2-dev
+ * @version 2.3.3-dev
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -117,7 +117,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = '2.3.2';
+    var _version = '2.3.3-dev';
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -342,16 +342,16 @@ var Codebird = function () {
         // replace AA by URL parameters
         var method_template = method;
         var match = [];
-        if (match = method.match('/[A-Z_]{2,}/')) {
+        if (match = method.match(/[A-Z_]{2,}/)) {
             for (var i = 0; i < match.length; i++) {
                 var param = match[i];
                 var param_l = param.toLowerCase();
                 method_template = method_template.split(param).join(':' + param_l);
-                if (typeof apiparams[param_l] != 'undefined') {
+                if (typeof apiparams[param_l] == 'undefined') {
                     for (j = 0; j < 26; j++) {
                         method_template = method_template.split(String.fromCharCode(65 + j)).join('_' + String.fromCharCode(97 + j));
                     }
-                    c('To call the templated method "' + method_template + '", specify the parameter value for "' + param_l + '".');
+                    console.warn('To call the templated method "' + method_template + '", specify the parameter value for "' + param_l + '".');
                 }
                 method = method.split(param).join(apiparams[param_l]);
                 delete apiparams[param_l];
@@ -391,7 +391,7 @@ var Codebird = function () {
             params.screen_name = null;
         }
         if (_oauth_token == null) {
-            c('To get the authenticate URL, the OAuth token must be set.');
+            console.warn('To get the authenticate URL, the OAuth token must be set.');
         }
         var url = _endpoint_oauth + 'oauth/authenticate?oauth_token=' + _url(_oauth_token);
         if (params.force_login === true) {
@@ -417,7 +417,7 @@ var Codebird = function () {
             params.screen_name = null;
         }
         if (_oauth_token == null) {
-            c('To get the authorize URL, the OAuth token must be set.');
+            console.warn('To get the authorize URL, the OAuth token must be set.');
         }
         var url = _endpoint_oauth + 'oauth/authorize?oauth_token=' + _url(_oauth_token);
         if (params.force_login === true) {
@@ -438,7 +438,7 @@ var Codebird = function () {
 
     var oauth2_token = function (callback) {
         if (_oauth_consumer_key == null) {
-            c('To obtain a bearer token, the consumer key must be set.');
+            console.warn('To obtain a bearer token, the consumer key must be set.');
         }
 
         if (typeof callback == "undefined") {
@@ -510,10 +510,10 @@ var Codebird = function () {
      */
     var _sha1 = function (data) {
         if (_oauth_consumer_secret == null) {
-            c('To generate a hash, the consumer secret must be set.');
+            console.warn('To generate a hash, the consumer secret must be set.');
         }
         if (typeof b64_hmac_sha1 != 'function') {
-            c('To generate a hash, the Javascript SHA1.js must be available.');
+            console.warn('To generate a hash, the Javascript SHA1.js must be available.');
         }
         b64pad = '=';
         return b64_hmac_sha1(_oauth_consumer_secret + '&' + (_oauth_token_secret != null ? _oauth_token_secret : ''), data);
@@ -637,7 +637,7 @@ var Codebird = function () {
             var length = 8;
         }
         if (length < 1) {
-            c('Invalid nonce length.');
+            console.warn('Invalid nonce length.');
         }
         var nonce = '';
         for (var i = 0; i < length; i++) {
@@ -680,22 +680,7 @@ var Codebird = function () {
             }
         }
         keys.sort(sorter);
-
-        populateArr = inputArr;
-    
-        // Rebuild array with sorted key names
-        for (i = 0; i < keys.length; i++) {
-            k = keys[i];
-            tmp_arr[k] = inputArr[k];
-            delete inputArr[k];
-        }
-        for (i in tmp_arr) {
-            if (tmp_arr.hasOwnProperty(i)) {
-                populateArr[i] = tmp_arr[i];
-            }
-        }
-    
-        return strictForIn || populateArr;
+        return keys;
     };
 
     /**
@@ -735,7 +720,7 @@ var Codebird = function () {
             var append_to_get = false;
         }
         if (_oauth_consumer_key == null) {
-            c('To generate a signature, the consumer key must be set.');
+            console.warn('To generate a signature, the consumer key must be set.');
         }
         var sign_params = {
             consumer_key: _oauth_consumer_key,
@@ -757,9 +742,10 @@ var Codebird = function () {
             var value = params[key];
             sign_base_params[key] = _url(value);
         }
-        _ksort(sign_base_params);
+        var keys = _ksort(sign_base_params);
         var sign_base_string = '';
-        for (var key in sign_base_params) {
+        for (var i=0;i<keys.length;i++) {
+            var key = keys[i];
             var value = sign_base_params[key];
             sign_base_string += key + '=' + value + '&';
         }
@@ -953,7 +939,7 @@ var Codebird = function () {
                 return httpmethod;
             }
         }
-        c('Can\'t find HTTP method to use for "' + method + '".');
+        console.warn('Can\'t find HTTP method to use for "' + method + '".');
     };
 
     /**
@@ -1158,7 +1144,7 @@ var Codebird = function () {
             xml.open(httpmethod, url_with_params, true);
         } else {
             if (_use_jsonp) {
-                c('Sending POST requests is not supported for IE7-9.');
+                console.warn('Sending POST requests is not supported for IE7-9.');
                 return;
             }
             if (multipart) {
@@ -1185,7 +1171,7 @@ var Codebird = function () {
         }
         if (app_only_auth) {
             if (_oauth_consumer_key == null) {
-                c('To make an app-only auth API request, the consumer key must be set.');
+                console.warn('To make an app-only auth API request, the consumer key must be set.');
             }
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token == null) {
