@@ -1148,7 +1148,7 @@ var Codebird = function () {
         setConsumerKey: setConsumerKey,
         getVersion: getVersion,
         setToken: setToken,
-		setBearerToken: setBearerToken,
+        setBearerToken: setBearerToken,
         setUseProxy: setUseProxy,
         __call: __call,
         oauth_authenticate: oauth_authenticate,
