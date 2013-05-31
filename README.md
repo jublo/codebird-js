@@ -139,7 +139,7 @@ Tweeting is as easy as this:
 ```javascript
 cb.__call(
     'statuses_update',
-    {'status=Whohoo, I just tweeted!'},
+    {'status': 'Whohoo, I just tweeted!'},
     function (reply) {
         // ...
     }
