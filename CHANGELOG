@@ -3,6 +3,7 @@ codebird-js - changelog
 
 2.3.3 (not yet released)
 - oauth2_token doesn't respect _useProxy CORS setting
+- #10 setBearerToken was not public
 
 2.3.2 (2013-05-21)
 - Sorting the OAuth parameter list in IE incorrectly
