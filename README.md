@@ -2,6 +2,8 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
+[![Download latest version from SourceForge](https://f.cloud.github.com/assets/157944/591288/9a6955f4-c9fe-11e2-8bca-15db918638ef.png)](https://sourceforge.net/projects/codebird-js.codebird.p/files/latest/download)
+
 Copyright (C) 2010-2013 J.M. <me@mynetx.net>
 
 This program is free software: you can redistribute it and/or modify
