@@ -19,12 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Define constants
- */
-var IMAGETYPE_GIF = 1,
-    IMAGETYPE_JPEG = 2,
-    IMAGETYPE_PNG = 3;
 
 /**
  * Array.indexOf polyfill
@@ -108,11 +102,6 @@ var Codebird = function () {
      * The corresponding request or access token secret
      */
     var _oauth_token_secret = null;
-
-    /**
-     * The file formats that Twitter accepts as image uploads
-     */
-    var _supported_media_files = [IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG];
 
     /**
      * The current Codebird version
