@@ -448,6 +448,13 @@ var Codebird = function () {
         var post_fields = "grant_type=client_credentials";
         var url = _endpoint_oauth + "oauth2/token";
 
+        if (_use_proxy) {
+            url = url.replace(
+                _endpoint_base,
+                _endpoint_proxy
+            );
+        }
+
         var xml;
         try {
             xml = new XMLHttpRequest();
@@ -457,7 +464,7 @@ var Codebird = function () {
         xml.open("POST", url, true);
         xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xml.setRequestHeader(
-            "Authorization",
+            (_use_proxy ? "X-" : "") + "Authorization",
             "Basic " + base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
         );
 
@@ -1095,7 +1102,7 @@ var Codebird = function () {
                 var httpstatus = 12027;
                 try {
                     httpstatus = xml.status;
-                } catch (e) {}console.log(xml);
+                } catch (e) {}
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
                 callback(reply);

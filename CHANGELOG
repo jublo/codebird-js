@@ -2,18 +2,19 @@ codebird-js - changelog
 =======================
 
 2.3.3 (not yet released)
+- oauth2_token doesn't respect _useProxy CORS setting
 
 2.3.2 (2013-05-21)
-+ Fix sorting the OAuth parameter list in IE correctly
-+ Fix undefined function c for debug logging
+- Sorting the OAuth parameter list in IE incorrectly
+- Undefined function c for debug logging
 + Correctly detect templated methods and insert their parameters
 
 2.3.1 (2013-04-26)
-+ Fix OAuth signature generation for POST requests with oauth_callback
-+ Fix _ksort implementation
+- Wrong OAuth signature generation for POST requests with oauth_callback
+- Wrong _ksort implementation
 
 2.3.0 (2013-04-26)
-+ Fix _detectMultipart for statuses/update calls
+- Bug in _detectMultipart for statuses/update calls
 + Add Array.indexOf polyfill
 + Circumvent same-origin policy with CORS
 + Make oauth_authenticate and oauth_authorize asynchronous
