@@ -744,7 +744,7 @@ var Codebird = function () {
         }
         var keys = _ksort(sign_base_params);
         var sign_base_string = '';
-        for (var i=0;i<keys.length;i++) {
+        for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var value = sign_base_params[key];
             sign_base_string += key + '=' + value + '&';
@@ -754,16 +754,19 @@ var Codebird = function () {
 
         params = append_to_get ? sign_base_params : oauth_params;
         params['oauth_signature'] = signature;
+        keys = _ksort(params);
         if (append_to_get) {
             var authorization = '';
-            for(var key in params) {
+            for(var i = 0; i < keys.length; i++) {
+                var key = keys[i];
                 var value = params[key];
                 authorization += key + "=" + _url(value) + "&";
             }
             return authorization.substring(0, authorization.length - 1);
         }
         var authorization = 'OAuth ';
-        for (var key in params) {
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
             var value = params[key];
             authorization += key + '="' + _url(value) + '", ';
         }
@@ -1008,49 +1011,14 @@ var Codebird = function () {
                 "--" + multipart_border + "\r\n"
                 + "Content-Disposition: form-data; name=\"" + key + "\"";
             if (possible_files.indexOf(key) > -1) {
-                // detect format and MIME
-                var media_format = _detectMediaFormat(params[key]);
-                var media_mime = "application/octet-stream";
-                switch (media_format) {
-                    case "jpg":
-                        media_mime = "image/jpeg";
-                        break;
-                    case "png":
-                        media_mime = "image/png";
-                        break;
-                    case "gif":
-                        media_mime = "image/gif";
-                        break;
-                }
-
                 multipart_request +=
-                    "; filename=\"image."
-                    + media_format + "\"\r\n"
-                    + "Content-Type: " + media_mime;
+                    "\r\nContent-Transfer-Encoding: base64";
             }
             multipart_request +=
                 "\r\n\r\n" + params[key] + "\r\n";
         }
         multipart_request += "--" + multipart_border + "--";
         return multipart_request;
-    };
-
-    /**
-     * Detects the media format of given parameter
-     *
-     * @param string param    The parameter to check
-     *
-     * @return string format  The detected media format
-     */
-    var _detectMediaFormat = function (param) {
-        if (param.substring(0, 4) == "\xFF\xD8\xFF\xE0") {
-            return "jpg";
-        } else if (param.substring(0, 3) == "\x47\x49\x46\x38") {
-            return "gif";
-        } else if (param.substring(0, 8) == "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A") {
-            return "png";
-        }
-        return "unknown";
     };
 
     /**
