@@ -19,8 +19,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+### Versions
 
-This is the JavaScript version of the Codebird library.
+- JavaScript: https://github.com/mynetx/codebird-js
+- PHP: https://github.com/mynetx/codebird-php
+
 
 1. Authentication
 -----------------
