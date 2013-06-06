@@ -3,6 +3,7 @@ codebird-js - changelog
 
 2.3.4 (not yet released)
 - Drop unnecessary media format settings ported from PHP getimagesize
+- Don't unintendedly overwrite global "url" variable
 
 2.3.3 (2013-05-31)
 - oauth2_token doesn't respect _useProxy CORS setting
