@@ -968,9 +968,9 @@ var Codebird = function () {
      */
     var _getEndpoint = function (method, method_template) {
         if (method.substring(0, 5) == 'oauth') {
-            url = _endpoint_oauth + method;
+            var url = _endpoint_oauth + method;
         } else {
-            url = _endpoint + method + '.json';
+            var url = _endpoint + method + '.json';
         }
         return url;
     };
@@ -1003,7 +1003,7 @@ var Codebird = function () {
             var callback = function (reply) {};
         }
 
-        url = _getEndpoint(method, method_template);
+        var url = _getEndpoint(method, method_template);
         var authorization = null;
 
         var xml;
