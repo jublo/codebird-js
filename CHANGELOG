@@ -3,6 +3,9 @@ codebird-js - changelog
 
 2.4.0 (not yet released)
 
+2.3.4 (not yet released)
++ Add contributing guidelines
+
 2.3.3 (2013-05-31)
 - oauth2_token doesn't respect _useProxy CORS setting
 - #10 setBearerToken was not public
