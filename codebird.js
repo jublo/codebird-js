@@ -1123,7 +1123,7 @@ var Codebird = function () {
                 params        = http_build_query(params);
             }
             post_fields = params;
-            if (_use_proxy) {
+            if (_use_proxy || multipart) { // force proxy for multipart base64
                 url = url.replace(
                     _endpoint_base,
                     _endpoint_proxy
