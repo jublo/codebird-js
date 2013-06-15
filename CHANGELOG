@@ -2,6 +2,7 @@ codebird-js - changelog
 =======================
 
 2.4.0 (not yet released)
++ Support multipart file uploads
 
 2.3.4 (not yet released)
 + Add contributing guidelines

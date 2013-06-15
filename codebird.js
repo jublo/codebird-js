@@ -740,7 +740,7 @@ var Codebird = function () {
         }
         var keys = _ksort(sign_base_params);
         var sign_base_string = '';
-        for (var i=0;i<keys.length;i++) {
+        for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var value = sign_base_params[key];
             sign_base_string += key + '=' + value + '&';
@@ -750,16 +750,19 @@ var Codebird = function () {
 
         params = append_to_get ? sign_base_params : oauth_params;
         params['oauth_signature'] = signature;
+        keys = _ksort(params);
         if (append_to_get) {
             var authorization = '';
-            for(var key in params) {
+            for(var i = 0; i < keys.length; i++) {
+                var key = keys[i];
                 var value = params[key];
                 authorization += key + "=" + _url(value) + "&";
             }
             return authorization.substring(0, authorization.length - 1);
         }
         var authorization = 'OAuth ';
-        for (var key in params) {
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
             var value = params[key];
             authorization += key + '="' + _url(value) + '", ';
         }
@@ -959,6 +962,62 @@ var Codebird = function () {
     };
 
     /**
+     * Build multipart request from upload params
+     *
+     * @param string method  The API method to call
+     * @param array  params  The parameters to send along
+     *
+     * @return string The built multipart request body
+     */
+    var _buildMultipart = function (method, params) {
+        // well, files will only work in multipart methods
+        if (! _detectMultipart(method)) {
+            return;
+        }
+
+        // only check specific parameters
+        var possible_methods = [
+            // Tweets
+            'statuses/update_with_media',
+            // Accounts
+            'account/update_profile_background_image',
+            'account/update_profile_image',
+            'account/update_profile_banner'
+        ];
+        var possible_files = {
+            // Tweets
+            'statuses/update_with_media': 'media[]',
+            // Accounts
+            'account/update_profile_background_image': 'image',
+            'account/update_profile_image': 'image',
+            'account/update_profile_banner': 'banner'
+        };
+        // method might have files?
+        if (possible_methods.indexOf(method) == -1) {
+            return;
+        }
+
+        // check for filenames
+        var possible_files = possible_files[method].split(" ");
+
+        var multipart_border = "--------------------" + _nonce();
+        var multipart_request = "";
+        for (var key in params) {
+            multipart_request +=
+                "--" + multipart_border + "\r\n"
+                + "Content-Disposition: form-data; name=\"" + key + "\"";
+            if (possible_files.indexOf(key) > -1) {
+                multipart_request +=
+                    "\r\nContent-Transfer-Encoding: base64";
+            }
+            multipart_request +=
+                "\r\n\r\n" + params[key] + "\r\n";
+        }
+        multipart_request += "--" + multipart_border + "--";
+        return multipart_request;
+    };
+
+    /**
      * Builds the complete API endpoint url
      *
      * @param string method           The API method to call
@@ -1052,13 +1111,15 @@ var Codebird = function () {
                 console.warn('Sending POST requests is not supported for IE7-9.');
                 return;
             }
-            authorization = _sign(httpmethod, url, {});
-            if (! multipart) {
+            if (multipart) {
+                authorization = _sign(httpmethod, url, {});
+                params        = _buildMultipart(method, params);
+            } else {
                 authorization = _sign(httpmethod, url, params);
                 params        = http_build_query(params);
             }
             post_fields = params;
-            if (_use_proxy) {
+            if (_use_proxy || multipart) { // force proxy for multipart base64
                 url = url.replace(
                     _endpoint_base,
                     _endpoint_proxy
@@ -1066,7 +1127,8 @@ var Codebird = function () {
             }
             xml.open(httpmethod, url, true);
             if (multipart) {
-                xml.setRequestHeader("Content-Type", "multipart/form-data");
+                xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
+                    + post_fields.split("\r\n")[0].substring(2));
             } else {
                 xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             }
