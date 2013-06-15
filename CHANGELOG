@@ -3,8 +3,8 @@ codebird-js - changelog
 
 2.4.0 (not yet released)
 + Support multipart file uploads
-
-2.3.4 (not yet released)
+- Drop unnecessary media format settings ported from PHP getimagesize
+- Don't unintendedly overwrite global "url" variable
 + Add contributing guidelines
 
 2.3.3 (2013-05-31)
