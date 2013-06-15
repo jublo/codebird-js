@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.3.4 (not yet released)
+2.3.4 (no release, ported to 2.4.0)
 - Drop unnecessary media format settings ported from PHP getimagesize
 - Don't unintendedly overwrite global "url" variable
 + Add contributing guidelines
