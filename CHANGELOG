@@ -2,6 +2,7 @@ codebird-js - changelog
 =======================
 
 2.4.1 (not yet released)
++ Pass JSHint validation
 
 2.4.0 (2013-06-15)
 + Support multipart file uploads
