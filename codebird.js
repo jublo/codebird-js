@@ -186,6 +186,21 @@ var Codebird = function () {
     };
 
     /**
+     * Sets custom CORS proxy server
+     *
+     * @param string proxy Address of proxy server to use
+     *
+     * @return void
+     */
+    var setProxy = function (proxy) {
+        // add trailing slash if missing
+        if (! proxy.match(/\/$/)) {
+            proxy += "/";
+        }
+        _endpoint_proxy = proxy;
+    };
+
+    /**
      * Parse URL-style parameters into object
      *
      * @param string str String to parse
@@ -1231,6 +1246,7 @@ var Codebird = function () {
         setToken: setToken,
         setBearerToken: setBearerToken,
         setUseProxy: setUseProxy,
+        setProxy: setProxy,
         __call: __call,
         oauth_authenticate: oauth_authenticate,
         oauth_authorize: oauth_authorize,
