@@ -100,7 +100,7 @@ var Codebird = function () {
     /**
      * The API endpoint to use for internal requests
      */
-    var _endpoint_internal = _endpoint_base + "i/";
+    var _endpoint_internal = _endpoint_base + "1.1/";
 
     /**
      * Use JSONP for GET requests in IE7-9
