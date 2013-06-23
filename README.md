@@ -37,13 +37,13 @@ To authenticate your API requests on behalf of a certain Twitter user
 
 <script type="text/javascript">
 var cb = new Codebird;
-cb.setConsumerKey('YOURKEY', 'YOURSECRET');
+cb.setConsumerKey("YOURKEY", "YOURSECRET");
 </script>
 ```
 
 You may either set the OAuth token and secret, if you already have them:
 ```javascript
-cb.setToken('YOURTOKEN', 'YOURTOKENSECRET');
+cb.setToken("YOURTOKEN", "YOURTOKENSECRET");
 ```
 
 Or you authenticate, like this:
@@ -51,15 +51,15 @@ Or you authenticate, like this:
 ```javascript
 // gets a request token
 cb.__call(
-    'oauth_requestToken',
-    {oauth_callback: 'oob'},
+    "oauth_requestToken",
+    {oauth_callback: "oob"},
     function (reply) {
         // stores it
         cb.setToken(reply.oauth_token, reply.oauth_token_secret);
 
         // gets the authorize screen URL
         cb.__call(
-            'oauth_authorize',
+            "oauth_authorize",
             {},
             function (auth_url) {
                 window.codebird_auth = window.open(auth_url);
@@ -74,7 +74,7 @@ After the user enters the PIN, complete the authentication:
 
 ```javascript
 cb.__call(
-    'oauth_accessToken',
+    "oauth_accessToken",
     {oauth_verifier: document.getElementById("PINFIELD").value},
     function (reply) {
         // store the authenticated token, which may be different from the request token (!)
@@ -96,7 +96,7 @@ To obtain an app-only bearer token, call the appropriate API:
 
 ```javascript
 cb.__call(
-    'oauth2_token',
+    "oauth2_token",
     {},
     function (reply) {
         var bearer_token = reply.access_token;
@@ -110,10 +110,59 @@ only when you call the ```oauth2/invalidate_token``` method.
 
 If you already have your token, tell Codebird to use it:
 ```javascript
-cb.setBearerToken('YOURBEARERTOKEN');
+cb.setBearerToken("YOURBEARERTOKEN");
 ```
 
 For sending an API request with app-only auth, see the ‘Usage examples’ section.
+
+### 1.2. Authenticating using a callback URL, without PIN
+
+
+1. Before sending your user off to Twitter, you have to store the request token and its secret, for example in a cookie.
+2. In the callback URL, extract those values and assign them to the Codebird object.
+3. Extract the ```oauth_verifier``` field from the request URI.
+
+In Javascript, try extracting the URL parameter like this:
+
+```javascript
+var cb          = new Codebird;
+var current_url = location.toString();
+var query       = current_url.match(/\?(.+)$/).split("&amp;");
+var parameters  = {};
+var parameter;
+
+cb.setConsumerKey("STUFF", "HERE");
+
+for (var i = 0; i &lt; query.length; i++) {
+    parameter = query[i].split("=");
+    if (parameter.length === 1) {
+        parameter[1] = "";
+    }
+    parameters[decodeURIComponent(parameter[0])] = decodeURIComponent(parameter[1]);
+}
+
+// check if oauth_verifier is set
+if (typeof parameters.oauth_verifier !== "undefined") {
+    // assign stored request token parameters to codebird here
+    // ...
+    cb.setToken(stored_somewhere.oauth_token, stored_somewhere.oauth_token_secret);
+
+    cb.__call(
+        "oauth_accessToken",
+        {
+            oauth_verifier: parameters.oauth_verifier
+        },
+        function (reply) {
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+            // if you need to persist the login after page reload,
+            // consider storing the token in a cookie or HTML5 local storage
+        }
+    );
+}
+```
+
+Does that work properly?
 
 
 2. Usage examples
@@ -128,10 +177,10 @@ unless you are sure to know what you are doing.*
 When you have an access token, calling the API is simple:
 
 ```javascript
-cb.setToken('YOURTOKEN', 'YOURTOKENSECRET'); // see above
+cb.setToken("YOURTOKEN", "YOURTOKENSECRET"); // see above
 
 cb.__call(
-    'statuses_homeTimeline',
+    "statuses_homeTimeline",
     {},
     function (reply) {
         console.log(reply);
@@ -143,8 +192,8 @@ Tweeting is as easy as this:
 
 ```javascript
 cb.__call(
-    'statuses_update',
-    {'status': 'Whohoo, I just tweeted!'},
+    "statuses_update",
+    {"status": "Whohoo, I just tweeted!"},
     function (reply) {
         // ...
     }
@@ -156,10 +205,10 @@ giving all parameters in an array is supported, too:
 
 ```javascript
 var params = {
-    screen_name: 'mynetx'
+    screen_name: "mynetx"
 };
 cb.__call(
-    'users_show',
+    "users_show",
     params,
     function (reply) {
         // ...
@@ -172,11 +221,11 @@ and the media have to be base64-encoded:
 
 ```javascript
 var params = {
-    'status': 'The bird is flying high. #larry',
-    'media[]': 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC'
+    "status": "The bird is flying high. #larry",
+    "media[]": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
 );
 cb.__call(
-    'statuses_updateWithMedia',
+    "statuses_updateWithMedia",
     params,
     function (reply) {
         // ...
@@ -191,8 +240,8 @@ add another parameter to your method call, like this:
 
 ```javascript
 cb.__call(
-    'search_tweets',
-    'q=Twitter',
+    "search_tweets",
+    "q=Twitter",
     function (reply) {
         // ...
     },
@@ -282,6 +331,18 @@ For IE7-9, Codebird works in limited operation mode:
 - Calls to GET methods work fine,
 - calling POST methods is impossible.
 
+### 6.3 Using your own proxy server
+
+The source code of the CORS proxy is publicly available.  If you want to, 
+set up your own instance on your server.  Afterwards, tell Codebird the
+address:
+
+```javascript
+cb.setProxy("https://example.com/codebird-cors-proxy/");
+```
+
+Heads up!  Follow the notes in the [codebird-cors-proxy README](https://github.com/mynetx/codebird-cors-proxy/#readme) for details.
+
 7. Using multiple Codebird instances
 ------------------------------------
 
@@ -317,10 +378,10 @@ Take a look at the returned data as follows:
 
 ```javascript
 {
-    oauth_token: '14648265-rPn8EJwfB**********************',
-    oauth_token_secret: 'agvf3L3**************************',
+    oauth_token: "14648265-rPn8EJwfB**********************",
+    oauth_token_secret: "agvf3L3**************************",
     user_id: 14648265,
-    screen_name: 'mynetx',
+    screen_name: "mynetx",
     httpstatus: 200
 }
 ```
@@ -332,7 +393,7 @@ user entity of the currently authenticated user is to use the
 
 ```javascript
 cb.__call(
-    'account_verifyCredentials',
+    "account_verifyCredentials",
     {},
     function (reply) {
         console.log(reply);
@@ -356,7 +417,7 @@ Here is how you can walk through cursored results with Codebird.
 1. Get the first result set of a cursored method:
 ```javascript
 cb.__call(
-    'followers_list',
+    "followers_list",
     {},
     function (result1) {
         // ...
@@ -373,7 +434,7 @@ var nextCursor = result1.next_cursor_str;
 ```javascript
     if (nextCursor > 0) {
         cb.__call(
-            'followers_list',
+            "followers_list",
             {cursor: nextCursor},
             function (result2) {
                 // ...

@@ -1,6 +1,11 @@
 codebird-js - changelog
 =======================
 
+2.4.1 (2013-06-23)
++ Pass JSHint validation
++ #15 Allow to assign custom proxy address
+- #19 API parameters with escaped characters fail in IE7-9
+
 2.4.0 (2013-06-15)
 + Support multipart file uploads
 - Drop unnecessary media format settings ported from PHP getimagesize
