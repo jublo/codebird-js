@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.4.1-dev
+ * @version 2.4.1
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -126,7 +126,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.4.1-dev";
+    var _version = "2.4.1";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -774,14 +774,14 @@ var Codebird = function () {
         var oauth_params = _clone(sign_base_params);
         for (key in params) {
             value = params[key];
-            sign_base_params[key] = _url(value);
+            sign_base_params[key] = value;
         }
         var keys = _ksort(sign_base_params);
         var sign_base_string = "";
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
             value = sign_base_params[key];
-            sign_base_string += key + "=" + value + "&";
+            sign_base_string += key + "=" + _url(value) + "&";
         }
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
         var signature = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
