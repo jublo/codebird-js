@@ -115,6 +115,55 @@ cb.setBearerToken("YOURBEARERTOKEN");
 
 For sending an API request with app-only auth, see the ‘Usage examples’ section.
 
+### 1.2. Authenticating using a callback URL, without PIN
+
+
+1. Before sending your user off to Twitter, you have to store the request token and its secret, for example in a cookie.
+2. In the callback URL, extract those values and assign them to the Codebird object.
+3. Extract the ```oauth_verifier``` field from the request URI.
+
+In Javascript, try extracting the URL parameter like this:
+
+```javascript
+var cb          = new Codebird;
+var current_url = location.toString();
+var query       = current_url.match(/\?(.+)$/).split("&amp;");
+var parameters  = {};
+var parameter;
+
+cb.setConsumerKey("STUFF", "HERE");
+
+for (var i = 0; i &lt; query.length; i++) {
+    parameter = query[i].split("=");
+    if (parameter.length === 1) {
+        parameter[1] = "";
+    }
+    parameters[decodeURIComponent(parameter[0])] = decodeURIComponent(parameter[1]);
+}
+
+// check if oauth_verifier is set
+if (typeof parameters.oauth_verifier !== "undefined") {
+    // assign stored request token parameters to codebird here
+    // ...
+    cb.setToken(stored_somewhere.oauth_token, stored_somewhere.oauth_token_secret);
+
+    cb.__call(
+        "oauth_accessToken",
+        {
+            oauth_verifier: parameters.oauth_verifier
+        },
+        function (reply) {
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+            // if you need to persist the login after page reload,
+            // consider storing the token in a cookie or HTML5 local storage
+        }
+    );
+}
+```
+
+Does that work properly?
+
 
 2. Usage examples
 -----------------
