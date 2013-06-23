@@ -282,6 +282,18 @@ For IE7-9, Codebird works in limited operation mode:
 - Calls to GET methods work fine,
 - calling POST methods is impossible.
 
+### 6.3 Using your own proxy server
+
+The source code of the CORS proxy is publicly available.  If you want to, 
+set up your own instance on your server.  Afterwards, tell Codebird the
+address:
+
+```javascript
+cb.setProxy("https://example.com/codebird-cors-proxy/");
+```
+
+Heads up!  Follow the notes in the [codebird-cors-proxy README](https://github.com/mynetx/codebird-cors-proxy/#readme) for details.
+
 7. Using multiple Codebird instances
 ------------------------------------
 
