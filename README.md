@@ -66,7 +66,7 @@ cb.__call(
             }
         );
     }
-));
+);
 ```
 
 Now you need to add a PIN box to your website. 
