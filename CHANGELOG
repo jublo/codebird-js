@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.4.2 (not yet released)
+2.4.2 (2013-07-09)
 - #21 Typo extra bracket in readme sample code
 - #27 Array bad behavior in iOS
 
