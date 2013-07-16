@@ -133,7 +133,7 @@ var parameter;
 
 cb.setConsumerKey("STUFF", "HERE");
 
-for (var i = 0; i &lt; query.length; i++) {
+for (var i = 0; i < query.length; i++) {
     parameter = query[i].split("=");
     if (parameter.length === 1) {
         parameter[1] = "";
