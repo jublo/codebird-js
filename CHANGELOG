@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.4.3 (not yet released)
+2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
 - #30 HTML-escaping typo in readme code sample
 
