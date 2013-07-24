@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.4.2
+ * @version 2.4.3
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -126,7 +126,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.4.2";
+    var _version = "2.4.3";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -336,6 +336,10 @@ var Codebird = function () {
 
         case "oauth2_token":
             return this[fn](callback);
+        }
+        // reset token when requesting a new token (causes 401 for signature error on 2nd+ requests)
+        if (fn === "oauth_requestToken") {
+            setToken(null, null);
         }
         // parse parameters
         var apiparams = {};

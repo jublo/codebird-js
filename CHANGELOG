@@ -1,6 +1,10 @@
 codebird-js - changelog
 =======================
 
+2.4.3 (2013-07-24)
+- #31 HTTP error on multiple oauth_requestToken calls
+- #30 HTML-escaping typo in readme code sample
+
 2.4.2 (2013-07-09)
 - #21 Typo extra bracket in readme sample code
 - #27 Array bad behavior in iOS
