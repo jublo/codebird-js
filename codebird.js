@@ -337,6 +337,10 @@ var Codebird = function () {
         case "oauth2_token":
             return this[fn](callback);
         }
+        // reset token when requesting a new token (causes 401 for signature error on 2nd+ requests)
+        if (fn === "oauth_requestToken") {
+            setToken(null, null);
+        }
         // parse parameters
         var apiparams = {};
         if (typeof params === "object") {
