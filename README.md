@@ -449,3 +449,49 @@ instead of ```next_cursor_str```.
 It might make sense to use the cursors in a loop.  Watch out, though, 
 not to send more than the allowed number of requests to ```followers/list``` 
 per rate-limit timeframe, or else you will hit your rate-limit.
+
+…use xAuth with Codebird?
+-------------------------
+
+Codebird supports xAuth just like every other authentication used at Twitter.
+Remember that your application needs to be whitelisted to be able to use xAuth.
+
+Here’s an example:
+```javascript
+cb.__call(
+    "oauth_accessToken",
+    {
+        "x_auth_username": "username",
+        "x_auth_password": "4h3_p4$$w0rd",
+        "x_auth_mode"    : "client_auth"
+    },
+    function (reply) {
+        console.log(reply);
+        // ...
+    }
+);
+```
+
+If everything went fine, you will get an object like this:
+
+```javascript
+{
+    "oauth_token": "14648265-ABLfBFlE*********************************",
+    "oauth_token_secret": "9yTBY3pEfj*********************************",
+    "user_id": "14648265",
+    "screen_name": "myx",
+    "x_auth_expires": "0",
+    "httpstatus": 200
+}
+```
+
+Are you getting a strange error message, an empty error, or status "0"?
+If the user is enrolled in login verification, the server will return a
+HTTP 401 error with a custom body (that may be filtered by your browser). 
+
+You may check the browser web console for an error message.
+
+When this error occurs, advise the user to 
+[generate a temporary password](https://twitter.com/settings/applications)
+on twitter.com and use that to complete signing in to the application.
+
