@@ -1,6 +1,9 @@
 codebird-js - changelog
 =======================
 
+2.5.0 (not yet released)
++ #24 Add README section about xAuth
+
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
 - #30 HTML-escaping typo in readme code sample
