@@ -162,8 +162,6 @@ if (typeof parameters.oauth_verifier !== "undefined") {
 }
 ```
 
-Does that work properly?
-
 
 2. Usage examples
 -----------------
