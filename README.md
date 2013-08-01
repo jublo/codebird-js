@@ -327,7 +327,8 @@ Internet Explorer 7-9.  Codebird cannot send POST requests in these browsers.
 For IE7-9, Codebird works in limited operation mode:
 
 - Calls to GET methods work fine,
-- calling POST methods is impossible.
+- calling POST methods is impossible,
+- Application-only auth does not work.
 
 ### 6.3 Using your own proxy server
 
