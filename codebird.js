@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.4.1-dev
+ * @version 2.5.0-dev
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -41,7 +41,7 @@
 /**
  * Array.indexOf polyfill
  */
-if (! Array.indexOf) {
+if (! Array.prototype.indexOf) {
     Array.prototype.indexOf = function (obj, start) {
         for (var i = (start || 0); i < this.length; i++) {
             if (this[i] === obj) {
@@ -98,9 +98,9 @@ var Codebird = function () {
     var _endpoint_proxy = "https://api.jublo.net/codebird/";
 
     /**
-     * The API endpoint to use for internal requests
+     * The API endpoint to use for old requests
      */
-    var _endpoint_internal = _endpoint_base + "1.1/";
+    var _endpoint_old = _endpoint_base + "1/";
 
     /**
      * Use JSONP for GET requests in IE7-9
@@ -131,7 +131,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.4.1-internal-dev";
+    var _version = "2.5.0-dev";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -341,6 +341,10 @@ var Codebird = function () {
 
         case "oauth2_token":
             return this[fn](callback);
+        }
+        // reset token when requesting a new token (causes 401 for signature error on 2nd+ requests)
+        if (fn === "oauth_requestToken") {
+            setToken(null, null);
         }
         // parse parameters
         var apiparams = {};
@@ -576,7 +580,7 @@ var Codebird = function () {
         // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
         // +   bugfixed by: Pellentesque Malesuada
         // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +   improved by: Rafal Kukawski (http://kukawski.pl)
+        // +   improved by: Rafał Kukawski (http://kukawski.pl)
         // *     example 1: base64_encode('Kevin van Zonneveld');
         // *     returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
         // mozilla has this native
@@ -725,7 +729,7 @@ var Codebird = function () {
 
     /**
      * Clone objects
-     * 
+     *
      * @param object obj    The object to clone
      *
      * @return object clone The cloned object
@@ -781,14 +785,14 @@ var Codebird = function () {
         var oauth_params = _clone(sign_base_params);
         for (key in params) {
             value = params[key];
-            sign_base_params[key] = _url(value);
+            sign_base_params[key] = value;
         }
         var keys = _ksort(sign_base_params);
         var sign_base_string = "";
         for (var i = 0; i < keys.length; i++) {
             key = keys[i];
             value = sign_base_params[key];
-            sign_base_string += key + "=" + value + "&";
+            sign_base_string += key + "=" + _url(value) + "&";
         }
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
         var signature = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
@@ -826,6 +830,8 @@ var Codebird = function () {
         // multi-HTTP method endpoints
         switch(method) {
         case "account/settings":
+        case "account/login_verification_enrollment":
+        case "account/login_verification_request":
             method = params.length ? method + "__post" : method;
             break;
         }
@@ -920,14 +926,20 @@ var Codebird = function () {
             "application/rate_limit_status",
 
             // Internal
+            "users/recommendations",
+            "account/push_destinations/device",
             "activity/about_me",
             "activity/by_friends",
+            "statuses/media_timeline",
+            "timeline/home",
+            "help/experiments",
             "search/typeahead",
+            "discover/universal",
+            "conversation/show",
             "statuses/:id/activity/summary",
-
-            // Not authorized as of 2012-10-17
-            "discovery",
-            "resolve"
+            "account/login_verification_enrollment",
+            "account/login_verification_request",
+            "prompts/suggest"
         ];
         httpmethods.POST = [
             // Tweets
@@ -986,7 +998,13 @@ var Codebird = function () {
             "oauth/access_token",
             "oauth/request_token",
             "oauth2/token",
-            "oauth2/invalidate_token"
+            "oauth2/invalidate_token",
+
+            // Internal
+            "direct_messages/read",
+            "account/login_verification_enrollment__post",
+            "push_destinations/enable_login_verification",
+            "account/login_verification_request__post"
         ];
         for (var httpmethod in httpmethods) {
             if (httpmethods[httpmethod].indexOf(method) > -1) {
@@ -1073,7 +1091,7 @@ var Codebird = function () {
     };
 
     /**
-     * Detects if API call should use internal endpoint
+     * Detects if API call is internal
      *
      * @param string method The API method to call
      *
@@ -1081,30 +1099,38 @@ var Codebird = function () {
      */
     var _detectInternal = function (method) {
         var internals = [
-            "activity/about_me",
-            "activity/by_friends",
-            "discovery",
-            "search/typeahead",
-            "statuses/:id/activity/summary",
-            "resolve"
+            "users/recommendations"
         ];
         return internals.join(" ").indexOf(method) > -1;
+    };
+
+    /**
+     * Detects if API call should use old endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in old API
+     */
+    var _detectOld = function (method) {
+        var olds = [
+            "account/push_destinations/device"
+        ];
+        return olds.join(" ").indexOf(method) > -1;
     };
 
     /**
      * Builds the complete API endpoint url
      *
      * @param string method           The API method to call
-     * @param string method_template  The templated API method to call
      *
      * @return string The URL to send the request to
      */
-    var _getEndpoint = function (method, method_template) {
+    var _getEndpoint = function (method) {
         var url;
         if (method.substring(0, 5) === "oauth") {
             url = _endpoint_oauth + method;
-        } else if (_detectInternal(method_template)) {
-            url = _endpoint_internal + method + ".json";
+        } else if (_detectOld(method)) {
+            url = _endpoint_old + method + ".json";
         } else {
             url = _endpoint + method + ".json";
         }
@@ -1119,8 +1145,8 @@ var Codebird = function () {
      * @param string          method_template The templated API method to call
      * @param array  optional params          The parameters to send along
      * @param bool   optional multipart       Whether to use multipart/form-data
-     * @param bool   optional app_only_auth   Whether to use app-only bearer authentication
-     * @param bool   optional internal        Whether to use internal API
+     * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
+     * @param bool   optional $internal       Whether to use internal call
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
@@ -1136,9 +1162,6 @@ var Codebird = function () {
         if (typeof app_only_auth === "undefined") {
             app_only_auth = false;
         }
-        if (typeof internal === "undefined") {
-            internal = false;
-        }
         if (typeof callback !== "function") {
             callback = function () {};
         }
@@ -1147,7 +1170,7 @@ var Codebird = function () {
             params.application_id = 333903271;
         }
 
-        var url = _getEndpoint(method, method_template);
+        var url = _getEndpoint(method);
         var authorization = null;
 
         var xml, post_fields;
@@ -1204,7 +1227,7 @@ var Codebird = function () {
                 params        = http_build_query(params);
             }
             post_fields = params;
-            if (_use_proxy || multipart) { // force proxy for multipart base64
+            if (_use_proxy) {
                 url = url.replace(
                     _endpoint_base,
                     _endpoint_proxy
@@ -1225,7 +1248,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 return oauth2_token(function () {
-                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, internal, callback);
+                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, false, callback);
                 });
             }
             authorization = "Bearer " + _oauth_bearer_token;
