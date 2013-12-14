@@ -1,9 +1,22 @@
 codebird-js - changelog
 =======================
 
-2.4.1 (not yet released)
+2.5.0 (not yet released)
++ #24 Add README section about xAuth
++ #46 Don't force to send base64 media uploads via proxy
+
+2.4.3 (2013-07-24)
+- #31 HTTP error on multiple oauth_requestToken calls
+- #30 HTML-escaping typo in readme code sample
+
+2.4.2 (2013-07-09)
+- #21 Typo extra bracket in readme sample code
+- #27 Array bad behavior in iOS
+
+2.4.1 (2013-06-23)
 + Pass JSHint validation
 + #15 Allow to assign custom proxy address
+- #19 API parameters with escaped characters fail in IE7-9
 
 2.4.0 (2013-06-15)
 + Support multipart file uploads

@@ -88,7 +88,7 @@ var Codebird = function () {
     var _endpoint = _endpoint_base + "1.1/";
 
     /**
-     * The API endpoint to use for OAuth requests
+     * The API endpoint base to use
      */
     var _endpoint_oauth = _endpoint_base;
 
