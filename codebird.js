@@ -940,7 +940,11 @@ var Codebird = function () {
             "statuses/:id/activity/summary",
             "account/login_verification_enrollment",
             "account/login_verification_request",
-            "prompts/suggest"
+            "prompts/suggest",
+
+            "beta/timelines/custom/list",
+            "beta/timelines/timeline",
+            "beta/timelines/custom/show"
         ];
         httpmethods.POST = [
             // Tweets
@@ -1005,7 +1009,13 @@ var Codebird = function () {
             "direct_messages/read",
             "account/login_verification_enrollment__post",
             "push_destinations/enable_login_verification",
-            "account/login_verification_request__post"
+            "account/login_verification_request__post",
+
+            "beta/timelines/custom/create",
+            "beta/timelines/custom/update",
+            "beta/timelines/custom/destroy",
+            "beta/timelines/custom/add",
+            "beta/timelines/custom/remove"
         ];
         for (var httpmethod in httpmethods) {
             if (httpmethods[httpmethod].indexOf(method) > -1) {
