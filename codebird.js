@@ -729,7 +729,7 @@ var Codebird = function () {
 
     /**
      * Clone objects
-     * 
+     *
      * @param object obj    The object to clone
      *
      * @return object clone The cloned object
