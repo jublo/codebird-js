@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.5.0-dev
+ * @version 2.4.3
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -131,7 +131,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-dev";
+    var _version = "2.4.3";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -729,7 +729,7 @@ var Codebird = function () {
 
     /**
      * Clone objects
-     *
+     * 
      * @param object obj    The object to clone
      *
      * @return object clone The cloned object
@@ -1197,7 +1197,13 @@ var Codebird = function () {
                 var callback_name = _nonce();
                 window[callback_name] = function (reply) {
                     reply.httpstatus = 200;
-                    callback(reply);
+
+                    var rate = {
+                        limit: xml.getResponseHeader('x-rate-limit-limit'),
+                        remaining: xml.getResponseHeader('x-rate-limit-remaining'),
+                        reset: xml.getResponseHeader('x-rate-limit-reset'),
+                    };
+                    callback(reply, rate);
                 };
                 params.callback = callback_name;
                 url_with_params = url + "?" + _sign(httpmethod, url, params, true);
@@ -1228,7 +1234,7 @@ var Codebird = function () {
                 params        = http_build_query(params);
             }
             post_fields = params;
-            if (_use_proxy) {
+            if (_use_proxy || multipart) { // force proxy for multipart base64
                 url = url.replace(
                     _endpoint_base,
                     _endpoint_proxy
@@ -1265,7 +1271,12 @@ var Codebird = function () {
                 } catch (e) {}
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
-                callback(reply);
+                var rate = {
+                    limit: xml.getResponseHeader('x-rate-limit-limit'),
+                    remaining: xml.getResponseHeader('x-rate-limit-remaining'),
+                    reset: xml.getResponseHeader('x-rate-limit-reset'),
+                };
+                callback(reply, rate);
             }
         };
         xml.send(httpmethod === "GET" ? null : post_fields);
