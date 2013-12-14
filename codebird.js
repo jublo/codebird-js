@@ -934,6 +934,7 @@ var Codebird = function () {
             "timeline/home",
             "help/experiments",
             "search/typeahead",
+            "search/universal",
             "discover/universal",
             "conversation/show",
             "statuses/:id/activity/summary",
