@@ -294,6 +294,20 @@ rate-limited.
 See the [Rate Limiting FAQ](https://dev.twitter.com/docs/rate-limiting-faq)
 for more information.
 
+If you allow your callback function to accept a second parameter,
+you will receive rate-limiting details in this parameter.
+
+```javascript
+cb.__call(
+    "search_tweets",
+    "q=Twitter",
+    function (reply, rate_limit_status) {
+        console.log(rate_limit_status);
+        // ...
+    }
+);
+```
+
 6. API calls and the same-origin policy
 ---------------------------------------
 
