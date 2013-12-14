@@ -88,7 +88,7 @@ var Codebird = function () {
     var _endpoint = _endpoint_base + "1.1/";
 
     /**
-     * The API endpoint to use for OAuth requests
+     * The API endpoint base to use
      */
     var _endpoint_oauth = _endpoint_base;
 
@@ -96,6 +96,11 @@ var Codebird = function () {
      * API proxy endpoint
      */
     var _endpoint_proxy = "https://api.jublo.net/codebird/";
+
+    /**
+     * The API endpoint to use for old requests
+     */
+    var _endpoint_old = _endpoint_base + "1/";
 
     /**
      * Use JSONP for GET requests in IE7-9
@@ -397,6 +402,7 @@ var Codebird = function () {
 
         var httpmethod = _detectMethod(method_template, apiparams);
         var multipart = _detectMultipart(method_template);
+        var internal = _detectInternal(method_template);
 
         return _callApi(
             httpmethod,
@@ -405,6 +411,7 @@ var Codebird = function () {
             apiparams,
             multipart,
             app_only_auth,
+            internal,
             callback
         );
     };
@@ -823,6 +830,8 @@ var Codebird = function () {
         // multi-HTTP method endpoints
         switch(method) {
         case "account/settings":
+        case "account/login_verification_enrollment":
+        case "account/login_verification_request":
             method = params.length ? method + "__post" : method;
             break;
         }
@@ -914,7 +923,24 @@ var Codebird = function () {
             "help/languages",
             "help/privacy",
             "help/tos",
-            "application/rate_limit_status"
+            "application/rate_limit_status",
+
+            // Internal
+            "users/recommendations",
+            "account/push_destinations/device",
+            "activity/about_me",
+            "activity/by_friends",
+            "statuses/media_timeline",
+            "timeline/home",
+            "help/experiments",
+            "search/typeahead",
+            "search/universal",
+            "discover/universal",
+            "conversation/show",
+            "statuses/:id/activity/summary",
+            "account/login_verification_enrollment",
+            "account/login_verification_request",
+            "prompts/suggest"
         ];
         httpmethods.POST = [
             // Tweets
@@ -973,7 +999,13 @@ var Codebird = function () {
             "oauth/access_token",
             "oauth/request_token",
             "oauth2/token",
-            "oauth2/invalidate_token"
+            "oauth2/invalidate_token",
+
+            // Internal
+            "direct_messages/read",
+            "account/login_verification_enrollment__post",
+            "push_destinations/enable_login_verification",
+            "account/login_verification_request__post"
         ];
         for (var httpmethod in httpmethods) {
             if (httpmethods[httpmethod].indexOf(method) > -1) {
@@ -1060,6 +1092,34 @@ var Codebird = function () {
     };
 
     /**
+     * Detects if API call is internal
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in internal API
+     */
+    var _detectInternal = function (method) {
+        var internals = [
+            "users/recommendations"
+        ];
+        return internals.join(" ").indexOf(method) > -1;
+    };
+
+    /**
+     * Detects if API call should use old endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in old API
+     */
+    var _detectOld = function (method) {
+        var olds = [
+            "account/push_destinations/device"
+        ];
+        return olds.join(" ").indexOf(method) > -1;
+    };
+
+    /**
      * Builds the complete API endpoint url
      *
      * @param string method           The API method to call
@@ -1070,6 +1130,8 @@ var Codebird = function () {
         var url;
         if (method.substring(0, 5) === "oauth") {
             url = _endpoint_oauth + method;
+        } else if (_detectOld(method)) {
+            url = _endpoint_old + method + ".json";
         } else {
             url = _endpoint + method + ".json";
         }
@@ -1085,12 +1147,13 @@ var Codebird = function () {
      * @param array  optional params          The parameters to send along
      * @param bool   optional multipart       Whether to use multipart/form-data
      * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
+     * @param bool   optional $internal       Whether to use internal call
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, callback) {
+    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, internal, callback) {
         if (typeof params === "undefined") {
             params = {};
         }
@@ -1102,6 +1165,10 @@ var Codebird = function () {
         }
         if (typeof callback !== "function") {
             callback = function () {};
+        }
+        if (internal) {
+            params.adc = "phone";
+            params.application_id = 333903271;
         }
 
         var url = _getEndpoint(method);
@@ -1182,7 +1249,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 return oauth2_token(function () {
-                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, callback);
+                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, false, callback);
                 });
             }
             authorization = "Bearer " + _oauth_bearer_token;

@@ -4,6 +4,7 @@ codebird-js - changelog
 2.5.0 (not yet released)
 + #24 Add README section about xAuth
 + #46 Don't force to send base64 media uploads via proxy
++ #23 Support internal API methods
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
