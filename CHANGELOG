@@ -6,6 +6,7 @@ codebird-js - changelog
 + #46 Don't force to send base64 media uploads via proxy
 + #23 Support internal API methods
 + #50 Current rate sent back with each call
++ Support custom timelines beta API
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
