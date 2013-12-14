@@ -69,7 +69,7 @@ cb.__call(
 );
 ```
 
-Now you need to add a PIN box to your website. 
+Now you need to add a PIN box to your website.
 After the user enters the PIN, complete the authentication:
 
 ```javascript
@@ -168,7 +168,7 @@ if (typeof parameters.oauth_verifier !== "undefined") {
 
 ### Heads up
 
-*Because the Consumer Key and Token Secret are available in the code 
+*Because the Consumer Key and Token Secret are available in the code
 it is important that you configure your app as read-only at Twitter,
 unless you are sure to know what you are doing.*
 
@@ -214,7 +214,7 @@ cb.__call(
 );
 ```
 
-When **uploading files to Twitter**, the array syntax is obligatory, 
+When **uploading files to Twitter**, the array syntax is obligatory,
 and the media have to be base64-encoded:
 
 ```javascript
@@ -285,13 +285,13 @@ You can find it within the return object’s ```httpstatus``` property.
 
 ### 5.1 Dealing with rate-limits
 
-Basically, Codebird leaves it up to you to handle Twitter’s rate limit.  
+Basically, Codebird leaves it up to you to handle Twitter’s rate limit.
 The library returns the response HTTP status code, so you can detect rate limits.
 
-I suggest you to check if the ```reply.httpstatus``` property is ```400``` 
-and check with the Twitter API to find out if you are currently being 
-rate-limited. 
-See the [Rate Limiting FAQ](https://dev.twitter.com/docs/rate-limiting-faq) 
+I suggest you to check if the ```reply.httpstatus``` property is ```400```
+and check with the Twitter API to find out if you are currently being
+rate-limited.
+See the [Rate Limiting FAQ](https://dev.twitter.com/docs/rate-limiting-faq)
 for more information.
 
 6. API calls and the same-origin policy
@@ -308,8 +308,8 @@ With Codebird, don’t worry about this.  We automatically send cross-domain
 requests using a secured proxy that sends back the required headers to the
 user’s browser.
 
-This CORS proxy is using an encrypted SSL connection.  
-*We do not record data sent to or from the Twitter API. 
+This CORS proxy is using an encrypted SSL connection.
+*We do not record data sent to or from the Twitter API.
 Using Codebird’s CORS proxy is subject to the Acceptable use policy.*
 
 If your JavaScript environment is not restricted under the same-origin policy
@@ -332,7 +332,7 @@ For IE7-9, Codebird works in limited operation mode:
 
 ### 6.3 Using your own proxy server
 
-The source code of the CORS proxy is publicly available.  If you want to, 
+The source code of the CORS proxy is publicly available.  If you want to,
 set up your own instance on your server.  Afterwards, tell Codebird the
 address:
 
@@ -367,7 +367,7 @@ How Do I…?
 
 When the user returns from the authentication screen, you need to trade
 the obtained request token for an access token, using the OAuth verifier.
-As discussed in the section ‘Usage example,’ you use a call to 
+As discussed in the section ‘Usage example,’ you use a call to
 ```oauth/access_token``` to do that.
 
 The API reply to this method call tells you details about the user that just logged in.
@@ -385,9 +385,9 @@ Take a look at the returned data as follows:
 }
 ```
 
-If you need to get more details, such as the user’s latest tweet, 
-you should fetch the complete User Entity.  The simplest way to get the 
-user entity of the currently authenticated user is to use the 
+If you need to get more details, such as the user’s latest tweet,
+you should fetch the complete User Entity.  The simplest way to get the
+user entity of the currently authenticated user is to use the
 ```account/verify_credentials``` API method.  In Codebird, it works like this:
 
 ```javascript
@@ -400,16 +400,16 @@ cb.__call(
 );
 ```
 
-I suggest to cache the User Entity after obtaining it, as the 
-```account/verify_credentials``` method is rate-limited by 15 calls per 15 minutes. 
+I suggest to cache the User Entity after obtaining it, as the
+```account/verify_credentials``` method is rate-limited by 15 calls per 15 minutes.
 
 …walk through cursored results?
 -------------------------------
 
-The Twitter REST API utilizes a technique called ‘cursoring’ to paginate 
-large result sets. Cursoring separates results into pages of no more than 
-5000 results at a time, and provides a means to move backwards and 
-forwards through these pages. 
+The Twitter REST API utilizes a technique called ‘cursoring’ to paginate
+large result sets. Cursoring separates results into pages of no more than
+5000 results at a time, and provides a means to move backwards and
+forwards through these pages.
 
 Here is how you can walk through cursored results with Codebird.
 
@@ -442,11 +442,11 @@ var nextCursor = result1.next_cursor_str;
     }
 ```
 
-To navigate back instead of forth, use the field ```resultX.previous_cursor_str``` 
+To navigate back instead of forth, use the field ```resultX.previous_cursor_str```
 instead of ```next_cursor_str```.
 
-It might make sense to use the cursors in a loop.  Watch out, though, 
-not to send more than the allowed number of requests to ```followers/list``` 
+It might make sense to use the cursors in a loop.  Watch out, though,
+not to send more than the allowed number of requests to ```followers/list```
 per rate-limit timeframe, or else you will hit your rate-limit.
 
 …use xAuth with Codebird?
@@ -486,11 +486,37 @@ If everything went fine, you will get an object like this:
 
 Are you getting a strange error message, an empty error, or status "0"?
 If the user is enrolled in login verification, the server will return a
-HTTP 401 error with a custom body (that may be filtered by your browser). 
+HTTP 401 error with a custom body (that may be filtered by your browser).
 
 You may check the browser web console for an error message.
 
-When this error occurs, advise the user to 
+When this error occurs, advise the user to
 [generate a temporary password](https://twitter.com/settings/applications)
 on twitter.com and use that to complete signing in to the application.
 
+…access and use undocumented Twitter API methods?
+-------------------------------------------------
+
+Besides the well-documented official methods, the Twitter API also contains
+undocumented additional methods.  They are used by official Twitter clients,
+such as Twitter for iPhone and Twitter for Mac.
+
+Access to these methods is restricted: Only white-listed applications
+(consumer keys) may access undocumented methods.  Codebird supports accessing
+internal methods, but that will only work if you provide a white-listed API key.
+By reason, the API keys and secrets for official Twitter clients are not
+provided within this package, since they should have been kept a secret.
+
+If you provide Codebird with the Twitter for iPhone consumer key and secret,
+the following example will get the latest events that happened with you:
+
+```javascript
+cb.__call(
+    "activity_aboutMe",
+    {},
+    function (reply) {
+        console.log(reply);
+        // ...
+    }
+);
+```
