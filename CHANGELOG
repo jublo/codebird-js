@@ -7,6 +7,7 @@ codebird-js - changelog
 + #23 Support internal API methods
 + #50 Current rate sent back with each call
 + Support custom timelines beta API
+- Remove POST geo/place API method, deprecated
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

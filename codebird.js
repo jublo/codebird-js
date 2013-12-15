@@ -993,9 +993,6 @@ var Codebird = function () {
             "saved_searches/create",
             "saved_searches/destroy/:id",
 
-            // Places & Geo
-            "geo/place",
-
             // Spam Reporting
             "users/report_spam",
 
