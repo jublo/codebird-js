@@ -371,7 +371,7 @@ var Codebird = function () {
         }
 
         // undo replacement for URL parameters
-        var url_parameters_with_underscore = ["screen_name"];
+        var url_parameters_with_underscore = ["screen_name", "place_id"];
         for (i = 0; i < url_parameters_with_underscore.length; i++) {
             param = url_parameters_with_underscore[i].toUpperCase();
             var replacement_was = param.split("_").join("/");
