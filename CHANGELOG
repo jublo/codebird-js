@@ -8,6 +8,7 @@ codebird-js - changelog
 + #50 Current rate sent back with each call
 + Support custom timelines beta API
 - Remove POST geo/place API method, deprecated
++ #52 Don't use proxy for non-browser environments
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
