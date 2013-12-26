@@ -115,8 +115,11 @@ var Codebird = function () {
 
     /**
      * Whether to access the API via a proxy that is allowed by CORS
+     * Assume that CORS is only necessary in browsers
      */
-    var _use_proxy = true;
+    var _use_proxy = (typeof navigator !== "undefined"
+        && typeof navigator.userAgent !== "undefined"
+    );
 
     /**
      * The Request or access token. Used to sign requests

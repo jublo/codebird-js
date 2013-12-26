@@ -327,8 +327,10 @@ This CORS proxy is using an encrypted SSL connection.
 Using Codebird’s CORS proxy is subject to the Acceptable use policy.*
 
 If your JavaScript environment is not restricted under the same-origin policy
-(for example in node-js), it is recommended that you turn off the CORS
-compatibility like this:
+(for example in node.js), direct connections to the Twitter API are established
+automatically, instead of contacting the CORS proxy.
+
+You may also turn off the CORS compatibility manually like this:
 
 ```javascript
 cb.setUseProxy(false);
