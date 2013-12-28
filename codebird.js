@@ -33,7 +33,9 @@
           navigator,
           console,
           XMLHttpRequest,
-          ActiveXObject */
+          ActiveXObject,
+          module,
+          define */
 "use strict";
 
 /**
@@ -1271,9 +1273,9 @@ var Codebird = function () {
                     reply.httpstatus = 200;
 
                     var rate = {
-                        limit: xml.getResponseHeader('x-rate-limit-limit'),
-                        remaining: xml.getResponseHeader('x-rate-limit-remaining'),
-                        reset: xml.getResponseHeader('x-rate-limit-reset'),
+                        limit: xml.getResponseHeader("x-rate-limit-limit"),
+                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                        reset: xml.getResponseHeader("x-rate-limit-reset")
                     };
                     callback(reply, rate);
                 };
@@ -1344,9 +1346,9 @@ var Codebird = function () {
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
                 var rate = {
-                    limit: xml.getResponseHeader('x-rate-limit-limit'),
-                    remaining: xml.getResponseHeader('x-rate-limit-remaining'),
-                    reset: xml.getResponseHeader('x-rate-limit-reset'),
+                    limit: xml.getResponseHeader("x-rate-limit-limit"),
+                    remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                    reset: xml.getResponseHeader("x-rate-limit-reset")
                 };
                 callback(reply, rate);
             }
