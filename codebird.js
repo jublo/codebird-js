@@ -22,7 +22,6 @@
 
 /* jshint curly: true,
           eqeqeq: true,
-          indent: 4,
           latedef: true,
           quotmark: double,
           undef: true,
@@ -51,6 +50,7 @@ if (! Array.prototype.indexOf) {
     };
 }
 
+(function (window, undefined) {
 /**
  * A Twitter library in JavaScript
  *
@@ -1407,3 +1407,30 @@ var Codebird = function () {
         oauth2_token: oauth2_token
     };
 };
+
+if (typeof module === "object"
+    && module
+    && typeof module.exports === "object"
+) {
+    // Expose codebird as module.exports in loaders that implement the Node
+    // module pattern (including browserify). Do not create the global, since
+    // the user will be storing it themselves locally, and globals are frowned
+    // upon in the Node module world.
+    module.exports = Codebird;
+} else {
+    // Otherwise expose codebird to the global object as usual
+    window.Codebird = Codebird;
+
+    // Register as a named AMD module, since codebird can be concatenated with other
+    // files that may use define, but not via a proper concatenation script that
+    // understands anonymous AMD modules. A named AMD is safest and most robust
+    // way to register. Lowercase codebird is used because AMD module names are
+    // derived from file names, and codebird is normally delivered in a lowercase
+    // file name. Do this after creating the global so that if an AMD module wants
+    // to call noConflict to hide this version of codebird, it will work.
+    if (typeof define === "function" && define.amd) {
+        define("codebird", [], function () { return Codebird; });
+    }
+}
+
+})(window);
