@@ -558,22 +558,95 @@ var Codebird = function () {
     /**
      * Gets the base64-encoded SHA1 hash for the given data
      *
+     * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+     * in FIPS PUB 180-1
+     * Based on version 2.1 Copyright Paul Johnston 2000 - 2002.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * Distributed under the BSD License
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     *
      * @param string data The data to calculate the hash from
      *
      * @return string The hash
      */
-    var _sha1 = function (data) {
-        if (_oauth_consumer_secret === null) {
-            console.warn("To generate a hash, the consumer secret must be set.");
+    var _sha1 = function () {
+        function n(e, b) {
+            e[b >> 5] |= 128 << 24 - b % 32;
+            e[(b + 64 >> 9 << 4) + 15] = b;
+            for (var c = new Array(80), a = 1732584193, d = -271733879, h = -1732584194,
+                    k = 271733878, g = -1009589776, p = 0; p < e.length; p += 16) {
+                for (var o = a, q = d, r = h, s = k, t = g, f = 0; 80 > f; f++) {
+                    var m;
+
+                    if (f < 16) {
+                        m = e[p + f];
+                    } else {
+                        m = c[f - 3] ^ c[f - 8] ^ c[f - 14] ^ c[f - 16];
+                        m = m << 1 | m >>> 31;
+                    }
+
+                    c[f] = m;
+                    m = l(l(a << 5 | a >>> 27, 20 > f ? d & h | ~d & k : 40 > f ? d ^
+                        h ^ k : 60 > f ? d & h | d & k | h & k : d ^ h ^ k), l(
+                        l(g, c[f]), 20 > f ? 1518500249 : 40 > f ? 1859775393 :
+                        60 > f ? -1894007588 : -899497514));
+                    g = k;
+                    k = h;
+                    h = d << 30 | d >>> 2;
+                    d = a;
+                    a = m;
+                }
+                a = l(a, o);
+                d = l(d, q);
+                h = l(h, r);
+                k = l(k, s);
+                g = l(g, t);
+            }
+            return [a, d, h, k, g];
         }
-        if (typeof b64_hmac_sha1 !== "function") {
-            console.warn("To generate a hash, the Javascript SHA1.js must be available.");
+
+        function l(e, b) {
+            var c = (e & 65535) + (b & 65535);
+            return (e >> 16) + (b >> 16) + (c >> 16) << 16 | c & 65535;
         }
-        /*jshint -W020 */
-        b64pad = "=";
-        /*jshint +W020 */
-        return b64_hmac_sha1(_oauth_consumer_secret + "&" + (_oauth_token_secret !== null ? _oauth_token_secret : ""), data);
-    };
+
+        function q(e) {
+            for (var b = [], c = (1 << g) - 1, a = 0; a < e.length * g; a += g) {
+                b[a >> 5] |= (e.charCodeAt(a / g) & c) << 24 - a % 32;
+            }
+            return b;
+        }
+        var g = 8;
+        return function (e) {
+            var b = _oauth_consumer_secret + "&" + (null !== _oauth_token_secret ?
+                _oauth_token_secret : "");
+            if (_oauth_consumer_secret === null) {
+                console.warn("To generate a hash, the consumer secret must be set.");
+            }
+            var c = q(b);
+            if (c.length > 16) {
+                c = n(c, b.length * g);
+            }
+            b = new Array(16);
+            for (var a = new Array(16), d = 0; d < 16; d++) {
+                a[d] = c[d] ^ 909522486;
+                b[d] = c[d] ^ 1549556828;
+            }
+            c = n(a.concat(q(e)), 512 + e.length * g);
+            b = n(b.concat(c), 672);
+            c = "";
+            for (a = 0; a < 4 * b.length; a += 3) {
+                for (d = (b[a >> 2] >> 8 * (3 - a % 4) & 255) << 16 | (b[a + 1 >> 2] >>
+                    8 * (3 - (a + 1) % 4) & 255) << 8 | b[a + 2 >> 2] >> 8 * (3 -
+                    (a + 2) % 4) & 255, e = 0; 4 > e; e++) {
+                    c = 8 * a + 6 * e > 32 * b.length ? c + "=" : c +
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+                        .charAt(d >> 6 * (3 - e) & 63);
+                }
+            }
+            return c;
+        };
+    }();
 
     var base64_encode = function (data) {
         // http://kevin.vanzonneveld.net
