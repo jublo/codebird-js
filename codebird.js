@@ -675,60 +675,64 @@ var Codebird = function () {
         return (a ? c.slice(0, a - 3) : c) + "===".slice(a || 3);
     };
 
-    var http_build_query = function (formdata, numeric_prefix, arg_separator) {
-        // http://kevin.vanzonneveld.net
-        // +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Legaev Andrey
-        // +     improved by: Michael White (http://getsprink.com)
-        // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Brett Zamir (http://brett-zamir.me)
-        // +        revised by: stag019
-        // +     input by: Dreamer
-        // +     bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
-        // %                note 1: If the value is null, key and value is skipped in http_build_query of PHP. But, phpjs is not.
-        var value, key, tmp = [];
-
-        var _http_build_query_helper = function (key, val, arg_separator) {
-            var k, tmp = [];
-            if (val === true) {
-                val = "1";
-            } else if (val === false) {
-                val = "0";
+    /*
+     * Builds a HTTP query string from the given data
+     *
+     * http://phpjs.org
+     * +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Legaev Andrey
+     * +     improved by: Michael White (http://getsprink.com)
+     * +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Brett Zamir (http://brett-zamir.me)
+     * +        revised by: stag019
+     * +     input by: Dreamer
+     * +     bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
+     *
+     * @param string data The data to concatenate
+     *
+     * @return string The HTTP query
+     */
+    var _http_build_query = function (e, f, b) {
+        function g(c, a, d) {
+            var b, e = [];
+            if (a === true) {
+                a = "1";
+            } else if (a === false) {
+                a = "0";
             }
-            if (val !== null) {
-                if(typeof(val) === "object") {
-                    for (k in val) {
-                        if (val[k] !== null) {
-                            tmp.push(_http_build_query_helper(key + "[" + k + "]", val[k], arg_separator));
+            if (null !== a) {
+                if (typeof a === "object") {
+                    for (b in a) {
+                        if (a[b] !== null) {
+                            e.push(g(c + "[" + b + "]", a[b], d));
                         }
                     }
-                    return tmp.join(arg_separator);
-                } else if (typeof(val) !== "function") {
-                    return _url(key) + "=" + _url(val);
-                } else {
-                    throw new Error("There was an error processing for http_build_query().");
+                    return e.join(d);
                 }
+                if (typeof a !== "function") {
+                    return _url(c) + "=" + _url(a);
+                }
+                console.warn("There was an error processing for http_build_query().");
             } else {
                 return "";
             }
-        };
-
-        if (!arg_separator) {
-            arg_separator = "&";
         }
-        for (key in formdata) {
-            value = formdata[key];
-            if (numeric_prefix && !isNaN(key)) {
-                key = String(numeric_prefix) + key;
+        var d, c, h = [];
+        if (! b) {
+            b = "&";
+        }
+        for (c in e) {
+            d = e[c];
+            if (f && ! isNaN(c)) {
+                c = String(f) + c;
             }
-            var query=_http_build_query_helper(key, value, arg_separator);
-            if(query !== "") {
-                tmp.push(query);
+            d = g(c, d, b);
+            if (d !== "") {
+                h.push(d);
             }
         }
-
-        return tmp.join(arg_separator);
+        return h.join(b);
     };
 
     /**
@@ -1244,7 +1248,7 @@ var Codebird = function () {
         if (httpmethod === "GET") {
             var url_with_params = url;
             if (JSON.stringify(params) !== "{}") {
-                url_with_params += "?" + http_build_query(params);
+                url_with_params += "?" + _http_build_query(params);
             }
             authorization = _sign(httpmethod, url, params);
 
@@ -1292,7 +1296,7 @@ var Codebird = function () {
                 params        = _buildMultipart(method, params);
             } else {
                 authorization = _sign(httpmethod, url, params);
-                params        = http_build_query(params);
+                params        = _http_build_query(params);
             }
             post_fields = params;
             if (_use_proxy || multipart) { // force proxy for multipart base64
