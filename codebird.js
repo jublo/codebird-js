@@ -327,7 +327,7 @@ var Codebird = function () {
         if (typeof callback !== "function" && typeof params === "function") {
             callback = params;
             params = {};
-            if (typeof callback === "bool") {
+            if (typeof callback === "boolean") {
                 app_only_auth = callback;
             }
         } else if (typeof callback === "undefined") {
