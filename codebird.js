@@ -35,7 +35,8 @@
           XMLHttpRequest,
           ActiveXObject,
           module,
-          define */
+          define,
+          require */
 "use strict";
 
 /**
@@ -494,11 +495,9 @@ var Codebird = function () {
             );
         }
 
-        var xml;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
         xml.open("POST", url, true);
         xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -1196,7 +1195,7 @@ var Codebird = function () {
     /**
      * Builds the complete API endpoint url
      *
-     * @param string method           The API method to call
+     * @param string method The API method to call
      *
      * @return string The URL to send the request to
      */
@@ -1210,6 +1209,41 @@ var Codebird = function () {
             url = _endpoint + method + ".json";
         }
         return url;
+    };
+
+    /**
+     * Gets the XML HTTP Request object, trying to load it in various ways
+     *
+     * @return object The XMLHttpRequest object instance
+     */
+    var _getXmlRequestObject = function () {
+        var xml = null;
+        if (typeof window === "object"
+            && window
+            && typeof window.XMLHttpRequest === "function"
+        ) {
+            xml = new window.XMLHttpRequest();
+        } else if (typeof require === "function"
+            && require
+        ) {
+            try {
+                var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+                xml = new XMLHttpRequest();
+            } catch (e) {
+                try {
+                    var XMLHttpRequest = require("xhr2");
+                    xml = new XMLHttpRequest();
+                } catch (e) {
+                    console.error("xhr2 object not defined, trying ActiveXObject.");
+                    try {
+                        xml = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) {
+                        console.error("ActiveXObject object not defined, cancelling.");
+                    }
+                }
+            }
+        }
+        return xml;
     };
 
     /**
@@ -1248,12 +1282,12 @@ var Codebird = function () {
         var url = _getEndpoint(method);
         var authorization = null;
 
-        var xml, post_fields;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
+        var post_fields;
+
         if (httpmethod === "GET") {
             var url_with_params = url;
             if (JSON.stringify(params) !== "{}") {
