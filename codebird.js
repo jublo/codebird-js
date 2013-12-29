@@ -757,27 +757,34 @@ var Codebird = function () {
         return nonce;
     };
 
-    var _ksort = function (inputArr) {
+    /**
+     * Sort array elements by key
+     *
+     * @param array input_arr The array to sort
+     *
+     * @return array The sorted keys
+     */
+    var _ksort = function (input_arr) {
         var keys = [], sorter, k;
 
         sorter = function (a, b) {
-            var aFloat = parseFloat(a),
-            bFloat = parseFloat(b),
-            aNumeric = aFloat + "" === a,
-            bNumeric = bFloat + "" === b;
-            if (aNumeric && bNumeric) {
-                return aFloat > bFloat ? 1 : aFloat < bFloat ? -1 : 0;
-            } else if (aNumeric && !bNumeric) {
+            var a_float = parseFloat(a),
+            b_float = parseFloat(b),
+            a_numeric = a_float + "" === a,
+            b_numeric = b_float + "" === b;
+            if (a_numeric && b_numeric) {
+                return a_float > b_float ? 1 : a_float < b_float ? -1 : 0;
+            } else if (a_numeric && !b_numeric) {
                 return 1;
-            } else if (!aNumeric && bNumeric) {
+            } else if (!a_numeric && b_numeric) {
                 return -1;
             }
             return a > b ? 1 : a < b ? -1 : 0;
         };
 
         // Make a list of key names
-        for (k in inputArr) {
-            if (inputArr.hasOwnProperty(k)) {
+        for (k in input_arr) {
+            if (input_arr.hasOwnProperty(k)) {
                 keys.push(k);
             }
         }
