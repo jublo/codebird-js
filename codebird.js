@@ -34,9 +34,8 @@
           navigator,
           console,
           XMLHttpRequest,
-          ActiveXObject,
-          b64pad: true,
-          b64_hmac_sha1 */
+          ActiveXObject */
+"use strict";
 
 /**
  * Array.indexOf polyfill
