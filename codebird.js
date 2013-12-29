@@ -22,7 +22,6 @@
 
 /* jshint curly: true,
           eqeqeq: true,
-          indent: 4,
           latedef: true,
           quotmark: double,
           undef: true,
@@ -34,7 +33,10 @@
           navigator,
           console,
           XMLHttpRequest,
-          ActiveXObject */
+          ActiveXObject,
+          module,
+          define,
+          require */
 "use strict";
 
 /**
@@ -51,6 +53,7 @@ if (! Array.prototype.indexOf) {
     };
 }
 
+(function (undefined) {
 /**
  * A Twitter library in JavaScript
  *
@@ -492,11 +495,9 @@ var Codebird = function () {
             );
         }
 
-        var xml;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
         xml.open("POST", url, true);
         xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -1194,7 +1195,7 @@ var Codebird = function () {
     /**
      * Builds the complete API endpoint url
      *
-     * @param string method           The API method to call
+     * @param string method The API method to call
      *
      * @return string The URL to send the request to
      */
@@ -1208,6 +1209,41 @@ var Codebird = function () {
             url = _endpoint + method + ".json";
         }
         return url;
+    };
+
+    /**
+     * Gets the XML HTTP Request object, trying to load it in various ways
+     *
+     * @return object The XMLHttpRequest object instance
+     */
+    var _getXmlRequestObject = function () {
+        var xml = null;
+        if (typeof window === "object"
+            && window
+            && typeof window.XMLHttpRequest === "function"
+        ) {
+            xml = new window.XMLHttpRequest();
+        } else if (typeof require === "function"
+            && require
+        ) {
+            try {
+                var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+                xml = new XMLHttpRequest();
+            } catch (e) {
+                try {
+                    var XMLHttpRequest = require("xhr2");
+                    xml = new XMLHttpRequest();
+                } catch (e) {
+                    console.error("xhr2 object not defined, trying ActiveXObject.");
+                    try {
+                        xml = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) {
+                        console.error("ActiveXObject object not defined, cancelling.");
+                    }
+                }
+            }
+        }
+        return xml;
     };
 
     /**
@@ -1246,12 +1282,12 @@ var Codebird = function () {
         var url = _getEndpoint(method);
         var authorization = null;
 
-        var xml, post_fields;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
+        var post_fields;
+
         if (httpmethod === "GET") {
             var url_with_params = url;
             if (JSON.stringify(params) !== "{}") {
@@ -1271,9 +1307,9 @@ var Codebird = function () {
                     reply.httpstatus = 200;
 
                     var rate = {
-                        limit: xml.getResponseHeader('x-rate-limit-limit'),
-                        remaining: xml.getResponseHeader('x-rate-limit-remaining'),
-                        reset: xml.getResponseHeader('x-rate-limit-reset'),
+                        limit: xml.getResponseHeader("x-rate-limit-limit"),
+                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                        reset: xml.getResponseHeader("x-rate-limit-reset")
                     };
                     callback(reply, rate);
                 };
@@ -1344,9 +1380,9 @@ var Codebird = function () {
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
                 var rate = {
-                    limit: xml.getResponseHeader('x-rate-limit-limit'),
-                    remaining: xml.getResponseHeader('x-rate-limit-remaining'),
-                    reset: xml.getResponseHeader('x-rate-limit-reset'),
+                    limit: xml.getResponseHeader("x-rate-limit-limit"),
+                    remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                    reset: xml.getResponseHeader("x-rate-limit-reset")
                 };
                 callback(reply, rate);
             }
@@ -1407,3 +1443,33 @@ var Codebird = function () {
         oauth2_token: oauth2_token
     };
 };
+
+if (typeof module === "object"
+    && module
+    && typeof module.exports === "object"
+) {
+    // Expose codebird as module.exports in loaders that implement the Node
+    // module pattern (including browserify). Do not create the global, since
+    // the user will be storing it themselves locally, and globals are frowned
+    // upon in the Node module world.
+    module.exports = Codebird;
+} else {
+    // Otherwise expose codebird to the global object as usual
+    if (typeof window === "object"
+        && window) {
+        window.Codebird = Codebird;
+    }
+
+    // Register as a named AMD module, since codebird can be concatenated with other
+    // files that may use define, but not via a proper concatenation script that
+    // understands anonymous AMD modules. A named AMD is safest and most robust
+    // way to register. Lowercase codebird is used because AMD module names are
+    // derived from file names, and codebird is normally delivered in a lowercase
+    // file name. Do this after creating the global so that if an AMD module wants
+    // to call noConflict to hide this version of codebird, it will work.
+    if (typeof define === "function" && define.amd) {
+        define("codebird", [], function () { return Codebird; });
+    }
+}
+
+})();
