@@ -25,6 +25,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 - PHP: https://github.com/mynetx/codebird-php
 
 
+0. Including Codebird
+---------------------
+
+To include Codebird in your code, add its scripts to your markup:
+
+```html
+<script type="text/javascript" src="codebird.js"></script>
+
+<script type="text/javascript">
+var cb = new Codebird;
+cb.setConsumerKey("YOURKEY", "YOURSECRET");
+</script>
+```
+
+You may also use a JavaScript module loader of your choice
+(such as [RequireJS](http://requirejs.org/) or the one bundled in Node.js)
+to load Codebird unobtrusively.  In Node.js, loading Codebird looks like this:
+
+```javascript
+var Codebird = require("codebird");
+// or with leading "./", if the codebird.js file is in your main folder:
+// var Codebird = require("./codebird");
+
+var cb = new Codebird;
+cb.setConsumerKey("YOURKEY", "YOURSECRET");
+```
+
+
 1. Authentication
 -----------------
 
