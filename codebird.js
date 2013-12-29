@@ -210,29 +210,26 @@ var Codebird = function () {
     /**
      * Parse URL-style parameters into object
      *
+     * version: 1109.2015
+     * discuss at: http://phpjs.org/functions/parse_str
+     * +   original by: Cagri Ekin
+     * +   improved by: Michael White (http://getsprink.com)
+     * +    tweaked by: Jack
+     * +   bugfixed by: Onno Marsman
+     * +   reimplemented by: stag019
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +   bugfixed by: stag019
+     * -    depends on: urldecode
+     * +   input by: Dreamer
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * %        note 1: When no argument is specified, will put variables in global scope.
+     *
      * @param string str String to parse
      * @param array array to load data into
      *
      * @return object
      */
-    function parse_str(str, array) {
-        // Parses GET/POST/COOKIE data and sets global variables
-        //
-        // version: 1109.2015
-        // discuss at: http://phpjs.org/functions/parse_str    // +   original by: Cagri Ekin
-        // +   improved by: Michael White (http://getsprink.com)
-        // +    tweaked by: Jack
-        // +   bugfixed by: Onno Marsman
-        // +   reimplemented by: stag019    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +   bugfixed by: stag019
-        // -    depends on: urldecode
-        // +   input by: Dreamer
-        // +   bugfixed by: Brett Zamir (http://brett-zamir.me)    // %        note 1: When no argument is specified, will put variables in global scope.
-        // *     example 1: var arr = {};
-        // *     example 1: parse_str('first=foo&second=bar', arr);
-        // *     results 1: arr == { first: 'foo', second: 'bar' }
-        // *     example 2: var arr = {};    // *     example 2: parse_str('str_a=Jack+and+Jill+didn%27t+see+the+well.', arr);
-        // *     results 2: arr == { str_a: "Jack and Jill didn't see the well." }
+    var _parse_str = function (str, array) {
         var glue1 = "=",
             glue2 = "&",
             array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
@@ -240,7 +237,7 @@ var Codebird = function () {
             fixStr = function (str) {
                 return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
             };
-        if (!array) {
+        if (! array) {
             array = this.window;
         }
 
@@ -307,7 +304,7 @@ var Codebird = function () {
                 /* jshint +W061 */
             }
         }
-    }
+    };
 
     /**
      * Main API handler working on any requests you issue
@@ -353,7 +350,7 @@ var Codebird = function () {
         if (typeof params === "object") {
             apiparams = params;
         } else {
-            parse_str(params, apiparams); //TODO
+            _parse_str(params, apiparams); //TODO
         }
 
         // map function name to API method
