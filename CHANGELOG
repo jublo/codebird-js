@@ -10,6 +10,7 @@ codebird-js - changelog
 - Remove POST geo/place API method, deprecated
 + #52 Don't use proxy for non-browser environments
 - #49 Places & Geo API call issue
++ #54 Integrate sha1 hash library
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

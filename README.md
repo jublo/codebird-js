@@ -32,7 +32,6 @@ To authenticate your API requests on behalf of a certain Twitter user
 (following OAuth 1.0a), take a look at these steps:
 
 ```html
-<script type="text/javascript" src="sha1.js"></script>
 <script type="text/javascript" src="codebird.js"></script>
 
 <script type="text/javascript">
