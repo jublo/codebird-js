@@ -34,9 +34,8 @@
           navigator,
           console,
           XMLHttpRequest,
-          ActiveXObject,
-          b64pad: true,
-          b64_hmac_sha1 */
+          ActiveXObject */
+"use strict";
 
 /**
  * Array.indexOf polyfill
@@ -211,29 +210,26 @@ var Codebird = function () {
     /**
      * Parse URL-style parameters into object
      *
+     * version: 1109.2015
+     * discuss at: http://phpjs.org/functions/parse_str
+     * +   original by: Cagri Ekin
+     * +   improved by: Michael White (http://getsprink.com)
+     * +    tweaked by: Jack
+     * +   bugfixed by: Onno Marsman
+     * +   reimplemented by: stag019
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +   bugfixed by: stag019
+     * -    depends on: urldecode
+     * +   input by: Dreamer
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * %        note 1: When no argument is specified, will put variables in global scope.
+     *
      * @param string str String to parse
      * @param array array to load data into
      *
      * @return object
      */
-    function parse_str(str, array) {
-        // Parses GET/POST/COOKIE data and sets global variables
-        //
-        // version: 1109.2015
-        // discuss at: http://phpjs.org/functions/parse_str    // +   original by: Cagri Ekin
-        // +   improved by: Michael White (http://getsprink.com)
-        // +    tweaked by: Jack
-        // +   bugfixed by: Onno Marsman
-        // +   reimplemented by: stag019    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +   bugfixed by: stag019
-        // -    depends on: urldecode
-        // +   input by: Dreamer
-        // +   bugfixed by: Brett Zamir (http://brett-zamir.me)    // %        note 1: When no argument is specified, will put variables in global scope.
-        // *     example 1: var arr = {};
-        // *     example 1: parse_str('first=foo&second=bar', arr);
-        // *     results 1: arr == { first: 'foo', second: 'bar' }
-        // *     example 2: var arr = {};    // *     example 2: parse_str('str_a=Jack+and+Jill+didn%27t+see+the+well.', arr);
-        // *     results 2: arr == { str_a: "Jack and Jill didn't see the well." }
+    var _parse_str = function (str, array) {
         var glue1 = "=",
             glue2 = "&",
             array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
@@ -241,7 +237,7 @@ var Codebird = function () {
             fixStr = function (str) {
                 return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
             };
-        if (!array) {
+        if (! array) {
             array = this.window;
         }
 
@@ -308,7 +304,7 @@ var Codebird = function () {
                 /* jshint +W061 */
             }
         }
-    }
+    };
 
     /**
      * Main API handler working on any requests you issue
@@ -331,7 +327,7 @@ var Codebird = function () {
         if (typeof callback !== "function" && typeof params === "function") {
             callback = params;
             params = {};
-            if (typeof callback === "bool") {
+            if (typeof callback === "boolean") {
                 app_only_auth = callback;
             }
         } else if (typeof callback === "undefined") {
@@ -354,7 +350,7 @@ var Codebird = function () {
         if (typeof params === "object") {
             apiparams = params;
         } else {
-            parse_str(params, apiparams); //TODO
+            _parse_str(params, apiparams); //TODO
         }
 
         // map function name to API method
@@ -506,7 +502,7 @@ var Codebird = function () {
         xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xml.setRequestHeader(
             (_use_proxy ? "X-" : "") + "Authorization",
-            "Basic " + base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
+            "Basic " + _base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
         );
 
         xml.onreadystatechange = function () {
@@ -539,16 +535,7 @@ var Codebird = function () {
      * @return mixed The encoded data
      */
     var _url = function (data) {
-        if (typeof data === "array") {
-            /*
-            return array_map(
-                [ // TODO
-                    this, "_url"
-                ],
-                data
-            );
-            */
-        } else if ((/boolean|number|string/).test(typeof data)) {
+        if ((/boolean|number|string/).test(typeof data)) {
             return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
         } else {
             return "";
@@ -648,109 +635,104 @@ var Codebird = function () {
         };
     }();
 
-    var base64_encode = function (data) {
-        // http://kevin.vanzonneveld.net
-        // +   original by: Tyler Akins (http://rumkin.com)
-        // +   improved by: Bayron Guevara
-        // +   improved by: Thunder.m
-        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +   bugfixed by: Pellentesque Malesuada
-        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +   improved by: Rafał Kukawski (http://kukawski.pl)
-        // *     example 1: base64_encode('Kevin van Zonneveld');
-        // *     returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
-        // mozilla has this native
-        // - but breaks in 2.0.0.12!
-        //if (typeof this.window['btoa'] == 'function') {
-        //    return btoa(data);
-        //}
-        var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-        var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-            ac = 0,
-            enc = "",
-            tmp_arr = [];
-
-        if (! data) {
-            return data;
+    /*
+     * Gets the base64 representation for the given data
+     *
+     * http://phpjs.org
+     * +   original by: Tyler Akins (http://rumkin.com)
+     * +   improved by: Bayron Guevara
+     * +   improved by: Thunder.m
+     * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +   bugfixed by: Pellentesque Malesuada
+     * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +   improved by: Rafał Kukawski (http://kukawski.pl)
+     *
+     * @param string data The data to calculate the base64 representation from
+     *
+     * @return string The base64 representation
+     */
+    var _base64_encode = function (a) {
+        var d, e, f, b, g = 0,
+            h = 0,
+            i = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+            c = [];
+        if (!a) {
+            return a;
         }
-
-        do { // pack three octets into four hexets
-            o1 = data.charCodeAt(i++);
-            o2 = data.charCodeAt(i++);
-            o3 = data.charCodeAt(i++);
-
-            bits = o1 << 16 | o2 << 8 | o3;
-
-            h1 = bits >> 18 & 0x3f;
-            h2 = bits >> 12 & 0x3f;
-            h3 = bits >> 6 & 0x3f;
-            h4 = bits & 0x3f;
-
-            // use hexets to index into b64, and append result to encoded string
-            tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-        } while (i < data.length);
-
-        enc = tmp_arr.join("");
-
-        var r = data.length % 3;
-
-        return (r ? enc.slice(0, r - 3) : enc) + "===".slice(r || 3);
+        do {
+            d = a.charCodeAt(g++);
+            e = a.charCodeAt(g++);
+            f = a.charCodeAt(g++);
+            b = d << 16 | e << 8 | f;
+            d = b >> 18 & 63;
+            e = b >> 12 & 63;
+            f = b >> 6 & 63;
+            b &= 63;
+            c[h++] = i.charAt(d) + i.charAt(e) + i.charAt(f) + i.charAt(b);
+        } while (g < a.length);
+        c = c.join("");
+        a = a.length % 3;
+        return (a ? c.slice(0, a - 3) : c) + "===".slice(a || 3);
     };
 
-    var http_build_query = function (formdata, numeric_prefix, arg_separator) {
-        // http://kevin.vanzonneveld.net
-        // +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Legaev Andrey
-        // +     improved by: Michael White (http://getsprink.com)
-        // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Brett Zamir (http://brett-zamir.me)
-        // +        revised by: stag019
-        // +     input by: Dreamer
-        // +     bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
-        // %                note 1: If the value is null, key and value is skipped in http_build_query of PHP. But, phpjs is not.
-        var value, key, tmp = [];
-
-        var _http_build_query_helper = function (key, val, arg_separator) {
-            var k, tmp = [];
-            if (val === true) {
-                val = "1";
-            } else if (val === false) {
-                val = "0";
+    /*
+     * Builds a HTTP query string from the given data
+     *
+     * http://phpjs.org
+     * +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Legaev Andrey
+     * +     improved by: Michael White (http://getsprink.com)
+     * +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Brett Zamir (http://brett-zamir.me)
+     * +        revised by: stag019
+     * +     input by: Dreamer
+     * +     bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
+     *
+     * @param string data The data to concatenate
+     *
+     * @return string The HTTP query
+     */
+    var _http_build_query = function (e, f, b) {
+        function g(c, a, d) {
+            var b, e = [];
+            if (a === true) {
+                a = "1";
+            } else if (a === false) {
+                a = "0";
             }
-            if (val !== null) {
-                if(typeof(val) === "object") {
-                    for (k in val) {
-                        if (val[k] !== null) {
-                            tmp.push(_http_build_query_helper(key + "[" + k + "]", val[k], arg_separator));
+            if (null !== a) {
+                if (typeof a === "object") {
+                    for (b in a) {
+                        if (a[b] !== null) {
+                            e.push(g(c + "[" + b + "]", a[b], d));
                         }
                     }
-                    return tmp.join(arg_separator);
-                } else if (typeof(val) !== "function") {
-                    return _url(key) + "=" + _url(val);
-                } else {
-                    throw new Error("There was an error processing for http_build_query().");
+                    return e.join(d);
                 }
+                if (typeof a !== "function") {
+                    return _url(c) + "=" + _url(a);
+                }
+                console.warn("There was an error processing for http_build_query().");
             } else {
                 return "";
             }
-        };
-
-        if (!arg_separator) {
-            arg_separator = "&";
         }
-        for (key in formdata) {
-            value = formdata[key];
-            if (numeric_prefix && !isNaN(key)) {
-                key = String(numeric_prefix) + key;
+        var d, c, h = [];
+        if (! b) {
+            b = "&";
+        }
+        for (c in e) {
+            d = e[c];
+            if (f && ! isNaN(c)) {
+                c = String(f) + c;
             }
-            var query=_http_build_query_helper(key, value, arg_separator);
-            if(query !== "") {
-                tmp.push(query);
+            d = g(c, d, b);
+            if (d !== "") {
+                h.push(d);
             }
         }
-
-        return tmp.join(arg_separator);
+        return h.join(b);
     };
 
     /**
@@ -775,27 +757,34 @@ var Codebird = function () {
         return nonce;
     };
 
-    var _ksort = function (inputArr) {
+    /**
+     * Sort array elements by key
+     *
+     * @param array input_arr The array to sort
+     *
+     * @return array The sorted keys
+     */
+    var _ksort = function (input_arr) {
         var keys = [], sorter, k;
 
         sorter = function (a, b) {
-            var aFloat = parseFloat(a),
-            bFloat = parseFloat(b),
-            aNumeric = aFloat + "" === a,
-            bNumeric = bFloat + "" === b;
-            if (aNumeric && bNumeric) {
-                return aFloat > bFloat ? 1 : aFloat < bFloat ? -1 : 0;
-            } else if (aNumeric && !bNumeric) {
+            var a_float = parseFloat(a),
+            b_float = parseFloat(b),
+            a_numeric = a_float + "" === a,
+            b_numeric = b_float + "" === b;
+            if (a_numeric && b_numeric) {
+                return a_float > b_float ? 1 : a_float < b_float ? -1 : 0;
+            } else if (a_numeric && !b_numeric) {
                 return 1;
-            } else if (!aNumeric && bNumeric) {
+            } else if (!a_numeric && b_numeric) {
                 return -1;
             }
             return a > b ? 1 : a < b ? -1 : 0;
         };
 
         // Make a list of key names
-        for (k in inputArr) {
-            if (inputArr.hasOwnProperty(k)) {
+        for (k in input_arr) {
+            if (input_arr.hasOwnProperty(k)) {
                 keys.push(k);
             }
         }
@@ -1266,7 +1255,7 @@ var Codebird = function () {
         if (httpmethod === "GET") {
             var url_with_params = url;
             if (JSON.stringify(params) !== "{}") {
-                url_with_params += "?" + http_build_query(params);
+                url_with_params += "?" + _http_build_query(params);
             }
             authorization = _sign(httpmethod, url, params);
 
@@ -1314,7 +1303,7 @@ var Codebird = function () {
                 params        = _buildMultipart(method, params);
             } else {
                 authorization = _sign(httpmethod, url, params);
-                params        = http_build_query(params);
+                params        = _http_build_query(params);
             }
             post_fields = params;
             if (_use_proxy || multipart) { // force proxy for multipart base64
