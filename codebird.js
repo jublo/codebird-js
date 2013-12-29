@@ -52,7 +52,7 @@ if (! Array.prototype.indexOf) {
     };
 }
 
-(function (window, undefined) {
+(function (undefined) {
 /**
  * A Twitter library in JavaScript
  *
@@ -1421,7 +1421,10 @@ if (typeof module === "object"
     module.exports = Codebird;
 } else {
     // Otherwise expose codebird to the global object as usual
-    window.Codebird = Codebird;
+    if (typeof window === "object"
+        && window) {
+        window.Codebird = Codebird;
+    }
 
     // Register as a named AMD module, since codebird can be concatenated with other
     // files that may use define, but not via a proper concatenation script that
@@ -1435,4 +1438,4 @@ if (typeof module === "object"
     }
 }
 
-})(window);
+})();
