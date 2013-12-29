@@ -535,16 +535,7 @@ var Codebird = function () {
      * @return mixed The encoded data
      */
     var _url = function (data) {
-        if (typeof data === "array") {
-            /*
-            return array_map(
-                [ // TODO
-                    this, "_url"
-                ],
-                data
-            );
-            */
-        } else if ((/boolean|number|string/).test(typeof data)) {
+        if ((/boolean|number|string/).test(typeof data)) {
             return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
         } else {
             return "";
