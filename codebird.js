@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.5.0-dev
+ * @version 2.5.0-alpha.1
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -32,7 +32,6 @@
           document,
           navigator,
           console,
-          XMLHttpRequest,
           ActiveXObject,
           module,
           define,
@@ -136,7 +135,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-dev";
+    var _version = "2.5.0-alpha.1";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -1229,15 +1228,15 @@ var Codebird = function () {
             try {
                 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
                 xml = new XMLHttpRequest();
-            } catch (e) {
+            } catch (e1) {
                 try {
                     var XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
-                } catch (e) {
+                } catch (e2) {
                     console.error("xhr2 object not defined, trying ActiveXObject.");
                     try {
                         xml = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch (e) {
+                    } catch (e3) {
                         console.error("ActiveXObject object not defined, cancelling.");
                     }
                 }
