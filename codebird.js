@@ -32,7 +32,6 @@
           document,
           navigator,
           console,
-          XMLHttpRequest,
           ActiveXObject,
           module,
           define,
@@ -1229,15 +1228,15 @@ var Codebird = function () {
             try {
                 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
                 xml = new XMLHttpRequest();
-            } catch (e) {
+            } catch (e1) {
                 try {
                     var XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
-                } catch (e) {
+                } catch (e2) {
                     console.error("xhr2 object not defined, trying ActiveXObject.");
                     try {
                         xml = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch (e) {
+                    } catch (e3) {
                         console.error("ActiveXObject object not defined, cancelling.");
                     }
                 }
