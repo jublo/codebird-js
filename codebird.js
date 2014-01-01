@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.4.3
+ * @version 2.5.0-alpha.1
  * @author J.M. <me@mynetx.net>
  * @copyright 2010-2013 J.M. <me@mynetx.net>
  *
@@ -22,7 +22,6 @@
 
 /* jshint curly: true,
           eqeqeq: true,
-          indent: 4,
           latedef: true,
           quotmark: double,
           undef: true,
@@ -33,10 +32,11 @@
           document,
           navigator,
           console,
-          XMLHttpRequest,
           ActiveXObject,
-          b64pad: true,
-          b64_hmac_sha1 */
+          module,
+          define,
+          require */
+"use strict";
 
 /**
  * Array.indexOf polyfill
@@ -52,6 +52,7 @@ if (! Array.prototype.indexOf) {
     };
 }
 
+(function (undefined) {
 /**
  * A Twitter library in JavaScript
  *
@@ -88,7 +89,7 @@ var Codebird = function () {
     var _endpoint = _endpoint_base + "1.1/";
 
     /**
-     * The API endpoint to use for OAuth requests
+     * The API endpoint base to use
      */
     var _endpoint_oauth = _endpoint_base;
 
@@ -96,6 +97,11 @@ var Codebird = function () {
      * API proxy endpoint
      */
     var _endpoint_proxy = "https://api.jublo.net/codebird/";
+
+    /**
+     * The API endpoint to use for old requests
+     */
+    var _endpoint_old = _endpoint_base + "1/";
 
     /**
      * Use JSONP for GET requests in IE7-9
@@ -110,8 +116,11 @@ var Codebird = function () {
 
     /**
      * Whether to access the API via a proxy that is allowed by CORS
+     * Assume that CORS is only necessary in browsers
      */
-    var _use_proxy = true;
+    var _use_proxy = (typeof navigator !== "undefined"
+        && typeof navigator.userAgent !== "undefined"
+    );
 
     /**
      * The Request or access token. Used to sign requests
@@ -126,7 +135,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.4.3";
+    var _version = "2.5.0-alpha.1";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -203,29 +212,26 @@ var Codebird = function () {
     /**
      * Parse URL-style parameters into object
      *
+     * version: 1109.2015
+     * discuss at: http://phpjs.org/functions/parse_str
+     * +   original by: Cagri Ekin
+     * +   improved by: Michael White (http://getsprink.com)
+     * +    tweaked by: Jack
+     * +   bugfixed by: Onno Marsman
+     * +   reimplemented by: stag019
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +   bugfixed by: stag019
+     * -    depends on: urldecode
+     * +   input by: Dreamer
+     * +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * %        note 1: When no argument is specified, will put variables in global scope.
+     *
      * @param string str String to parse
      * @param array array to load data into
      *
      * @return object
      */
-    function parse_str(str, array) {
-        // Parses GET/POST/COOKIE data and sets global variables
-        //
-        // version: 1109.2015
-        // discuss at: http://phpjs.org/functions/parse_str    // +   original by: Cagri Ekin
-        // +   improved by: Michael White (http://getsprink.com)
-        // +    tweaked by: Jack
-        // +   bugfixed by: Onno Marsman
-        // +   reimplemented by: stag019    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +   bugfixed by: stag019
-        // -    depends on: urldecode
-        // +   input by: Dreamer
-        // +   bugfixed by: Brett Zamir (http://brett-zamir.me)    // %        note 1: When no argument is specified, will put variables in global scope.
-        // *     example 1: var arr = {};
-        // *     example 1: parse_str('first=foo&second=bar', arr);
-        // *     results 1: arr == { first: 'foo', second: 'bar' }
-        // *     example 2: var arr = {};    // *     example 2: parse_str('str_a=Jack+and+Jill+didn%27t+see+the+well.', arr);
-        // *     results 2: arr == { str_a: "Jack and Jill didn't see the well." }
+    var _parse_str = function (str, array) {
         var glue1 = "=",
             glue2 = "&",
             array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
@@ -233,7 +239,7 @@ var Codebird = function () {
             fixStr = function (str) {
                 return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
             };
-        if (!array) {
+        if (! array) {
             array = this.window;
         }
 
@@ -300,7 +306,7 @@ var Codebird = function () {
                 /* jshint +W061 */
             }
         }
-    }
+    };
 
     /**
      * Main API handler working on any requests you issue
@@ -323,7 +329,7 @@ var Codebird = function () {
         if (typeof callback !== "function" && typeof params === "function") {
             callback = params;
             params = {};
-            if (typeof callback === "bool") {
+            if (typeof callback === "boolean") {
                 app_only_auth = callback;
             }
         } else if (typeof callback === "undefined") {
@@ -346,7 +352,7 @@ var Codebird = function () {
         if (typeof params === "object") {
             apiparams = params;
         } else {
-            parse_str(params, apiparams); //TODO
+            _parse_str(params, apiparams); //TODO
         }
 
         // map function name to API method
@@ -363,7 +369,7 @@ var Codebird = function () {
         }
 
         // undo replacement for URL parameters
-        var url_parameters_with_underscore = ["screen_name"];
+        var url_parameters_with_underscore = ["screen_name", "place_id"];
         for (i = 0; i < url_parameters_with_underscore.length; i++) {
             param = url_parameters_with_underscore[i].toUpperCase();
             var replacement_was = param.split("_").join("/");
@@ -397,6 +403,7 @@ var Codebird = function () {
 
         var httpmethod = _detectMethod(method_template, apiparams);
         var multipart = _detectMultipart(method_template);
+        var internal = _detectInternal(method_template);
 
         return _callApi(
             httpmethod,
@@ -405,6 +412,7 @@ var Codebird = function () {
             apiparams,
             multipart,
             app_only_auth,
+            internal,
             callback
         );
     };
@@ -486,17 +494,15 @@ var Codebird = function () {
             );
         }
 
-        var xml;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
         xml.open("POST", url, true);
         xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xml.setRequestHeader(
             (_use_proxy ? "X-" : "") + "Authorization",
-            "Basic " + base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
+            "Basic " + _base64_encode(_oauth_consumer_key + ":" + _oauth_consumer_secret)
         );
 
         xml.onreadystatechange = function () {
@@ -529,16 +535,7 @@ var Codebird = function () {
      * @return mixed The encoded data
      */
     var _url = function (data) {
-        if (typeof data === "array") {
-            /*
-            return array_map(
-                [ // TODO
-                    this, "_url"
-                ],
-                data
-            );
-            */
-        } else if ((/boolean|number|string/).test(typeof data)) {
+        if ((/boolean|number|string/).test(typeof data)) {
             return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
         } else {
             return "";
@@ -548,126 +545,194 @@ var Codebird = function () {
     /**
      * Gets the base64-encoded SHA1 hash for the given data
      *
+     * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+     * in FIPS PUB 180-1
+     * Based on version 2.1 Copyright Paul Johnston 2000 - 2002.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * Distributed under the BSD License
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     *
      * @param string data The data to calculate the hash from
      *
      * @return string The hash
      */
-    var _sha1 = function (data) {
-        if (_oauth_consumer_secret === null) {
-            console.warn("To generate a hash, the consumer secret must be set.");
-        }
-        if (typeof b64_hmac_sha1 !== "function") {
-            console.warn("To generate a hash, the Javascript SHA1.js must be available.");
-        }
-        /*jshint -W020 */
-        b64pad = "=";
-        /*jshint +W020 */
-        return b64_hmac_sha1(_oauth_consumer_secret + "&" + (_oauth_token_secret !== null ? _oauth_token_secret : ""), data);
-    };
+    var _sha1 = function () {
+        function n(e, b) {
+            e[b >> 5] |= 128 << 24 - b % 32;
+            e[(b + 64 >> 9 << 4) + 15] = b;
+            for (var c = new Array(80), a = 1732584193, d = -271733879, h = -1732584194,
+                    k = 271733878, g = -1009589776, p = 0; p < e.length; p += 16) {
+                for (var o = a, q = d, r = h, s = k, t = g, f = 0; 80 > f; f++) {
+                    var m;
 
-    var base64_encode = function (data) {
-        // http://kevin.vanzonneveld.net
-        // +   original by: Tyler Akins (http://rumkin.com)
-        // +   improved by: Bayron Guevara
-        // +   improved by: Thunder.m
-        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +   bugfixed by: Pellentesque Malesuada
-        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +   improved by: Rafał Kukawski (http://kukawski.pl)
-        // *     example 1: base64_encode('Kevin van Zonneveld');
-        // *     returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
-        // mozilla has this native
-        // - but breaks in 2.0.0.12!
-        //if (typeof this.window['btoa'] == 'function') {
-        //    return btoa(data);
-        //}
-        var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-        var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-            ac = 0,
-            enc = "",
-            tmp_arr = [];
+                    if (f < 16) {
+                        m = e[p + f];
+                    } else {
+                        m = c[f - 3] ^ c[f - 8] ^ c[f - 14] ^ c[f - 16];
+                        m = m << 1 | m >>> 31;
+                    }
 
-        if (! data) {
-            return data;
-        }
-
-        do { // pack three octets into four hexets
-            o1 = data.charCodeAt(i++);
-            o2 = data.charCodeAt(i++);
-            o3 = data.charCodeAt(i++);
-
-            bits = o1 << 16 | o2 << 8 | o3;
-
-            h1 = bits >> 18 & 0x3f;
-            h2 = bits >> 12 & 0x3f;
-            h3 = bits >> 6 & 0x3f;
-            h4 = bits & 0x3f;
-
-            // use hexets to index into b64, and append result to encoded string
-            tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-        } while (i < data.length);
-
-        enc = tmp_arr.join("");
-
-        var r = data.length % 3;
-
-        return (r ? enc.slice(0, r - 3) : enc) + "===".slice(r || 3);
-    };
-
-    var http_build_query = function (formdata, numeric_prefix, arg_separator) {
-        // http://kevin.vanzonneveld.net
-        // +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Legaev Andrey
-        // +     improved by: Michael White (http://getsprink.com)
-        // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // +     improved by: Brett Zamir (http://brett-zamir.me)
-        // +        revised by: stag019
-        // +     input by: Dreamer
-        // +     bugfixed by: Brett Zamir (http://brett-zamir.me)
-        // +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
-        // %                note 1: If the value is null, key and value is skipped in http_build_query of PHP. But, phpjs is not.
-        var value, key, tmp = [];
-
-        var _http_build_query_helper = function (key, val, arg_separator) {
-            var k, tmp = [];
-            if (val === true) {
-                val = "1";
-            } else if (val === false) {
-                val = "0";
+                    c[f] = m;
+                    m = l(l(a << 5 | a >>> 27, 20 > f ? d & h | ~d & k : 40 > f ? d ^
+                        h ^ k : 60 > f ? d & h | d & k | h & k : d ^ h ^ k), l(
+                        l(g, c[f]), 20 > f ? 1518500249 : 40 > f ? 1859775393 :
+                        60 > f ? -1894007588 : -899497514));
+                    g = k;
+                    k = h;
+                    h = d << 30 | d >>> 2;
+                    d = a;
+                    a = m;
+                }
+                a = l(a, o);
+                d = l(d, q);
+                h = l(h, r);
+                k = l(k, s);
+                g = l(g, t);
             }
-            if (val !== null) {
-                if(typeof(val) === "object") {
-                    for (k in val) {
-                        if (val[k] !== null) {
-                            tmp.push(_http_build_query_helper(key + "[" + k + "]", val[k], arg_separator));
+            return [a, d, h, k, g];
+        }
+
+        function l(e, b) {
+            var c = (e & 65535) + (b & 65535);
+            return (e >> 16) + (b >> 16) + (c >> 16) << 16 | c & 65535;
+        }
+
+        function q(e) {
+            for (var b = [], c = (1 << g) - 1, a = 0; a < e.length * g; a += g) {
+                b[a >> 5] |= (e.charCodeAt(a / g) & c) << 24 - a % 32;
+            }
+            return b;
+        }
+        var g = 8;
+        return function (e) {
+            var b = _oauth_consumer_secret + "&" + (null !== _oauth_token_secret ?
+                _oauth_token_secret : "");
+            if (_oauth_consumer_secret === null) {
+                console.warn("To generate a hash, the consumer secret must be set.");
+            }
+            var c = q(b);
+            if (c.length > 16) {
+                c = n(c, b.length * g);
+            }
+            b = new Array(16);
+            for (var a = new Array(16), d = 0; d < 16; d++) {
+                a[d] = c[d] ^ 909522486;
+                b[d] = c[d] ^ 1549556828;
+            }
+            c = n(a.concat(q(e)), 512 + e.length * g);
+            b = n(b.concat(c), 672);
+            c = "";
+            for (a = 0; a < 4 * b.length; a += 3) {
+                for (d = (b[a >> 2] >> 8 * (3 - a % 4) & 255) << 16 | (b[a + 1 >> 2] >>
+                    8 * (3 - (a + 1) % 4) & 255) << 8 | b[a + 2 >> 2] >> 8 * (3 -
+                    (a + 2) % 4) & 255, e = 0; 4 > e; e++) {
+                    c = 8 * a + 6 * e > 32 * b.length ? c + "=" : c +
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+                        .charAt(d >> 6 * (3 - e) & 63);
+                }
+            }
+            return c;
+        };
+    }();
+
+    /*
+     * Gets the base64 representation for the given data
+     *
+     * http://phpjs.org
+     * +   original by: Tyler Akins (http://rumkin.com)
+     * +   improved by: Bayron Guevara
+     * +   improved by: Thunder.m
+     * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +   bugfixed by: Pellentesque Malesuada
+     * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +   improved by: Rafał Kukawski (http://kukawski.pl)
+     *
+     * @param string data The data to calculate the base64 representation from
+     *
+     * @return string The base64 representation
+     */
+    var _base64_encode = function (a) {
+        var d, e, f, b, g = 0,
+            h = 0,
+            i = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+            c = [];
+        if (!a) {
+            return a;
+        }
+        do {
+            d = a.charCodeAt(g++);
+            e = a.charCodeAt(g++);
+            f = a.charCodeAt(g++);
+            b = d << 16 | e << 8 | f;
+            d = b >> 18 & 63;
+            e = b >> 12 & 63;
+            f = b >> 6 & 63;
+            b &= 63;
+            c[h++] = i.charAt(d) + i.charAt(e) + i.charAt(f) + i.charAt(b);
+        } while (g < a.length);
+        c = c.join("");
+        a = a.length % 3;
+        return (a ? c.slice(0, a - 3) : c) + "===".slice(a || 3);
+    };
+
+    /*
+     * Builds a HTTP query string from the given data
+     *
+     * http://phpjs.org
+     * +     original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Legaev Andrey
+     * +     improved by: Michael White (http://getsprink.com)
+     * +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+     * +     improved by: Brett Zamir (http://brett-zamir.me)
+     * +        revised by: stag019
+     * +     input by: Dreamer
+     * +     bugfixed by: Brett Zamir (http://brett-zamir.me)
+     * +     bugfixed by: MIO_KODUKI (http://mio-koduki.blogspot.com/)
+     *
+     * @param string data The data to concatenate
+     *
+     * @return string The HTTP query
+     */
+    var _http_build_query = function (e, f, b) {
+        function g(c, a, d) {
+            var b, e = [];
+            if (a === true) {
+                a = "1";
+            } else if (a === false) {
+                a = "0";
+            }
+            if (null !== a) {
+                if (typeof a === "object") {
+                    for (b in a) {
+                        if (a[b] !== null) {
+                            e.push(g(c + "[" + b + "]", a[b], d));
                         }
                     }
-                    return tmp.join(arg_separator);
-                } else if (typeof(val) !== "function") {
-                    return _url(key) + "=" + _url(val);
-                } else {
-                    throw new Error("There was an error processing for http_build_query().");
+                    return e.join(d);
                 }
+                if (typeof a !== "function") {
+                    return _url(c) + "=" + _url(a);
+                }
+                console.warn("There was an error processing for http_build_query().");
             } else {
                 return "";
             }
-        };
-
-        if (!arg_separator) {
-            arg_separator = "&";
         }
-        for (key in formdata) {
-            value = formdata[key];
-            if (numeric_prefix && !isNaN(key)) {
-                key = String(numeric_prefix) + key;
+        var d, c, h = [];
+        if (! b) {
+            b = "&";
+        }
+        for (c in e) {
+            d = e[c];
+            if (f && ! isNaN(c)) {
+                c = String(f) + c;
             }
-            var query=_http_build_query_helper(key, value, arg_separator);
-            if(query !== "") {
-                tmp.push(query);
+            d = g(c, d, b);
+            if (d !== "") {
+                h.push(d);
             }
         }
-
-        return tmp.join(arg_separator);
+        return h.join(b);
     };
 
     /**
@@ -692,27 +757,34 @@ var Codebird = function () {
         return nonce;
     };
 
-    var _ksort = function (inputArr) {
+    /**
+     * Sort array elements by key
+     *
+     * @param array input_arr The array to sort
+     *
+     * @return array The sorted keys
+     */
+    var _ksort = function (input_arr) {
         var keys = [], sorter, k;
 
         sorter = function (a, b) {
-            var aFloat = parseFloat(a),
-            bFloat = parseFloat(b),
-            aNumeric = aFloat + "" === a,
-            bNumeric = bFloat + "" === b;
-            if (aNumeric && bNumeric) {
-                return aFloat > bFloat ? 1 : aFloat < bFloat ? -1 : 0;
-            } else if (aNumeric && !bNumeric) {
+            var a_float = parseFloat(a),
+            b_float = parseFloat(b),
+            a_numeric = a_float + "" === a,
+            b_numeric = b_float + "" === b;
+            if (a_numeric && b_numeric) {
+                return a_float > b_float ? 1 : a_float < b_float ? -1 : 0;
+            } else if (a_numeric && !b_numeric) {
                 return 1;
-            } else if (!aNumeric && bNumeric) {
+            } else if (!a_numeric && b_numeric) {
                 return -1;
             }
             return a > b ? 1 : a < b ? -1 : 0;
         };
 
         // Make a list of key names
-        for (k in inputArr) {
-            if (inputArr.hasOwnProperty(k)) {
+        for (k in input_arr) {
+            if (input_arr.hasOwnProperty(k)) {
                 keys.push(k);
             }
         }
@@ -722,7 +794,7 @@ var Codebird = function () {
 
     /**
      * Clone objects
-     * 
+     *
      * @param object obj    The object to clone
      *
      * @return object clone The cloned object
@@ -823,6 +895,8 @@ var Codebird = function () {
         // multi-HTTP method endpoints
         switch(method) {
         case "account/settings":
+        case "account/login_verification_enrollment":
+        case "account/login_verification_request":
             method = params.length ? method + "__post" : method;
             break;
         }
@@ -914,7 +988,28 @@ var Codebird = function () {
             "help/languages",
             "help/privacy",
             "help/tos",
-            "application/rate_limit_status"
+            "application/rate_limit_status",
+
+            // Internal
+            "users/recommendations",
+            "account/push_destinations/device",
+            "activity/about_me",
+            "activity/by_friends",
+            "statuses/media_timeline",
+            "timeline/home",
+            "help/experiments",
+            "search/typeahead",
+            "search/universal",
+            "discover/universal",
+            "conversation/show",
+            "statuses/:id/activity/summary",
+            "account/login_verification_enrollment",
+            "account/login_verification_request",
+            "prompts/suggest",
+
+            "beta/timelines/custom/list",
+            "beta/timelines/timeline",
+            "beta/timelines/custom/show"
         ];
         httpmethods.POST = [
             // Tweets
@@ -963,9 +1058,6 @@ var Codebird = function () {
             "saved_searches/create",
             "saved_searches/destroy/:id",
 
-            // Places & Geo
-            "geo/place",
-
             // Spam Reporting
             "users/report_spam",
 
@@ -973,7 +1065,19 @@ var Codebird = function () {
             "oauth/access_token",
             "oauth/request_token",
             "oauth2/token",
-            "oauth2/invalidate_token"
+            "oauth2/invalidate_token",
+
+            // Internal
+            "direct_messages/read",
+            "account/login_verification_enrollment__post",
+            "push_destinations/enable_login_verification",
+            "account/login_verification_request__post",
+
+            "beta/timelines/custom/create",
+            "beta/timelines/custom/update",
+            "beta/timelines/custom/destroy",
+            "beta/timelines/custom/add",
+            "beta/timelines/custom/remove"
         ];
         for (var httpmethod in httpmethods) {
             if (httpmethods[httpmethod].indexOf(method) > -1) {
@@ -1060,9 +1164,37 @@ var Codebird = function () {
     };
 
     /**
+     * Detects if API call is internal
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in internal API
+     */
+    var _detectInternal = function (method) {
+        var internals = [
+            "users/recommendations"
+        ];
+        return internals.join(" ").indexOf(method) > -1;
+    };
+
+    /**
+     * Detects if API call should use old endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in old API
+     */
+    var _detectOld = function (method) {
+        var olds = [
+            "account/push_destinations/device"
+        ];
+        return olds.join(" ").indexOf(method) > -1;
+    };
+
+    /**
      * Builds the complete API endpoint url
      *
-     * @param string method           The API method to call
+     * @param string method The API method to call
      *
      * @return string The URL to send the request to
      */
@@ -1070,10 +1202,47 @@ var Codebird = function () {
         var url;
         if (method.substring(0, 5) === "oauth") {
             url = _endpoint_oauth + method;
+        } else if (_detectOld(method)) {
+            url = _endpoint_old + method + ".json";
         } else {
             url = _endpoint + method + ".json";
         }
         return url;
+    };
+
+    /**
+     * Gets the XML HTTP Request object, trying to load it in various ways
+     *
+     * @return object The XMLHttpRequest object instance
+     */
+    var _getXmlRequestObject = function () {
+        var xml = null;
+        if (typeof window === "object"
+            && window
+            && typeof window.XMLHttpRequest === "function"
+        ) {
+            xml = new window.XMLHttpRequest();
+        } else if (typeof require === "function"
+            && require
+        ) {
+            try {
+                var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+                xml = new XMLHttpRequest();
+            } catch (e1) {
+                try {
+                    var XMLHttpRequest = require("xhr2");
+                    xml = new XMLHttpRequest();
+                } catch (e2) {
+                    console.error("xhr2 object not defined, trying ActiveXObject.");
+                    try {
+                        xml = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e3) {
+                        console.error("ActiveXObject object not defined, cancelling.");
+                    }
+                }
+            }
+        }
+        return xml;
     };
 
     /**
@@ -1085,12 +1254,13 @@ var Codebird = function () {
      * @param array  optional params          The parameters to send along
      * @param bool   optional multipart       Whether to use multipart/form-data
      * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
+     * @param bool   optional $internal       Whether to use internal call
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, callback) {
+    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, internal, callback) {
         if (typeof params === "undefined") {
             params = {};
         }
@@ -1103,20 +1273,24 @@ var Codebird = function () {
         if (typeof callback !== "function") {
             callback = function () {};
         }
+        if (internal) {
+            params.adc = "phone";
+            params.application_id = 333903271;
+        }
 
         var url = _getEndpoint(method);
         var authorization = null;
 
-        var xml, post_fields;
-        try {
-            xml = new XMLHttpRequest();
-        } catch (e) {
-            xml = new ActiveXObject("Microsoft.XMLHTTP");
+        var xml = _getXmlRequestObject();
+        if (xml === null) {
+            return;
         }
+        var post_fields;
+
         if (httpmethod === "GET") {
             var url_with_params = url;
             if (JSON.stringify(params) !== "{}") {
-                url_with_params += "?" + http_build_query(params);
+                url_with_params += "?" + _http_build_query(params);
             }
             authorization = _sign(httpmethod, url, params);
 
@@ -1130,7 +1304,13 @@ var Codebird = function () {
                 var callback_name = _nonce();
                 window[callback_name] = function (reply) {
                     reply.httpstatus = 200;
-                    callback(reply);
+
+                    var rate = {
+                        limit: xml.getResponseHeader("x-rate-limit-limit"),
+                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                        reset: xml.getResponseHeader("x-rate-limit-reset")
+                    };
+                    callback(reply, rate);
                 };
                 params.callback = callback_name;
                 url_with_params = url + "?" + _sign(httpmethod, url, params, true);
@@ -1158,7 +1338,7 @@ var Codebird = function () {
                 params        = _buildMultipart(method, params);
             } else {
                 authorization = _sign(httpmethod, url, params);
-                params        = http_build_query(params);
+                params        = _http_build_query(params);
             }
             post_fields = params;
             if (_use_proxy || multipart) { // force proxy for multipart base64
@@ -1182,7 +1362,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 return oauth2_token(function () {
-                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, callback);
+                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, false, callback);
                 });
             }
             authorization = "Bearer " + _oauth_bearer_token;
@@ -1198,7 +1378,12 @@ var Codebird = function () {
                 } catch (e) {}
                 var reply = _parseApiReply(method_template, xml.responseText);
                 reply.httpstatus = httpstatus;
-                callback(reply);
+                var rate = {
+                    limit: xml.getResponseHeader("x-rate-limit-limit"),
+                    remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                    reset: xml.getResponseHeader("x-rate-limit-reset")
+                };
+                callback(reply, rate);
             }
         };
         xml.send(httpmethod === "GET" ? null : post_fields);
@@ -1257,3 +1442,33 @@ var Codebird = function () {
         oauth2_token: oauth2_token
     };
 };
+
+if (typeof module === "object"
+    && module
+    && typeof module.exports === "object"
+) {
+    // Expose codebird as module.exports in loaders that implement the Node
+    // module pattern (including browserify). Do not create the global, since
+    // the user will be storing it themselves locally, and globals are frowned
+    // upon in the Node module world.
+    module.exports = Codebird;
+} else {
+    // Otherwise expose codebird to the global object as usual
+    if (typeof window === "object"
+        && window) {
+        window.Codebird = Codebird;
+    }
+
+    // Register as a named AMD module, since codebird can be concatenated with other
+    // files that may use define, but not via a proper concatenation script that
+    // understands anonymous AMD modules. A named AMD is safest and most robust
+    // way to register. Lowercase codebird is used because AMD module names are
+    // derived from file names, and codebird is normally delivered in a lowercase
+    // file name. Do this after creating the global so that if an AMD module wants
+    // to call noConflict to hide this version of codebird, it will work.
+    if (typeof define === "function" && define.amd) {
+        define("codebird", [], function () { return Codebird; });
+    }
+}
+
+})();
