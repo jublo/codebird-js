@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.5.0-alpha.1 (2014-01-01)
+2.5.0-alpha.1.1 (2014-01-02)
 + #24 Add README section about xAuth
 + #46 Don't force to send base64 media uploads via proxy
 + #23 Support internal API methods
@@ -12,6 +12,7 @@ codebird-js - changelog
 - #49 Places & Geo API call issue
 + #53 Support AMD module definition syntax
 + #54 Integrate sha1 hash library
++ Add NPM package.json
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
