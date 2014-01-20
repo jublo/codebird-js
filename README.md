@@ -2,9 +2,7 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
-[![Download latest version from SourceForge](https://f.cloud.github.com/assets/157944/591288/9a6955f4-c9fe-11e2-8bca-15db918638ef.png)](https://sourceforge.net/projects/codebird-js.codebird.p/files/latest/download)
-
-Copyright (C) 2010-2013 J.M. &lt;me@mynetx.net&gt;
+Copyright (C) 2010-2014 Jublo IT Solutions &lt;support@jublo.net&gt;
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ### Versions
 
-- JavaScript: https://github.com/mynetx/codebird-js
-- PHP: https://github.com/mynetx/codebird-php
+- JavaScript: https://github.com/jublonet/codebird-js
+- PHP: https://github.com/jublonet/codebird-php
 
 
 0. Including Codebird
@@ -296,7 +294,7 @@ map to Codebird function calls. The general rules are:
     Examples:
     - ```statuses/show/:id``` maps to ```cb.__call("statuses_show_ID", 'id=12345', ...)```.
     - ```users/profile_image/:screen_name``` maps to
-      ```cb.__call("users_profileImage_SCREEN_NAME", "screen_name=mynetx", ...)```.
+      ```cb.__call("users_profileImage_SCREEN_NAME", "screen_name=jublonet", ...)```.
 
 4. HTTP methods (GET, POST, DELETE etc.)
 ----------------------------------------
@@ -383,7 +381,7 @@ address:
 cb.setProxy("https://example.com/codebird-cors-proxy/");
 ```
 
-Heads up!  Follow the notes in the [codebird-cors-proxy README](https://github.com/mynetx/codebird-cors-proxy/#readme) for details.
+Heads up!  Follow the notes in the [codebird-cors-proxy README](https://github.com/jublonet/codebird-cors-proxy/#readme) for details.
 
 7. Using multiple Codebird instances
 ------------------------------------
