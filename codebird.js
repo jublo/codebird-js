@@ -3,8 +3,8 @@
  *
  * @package codebird
  * @version 2.5.0-alpha.2-dev
- * @author J.M. <me@mynetx.net>
- * @copyright 2010-2013 J.M. <me@mynetx.net>
+ * @author Jublo IT Solutions <support@jublo.net>
+ * @copyright 2010-2014 Jublo IT Solutions <support@jublo.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
