@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.5.0-alpha.1.1 (2014-01-02)
+2.5.0-alpha.2-dev (not yet released)
 + #24 Add README section about xAuth
 + #46 Don't force to send base64 media uploads via proxy
 + #23 Support internal API methods
