@@ -13,6 +13,7 @@ codebird-js - changelog
 + #53 Support AMD module definition syntax
 + #54 Integrate sha1 hash library
 + Add NPM package.json
+- #55 Typo in _clone function
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

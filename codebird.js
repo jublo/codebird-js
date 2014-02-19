@@ -803,7 +803,7 @@ var Codebird = function () {
         var clone = {};
         for (var i in obj) {
             if (typeof(obj[i]) === "object") {
-                clone[i] = clone(obj[i]);
+                clone[i] = _clone(obj[i]);
             } else {
                 clone[i] = obj[i];
             }
