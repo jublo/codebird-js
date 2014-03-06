@@ -1219,7 +1219,7 @@ var Codebird = function () {
         var xml = null;
         if (typeof window === "object"
             && window
-            && typeof window.XMLHttpRequest === "function"
+            && typeof window.XMLHttpRequest !== "undefined"
         ) {
             xml = new window.XMLHttpRequest();
         } else if (typeof require === "function"
