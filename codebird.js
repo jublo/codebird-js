@@ -36,6 +36,7 @@
           module,
           define,
           require */
+(function (undefined) {
 "use strict";
 
 /**
@@ -52,7 +53,6 @@ if (! Array.prototype.indexOf) {
     };
 }
 
-(function (undefined) {
 /**
  * A Twitter library in JavaScript
  *
