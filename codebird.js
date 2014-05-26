@@ -1035,6 +1035,7 @@ var Codebird = function () {
             "statuses/update",
             "statuses/retweet/:id",
             "statuses/update_with_media",
+            "media/upload",
 
             // Direct Messages
             "direct_messages/destroy",
