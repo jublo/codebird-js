@@ -1359,6 +1359,9 @@ var Codebird = function () {
                 url_with_params = url_with_params.replace(
                     _endpoint_base,
                     _endpoint_proxy
+                ).replace(
+                    _endpoint_base_media,
+                    _endpoint_proxy
                 );
             }
             xml.open(httpmethod, url_with_params, true);
@@ -1378,6 +1381,9 @@ var Codebird = function () {
             if (_use_proxy || multipart) { // force proxy for multipart base64
                 url = url.replace(
                     _endpoint_base,
+                    _endpoint_proxy
+                ).replace(
+                    _endpoint_base_media,
                     _endpoint_proxy
                 );
             }
