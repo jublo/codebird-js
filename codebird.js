@@ -84,9 +84,19 @@ var Codebird = function () {
     var _endpoint_base = "https://api.twitter.com/";
 
     /**
+     * The media API endpoint base to use
+     */
+    var _endpoint_base_media = "https://upload.twitter.com/";
+
+    /**
      * The API endpoint to use
      */
     var _endpoint = _endpoint_base + "1.1/";
+
+    /**
+     * The media API endpoint to use
+     */
+    var _endpoint_media = _endpoint_base_media + "1.1/";
 
     /**
      * The API endpoint base to use
@@ -1186,6 +1196,20 @@ var Codebird = function () {
     };
 
     /**
+     * Detects if API call should use media endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in media API
+     */
+    var _detectMedia = function (method) {
+        var medias = [
+            "media/upload"
+        ];
+        return medias.join(" ").indexOf(method) > -1;
+    };
+
+    /**
      * Detects if API call should use old endpoint
      *
      * @param string method The API method to call
@@ -1210,6 +1234,8 @@ var Codebird = function () {
         var url;
         if (method.substring(0, 5) === "oauth") {
             url = _endpoint_oauth + method;
+        } else if (_detectMedia(method)) {
+            url = _endpoint_media + method + ".json";
         } else if (_detectOld(method)) {
             url = _endpoint_old + method + ".json";
         } else {
