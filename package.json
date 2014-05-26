@@ -19,7 +19,7 @@
     "networking",
     "CORS"
   ],
-  "author": "Jublo IT Solutions <support@jublo.net> (http://jublo.net/)",
+  "author": "Jublo Solutions <support@jublo.net> (http://jublo.net/)",
   "license": "GPL-3.0+",
   "bugs": {
     "url": "https://github.com/jublonet/codebird-js/issues"
