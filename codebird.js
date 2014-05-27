@@ -1057,6 +1057,8 @@ var Codebird = function () {
             "blocks/destroy",
             "account/update_profile_banner",
             "account/remove_profile_banner",
+            "mutes/users/create",
+            "mutes/users/destroy",
 
             // Favorites
             "favorites/destroy",
