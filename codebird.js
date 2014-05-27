@@ -913,6 +913,7 @@ var Codebird = function () {
             "statuses/retweets/:id",
             "statuses/show/:id",
             "statuses/oembed",
+            "statuses/retweeters/ids",
 
             // Search
             "search/tweets",
@@ -932,6 +933,7 @@ var Codebird = function () {
             "friendships/show",
             "friends/list",
             "followers/list",
+            "friendships/lookup",
 
             // Users
             "account/settings",
@@ -944,6 +946,8 @@ var Codebird = function () {
             "users/contributees",
             "users/contributors",
             "users/profile_banner",
+            "mutes/users/ids",
+            "mutes/users/list",
 
             // Suggested Users
             "users/suggestions/:slug",
@@ -963,6 +967,7 @@ var Codebird = function () {
             "lists/members",
             "lists/show",
             "lists/subscriptions",
+            "lists/ownerships",
 
             // Saved searches
             "saved_searches/list",
@@ -989,6 +994,9 @@ var Codebird = function () {
             "help/privacy",
             "help/tos",
             "application/rate_limit_status",
+
+            // Tweets
+            "statuses/lookup",
 
             // Internal
             "users/recommendations",

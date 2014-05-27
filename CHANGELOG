@@ -15,6 +15,7 @@ codebird-js - changelog
 + Add NPM package.json
 - #55 Typo in _clone function
 - #57 Fix XHR in Safari
++ Add new API methods
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls
