@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.5.0-alpha.1.1 (2014-01-02)
+2.5.0 (not yet released)
 + #24 Add README section about xAuth
 + #46 Don't force to send base64 media uploads via proxy
 + #23 Support internal API methods
@@ -13,6 +13,10 @@ codebird-js - changelog
 + #53 Support AMD module definition syntax
 + #54 Integrate sha1 hash library
 + Add NPM package.json
+- #55 Typo in _clone function
+- #57 Fix XHR in Safari
++ Add new API methods
++ #60 Multiple media per tweet
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

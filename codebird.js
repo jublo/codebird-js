@@ -2,9 +2,9 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.5.0-alpha.1.1
- * @author Jublo IT Solutions <support@jublo.net>
- * @copyright 2010-2014 Jublo IT Solutions <support@jublo.net>
+ * @version 2.5.0-rc.1
+ * @author Jublo Solutions <support@jublo.net>
+ * @copyright 2010-2014 Jublo Solutions <support@jublo.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
           module,
           define,
           require */
+(function (undefined) {
 "use strict";
 
 /**
@@ -52,7 +53,6 @@ if (! Array.prototype.indexOf) {
     };
 }
 
-(function (undefined) {
 /**
  * A Twitter library in JavaScript
  *
@@ -84,9 +84,19 @@ var Codebird = function () {
     var _endpoint_base = "https://api.twitter.com/";
 
     /**
+     * The media API endpoint base to use
+     */
+    var _endpoint_base_media = "https://upload.twitter.com/";
+
+    /**
      * The API endpoint to use
      */
     var _endpoint = _endpoint_base + "1.1/";
+
+    /**
+     * The media API endpoint to use
+     */
+    var _endpoint_media = _endpoint_base_media + "1.1/";
 
     /**
      * The API endpoint base to use
@@ -135,7 +145,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-alpha.1.1";
+    var _version = "2.5.0-rc.1";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -803,7 +813,7 @@ var Codebird = function () {
         var clone = {};
         for (var i in obj) {
             if (typeof(obj[i]) === "object") {
-                clone[i] = clone(obj[i]);
+                clone[i] = _clone(obj[i]);
             } else {
                 clone[i] = obj[i];
             }
@@ -913,6 +923,7 @@ var Codebird = function () {
             "statuses/retweets/:id",
             "statuses/show/:id",
             "statuses/oembed",
+            "statuses/retweeters/ids",
 
             // Search
             "search/tweets",
@@ -932,6 +943,7 @@ var Codebird = function () {
             "friendships/show",
             "friends/list",
             "followers/list",
+            "friendships/lookup",
 
             // Users
             "account/settings",
@@ -944,6 +956,8 @@ var Codebird = function () {
             "users/contributees",
             "users/contributors",
             "users/profile_banner",
+            "mutes/users/ids",
+            "mutes/users/list",
 
             // Suggested Users
             "users/suggestions/:slug",
@@ -963,6 +977,7 @@ var Codebird = function () {
             "lists/members",
             "lists/show",
             "lists/subscriptions",
+            "lists/ownerships",
 
             // Saved searches
             "saved_searches/list",
@@ -989,6 +1004,9 @@ var Codebird = function () {
             "help/privacy",
             "help/tos",
             "application/rate_limit_status",
+
+            // Tweets
+            "statuses/lookup",
 
             // Internal
             "users/recommendations",
@@ -1017,6 +1035,7 @@ var Codebird = function () {
             "statuses/update",
             "statuses/retweet/:id",
             "statuses/update_with_media",
+            "media/upload",
 
             // Direct Messages
             "direct_messages/destroy",
@@ -1178,6 +1197,20 @@ var Codebird = function () {
     };
 
     /**
+     * Detects if API call should use media endpoint
+     *
+     * @param string method The API method to call
+     *
+     * @return bool Whether the method is defined in media API
+     */
+    var _detectMedia = function (method) {
+        var medias = [
+            "media/upload"
+        ];
+        return medias.join(" ").indexOf(method) > -1;
+    };
+
+    /**
      * Detects if API call should use old endpoint
      *
      * @param string method The API method to call
@@ -1202,6 +1235,8 @@ var Codebird = function () {
         var url;
         if (method.substring(0, 5) === "oauth") {
             url = _endpoint_oauth + method;
+        } else if (_detectMedia(method)) {
+            url = _endpoint_media + method + ".json";
         } else if (_detectOld(method)) {
             url = _endpoint_old + method + ".json";
         } else {
@@ -1219,7 +1254,7 @@ var Codebird = function () {
         var xml = null;
         if (typeof window === "object"
             && window
-            && typeof window.XMLHttpRequest === "function"
+            && typeof window.XMLHttpRequest !== "undefined"
         ) {
             xml = new window.XMLHttpRequest();
         } else if (typeof require === "function"
@@ -1325,6 +1360,9 @@ var Codebird = function () {
                 url_with_params = url_with_params.replace(
                     _endpoint_base,
                     _endpoint_proxy
+                ).replace(
+                    _endpoint_base_media,
+                    _endpoint_proxy
                 );
             }
             xml.open(httpmethod, url_with_params, true);
@@ -1344,6 +1382,9 @@ var Codebird = function () {
             if (_use_proxy || multipart) { // force proxy for multipart base64
                 url = url.replace(
                     _endpoint_base,
+                    _endpoint_proxy
+                ).replace(
+                    _endpoint_base_media,
                     _endpoint_proxy
                 );
             }

@@ -2,7 +2,7 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
-Copyright (C) 2010-2014 Jublo IT Solutions &lt;support@jublo.net&gt;
+Copyright (C) 2010-2014 Jublo Solutions &lt;support@jublo.net&gt;
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ giving all parameters in an array is supported, too:
 
 ```javascript
 var params = {
-    screen_name: "myx"
+    screen_name: "jublonet"
 };
 cb.__call(
     "users_show",
@@ -239,8 +239,9 @@ cb.__call(
 );
 ```
 
-When **uploading files to Twitter**, the array syntax is obligatory,
-and the media have to be base64-encoded:
+#### Uploading files to Twitter
+
+The array syntax is obligatory, and the media have to be base64-encoded:
 
 ```javascript
 var params = {
@@ -255,6 +256,41 @@ cb.__call(
     }
 );
 ```
+
+#### Multiple images
+can be uploaded in a 2-step process. **First** you send each image to Twitter, like this:
+```javascript
+var params = {
+    "media_data": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
+);
+cb.__call(
+    "media_upload",
+    params,
+    function (reply) {
+        // you get a media id back:
+        console.log(reply.media_id_string);
+
+        // continue upload of 2nd image here
+    }
+);
+```
+**Second,** you attach the collected media ids for all images to your call
+to ```statuses/update```, like this:
+
+```javascript
+cb.__call(
+    "statuses_update",
+    {
+        "media_ids": "12345678901234567890,9876543210987654321"
+        "status": "Whohoo, I just tweeted two images!"
+    },
+    function (reply) {
+        // ...
+    }
+);
+```
+
+More [documentation for tweeting with multiple media](https://dev.twitter.com/docs/api/multiple-media-extended-entities) is available on the Twitter Developer site.
 
 ### Requests with app-only auth
 

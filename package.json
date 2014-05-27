@@ -1,6 +1,6 @@
 {
   "name": "codebird",
-  "version": "2.5.0-alpha.1.1",
+  "version": "2.5.0-rc.1",
   "description": "A Twitter library in JavaScript.",
   "main": "codebird.js",
   "directories": {
@@ -19,7 +19,7 @@
     "networking",
     "CORS"
   ],
-  "author": "Jublo IT Solutions <support@jublo.net> (http://jublo.net/)",
+  "author": "Jublo Solutions <support@jublo.net> (http://jublo.net/)",
   "license": "GPL-3.0+",
   "bugs": {
     "url": "https://github.com/jublonet/codebird-js/issues"
