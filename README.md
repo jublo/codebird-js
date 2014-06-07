@@ -457,7 +457,7 @@ Take a look at the returned data as follows:
     oauth_token: "14648265-rPn8EJwfB**********************",
     oauth_token_secret: "agvf3L3**************************",
     user_id: 14648265,
-    screen_name: "myx",
+    screen_name: "jublonet",
     httpstatus: 200
 }
 ```
@@ -555,7 +555,7 @@ If everything went fine, you will get an object like this:
     "oauth_token": "14648265-ABLfBFlE*********************************",
     "oauth_token_secret": "9yTBY3pEfj*********************************",
     "user_id": "14648265",
-    "screen_name": "myx",
+    "screen_name": "jublonet",
     "x_auth_expires": "0",
     "httpstatus": 200
 }
