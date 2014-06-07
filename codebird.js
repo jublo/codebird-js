@@ -1254,28 +1254,41 @@ var Codebird = function () {
      */
     var _getXmlRequestObject = function () {
         var xml = null;
+        // first, try the W3-standard object
         if (typeof window === "object"
             && window
             && typeof window.XMLHttpRequest !== "undefined"
         ) {
             xml = new window.XMLHttpRequest();
+        // then, try Titanium framework object
+        } else if (typeof Ti === "object"
+            && Ti
+            && typeof Ti.Network.createHTTPClient !== "undefined"
+        ) {
+            xml = Ti.Network.createHTTPClient();
+        // are we in an old Internet Explorer?
+        } else if (typeof ActiveXObject !== "undefined"
+        ) {
+            try {
+                xml = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                console.error("ActiveXObject object not defined.");
+            }
+        // now, consider RequireJS and/or Node.js objects
         } else if (typeof require === "function"
             && require
         ) {
+            // look for xmlhttprequest module
             try {
                 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
                 xml = new XMLHttpRequest();
             } catch (e1) {
+                // or maybe the user is using xhr2
                 try {
                     var XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
                 } catch (e2) {
-                    console.error("xhr2 object not defined, trying ActiveXObject.");
-                    try {
-                        xml = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch (e3) {
-                        console.error("ActiveXObject object not defined, cancelling.");
-                    }
+                    console.error("xhr2 object not defined, cancelling.");
                 }
             }
         }
@@ -1419,13 +1432,20 @@ var Codebird = function () {
                 try {
                     httpstatus = xml.status;
                 } catch (e) {}
-                var reply = _parseApiReply(method_template, xml.responseText);
+                var response = "";
+                try {
+                    response = xml.responseText;
+                } catch (e) {}
+                var reply = _parseApiReply(method_template, response);
                 reply.httpstatus = httpstatus;
-                var rate = {
-                    limit: xml.getResponseHeader("x-rate-limit-limit"),
-                    remaining: xml.getResponseHeader("x-rate-limit-remaining"),
-                    reset: xml.getResponseHeader("x-rate-limit-reset")
-                };
+                var rate = {};
+                if (typeof xml.getResponseHeader !== "undefined") {
+                    rate = {
+                        limit: xml.getResponseHeader("x-rate-limit-limit"),
+                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                        reset: xml.getResponseHeader("x-rate-limit-reset")
+                    };
+                }
                 callback(reply, rate);
             }
         };
@@ -1442,6 +1462,9 @@ var Codebird = function () {
      * @return array|object The parsed reply
      */
     var _parseApiReply = function (method, reply) {
+        if (typeof reply !== "string" || reply === "") {
+            return {};
+        }
         if (reply === "[]") {
             return [];
         }
