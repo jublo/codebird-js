@@ -1138,7 +1138,7 @@ var Codebird = function () {
      * @param string method  The API method to call
      * @param array  params  The parameters to send along
      *
-     * @return string The built multipart request body
+     * @return null|string The built multipart request body
      */
     var _buildMultipart = function (method, params) {
         // well, files will only work in multipart methods
