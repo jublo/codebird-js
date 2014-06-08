@@ -419,7 +419,6 @@ var Codebird = function () {
         return _callApi(
             httpmethod,
             method,
-            method_template,
             apiparams,
             multipart,
             app_only_auth,
@@ -1303,19 +1302,18 @@ var Codebird = function () {
     /**
      * Calls the API using cURL
      *
-     * @param string          httpmethod      The HTTP method to use for making the request
-     * @param string          method          The API method to call
-     * @param string          method_template The templated API method to call
-     * @param array  optional params          The parameters to send along
-     * @param bool   optional multipart       Whether to use multipart/form-data
-     * @param bool   optional app_only_auth   Whether to use app-only bearer authentication
-     * @param bool   optional internal        Whether to use internal call
-     * @param function        callback        The function to call with the API call result
+     * @param string          httpmethod    The HTTP method to use for making the request
+     * @param string          method        The API method to call
+     * @param array  optional params        The parameters to send along
+     * @param bool   optional multipart     Whether to use multipart/form-data
+     * @param bool   optional app_only_auth Whether to use app-only bearer authentication
+     * @param bool   optional internal      Whether to use internal call
+     * @param function        callback      The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, internal, callback) {
+    var _callApi = function (httpmethod, method, params, multipart, app_only_auth, internal, callback) {
         if (typeof params === "undefined") {
             params = {};
         }
@@ -1428,7 +1426,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 return oauth2_token(function () {
-                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, false, callback);
+                    _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
                 });
             }
             authorization = "Bearer " + _oauth_bearer_token;
