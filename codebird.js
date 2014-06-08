@@ -522,7 +522,11 @@ var Codebird = function () {
                 try {
                     httpstatus = xml.status;
                 } catch (e) {}
-                var reply = _parseApiReply("oauth2/token", xml.responseText);
+                var response = "";
+                try {
+                    response = xml.responseText;
+                } catch (e) {}
+                var reply = _parseApiReply(response);
                 reply.httpstatus = httpstatus;
                 if (httpstatus === 200) {
                     setBearerToken(reply.access_token);
@@ -1442,7 +1446,7 @@ var Codebird = function () {
                 try {
                     response = xml.responseText;
                 } catch (e) {}
-                var reply = _parseApiReply(method_template, response);
+                var reply = _parseApiReply(response);
                 reply.httpstatus = httpstatus;
                 var rate = null;
                 if (typeof xml.getResponseHeader !== "undefined"
@@ -1464,19 +1468,18 @@ var Codebird = function () {
     /**
      * Parses the API reply to encode it in the set return_format
      *
-     * @param string method The method that has been called
      * @param string reply  The actual reply, JSON-encoded or URL-encoded
      *
      * @return array|object The parsed reply
      */
-    var _parseApiReply = function (method, reply) {
+    var _parseApiReply = function (reply) {
         if (typeof reply !== "string" || reply === "") {
             return {};
         }
         if (reply === "[]") {
             return [];
         }
-        var parsed = false;
+        var parsed;
         try {
             parsed = JSON.parse(reply);
         } catch (e) {
