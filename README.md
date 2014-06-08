@@ -239,7 +239,7 @@ cb.__call(
 );
 ```
 
-#### Uploading files to Twitter
+### Uploading files to Twitter
 
 The array syntax is obligatory, and the media have to be base64-encoded:
 
