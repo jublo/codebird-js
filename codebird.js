@@ -32,6 +32,7 @@
           document,
           navigator,
           console,
+          Ti,
           ActiveXObject,
           module,
           define,
