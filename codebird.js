@@ -1356,11 +1356,16 @@ var Codebird = function () {
                 window[callback_name] = function (reply) {
                     reply.httpstatus = 200;
 
-                    var rate = {
-                        limit: xml.getResponseHeader("x-rate-limit-limit"),
-                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
-                        reset: xml.getResponseHeader("x-rate-limit-reset")
-                    };
+                    var rate = null;
+                    if (typeof xml.getResponseHeader !== "undefined"
+                        && xml.getResponseHeader("x-rate-limit-limit") !== ""
+                    ) {
+                        rate = {
+                            limit: xml.getResponseHeader("x-rate-limit-limit"),
+                            remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                            reset: xml.getResponseHeader("x-rate-limit-reset")
+                        };
+                    }
                     callback(reply, rate);
                 };
                 params.callback = callback_name;
@@ -1439,8 +1444,10 @@ var Codebird = function () {
                 } catch (e) {}
                 var reply = _parseApiReply(method_template, response);
                 reply.httpstatus = httpstatus;
-                var rate = {};
-                if (typeof xml.getResponseHeader !== "undefined") {
+                var rate = null;
+                if (typeof xml.getResponseHeader !== "undefined"
+                    && xml.getResponseHeader("x-rate-limit-limit") !== ""
+                ) {
                     rate = {
                         limit: xml.getResponseHeader("x-rate-limit-limit"),
                         remaining: xml.getResponseHeader("x-rate-limit-remaining"),
