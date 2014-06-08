@@ -17,14 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-### Versions
 
-- JavaScript: https://github.com/jublonet/codebird-js
-- PHP: https://github.com/jublonet/codebird-php
-
-
-0. Including Codebird
----------------------
+Including Codebird
+------------------
 
 To include Codebird in your code, add its scripts to your markup:
 
@@ -51,8 +46,8 @@ cb.setConsumerKey("YOURKEY", "YOURSECRET");
 ```
 
 
-1. Authentication
------------------
+Authentication
+--------------
 
 To authenticate your API requests on behalf of a certain Twitter user
 (following OAuth 1.0a), take a look at these steps:
@@ -111,7 +106,7 @@ cb.__call(
 );
 ```
 
-### 1.1. Application-only auth
+### Application-only auth
 
 Some API methods also support authenticating on a per-application level.
 This is useful for getting data that are not directly related to a specific
@@ -140,7 +135,7 @@ cb.setBearerToken("YOURBEARERTOKEN");
 
 For sending an API request with app-only auth, see the ‘Usage examples’ section.
 
-### 1.2. Authenticating using a callback URL, without PIN
+### Authenticating using a callback URL, without PIN
 
 
 1. Before sending your user off to Twitter, you have to store the request token and its secret, for example in a cookie.
@@ -188,8 +183,8 @@ if (typeof parameters.oauth_verifier !== "undefined") {
 ```
 
 
-2. Usage examples
------------------
+Usage examples
+--------------
 
 ### Heads up
 
@@ -310,8 +305,8 @@ cb.__call(
 
 Bear in mind that not all API methods support application-only auth.
 
-3. Mapping API methods to Codebird function calls
--------------------------------------------------
+Mapping API methods to Codebird function calls
+----------------------------------------------
 
 As you can see from the last example, there is a general way how Twitter’s API methods
 map to Codebird function calls. The general rules are:
@@ -332,19 +327,19 @@ map to Codebird function calls. The general rules are:
     - ```users/profile_image/:screen_name``` maps to
       ```cb.__call("users_profileImage_SCREEN_NAME", "screen_name=jublonet", ...)```.
 
-4. HTTP methods (GET, POST, DELETE etc.)
-----------------------------------------
+HTTP methods (GET, POST, DELETE etc.)
+-------------------------------------
 
 Never care about which HTTP method (verb) to use when calling a Twitter API.
 Codebird is intelligent enough to find out on its own.
 
-5. Response codes
------------------
+Response codes
+--------------
 
 The HTTP response code that the API gave is included in any return values.
 You can find it within the return object’s ```httpstatus``` property.
 
-### 5.1 Dealing with rate-limits
+### Dealing with rate-limits
 
 Basically, Codebird leaves it up to you to handle Twitter’s rate limit.
 The library returns the response HTTP status code, so you can detect rate limits.
@@ -369,15 +364,15 @@ cb.__call(
 );
 ```
 
-6. API calls and the same-origin policy
----------------------------------------
+API calls and the same-origin policy
+------------------------------------
 
 Normally, browsers only allow requests being sent to addresses that are on
 the same base domain.  This is a security feature called the “same-origin
 policy.”  However, this policy is in your way when you try to access the
 (remote) Twitter API domain and its methods.
 
-### 6.1 Cross-domain requests
+### Cross-domain requests
 
 With Codebird, don’t worry about this.  We automatically send cross-domain
 requests using a secured proxy that sends back the required headers to the
@@ -397,7 +392,7 @@ You may also turn off the CORS compatibility manually like this:
 cb.setUseProxy(false);
 ```
 
-### 6.2 Support for Internet Explorer 7 to 9
+### Support for Internet Explorer 7 to 9
 
 Cross-domain requests work well in any browser except for
 Internet Explorer 7-9.  Codebird cannot send POST requests in these browsers.
@@ -407,7 +402,7 @@ For IE7-9, Codebird works in limited operation mode:
 - calling POST methods is impossible,
 - Application-only auth does not work.
 
-### 6.3 Using your own proxy server
+### Using your own proxy server
 
 The source code of the CORS proxy is publicly available.  If you want to,
 set up your own instance on your server.  Afterwards, tell Codebird the
@@ -419,8 +414,8 @@ cb.setProxy("https://example.com/codebird-cors-proxy/");
 
 Heads up!  Follow the notes in the [codebird-cors-proxy README](https://github.com/jublonet/codebird-cors-proxy/#readme) for details.
 
-7. Using multiple Codebird instances
-------------------------------------
+Using multiple Codebird instances
+---------------------------------
 
 By default, each Codebird instance works on its own.
 
@@ -437,10 +432,9 @@ multiple Codebird instances, while the OAuth request and access tokens with thei
 secrets are *not* shared.
 
 How Do I…?
-==========
+----------
 
-…get user ID, screen name and more details about the current user?
-------------------------------------------------------------------
+### …get user ID, screen name and more details about the current user?
 
 When the user returns from the authentication screen, you need to trade
 the obtained request token for an access token, using the OAuth verifier.
@@ -480,8 +474,7 @@ cb.__call(
 I suggest to cache the User Entity after obtaining it, as the
 ```account/verify_credentials``` method is rate-limited by 15 calls per 15 minutes.
 
-…walk through cursored results?
--------------------------------
+### …walk through cursored results?
 
 The Twitter REST API utilizes a technique called ‘cursoring’ to paginate
 large result sets. Cursoring separates results into pages of no more than
@@ -526,8 +519,7 @@ It might make sense to use the cursors in a loop.  Watch out, though,
 not to send more than the allowed number of requests to ```followers/list```
 per rate-limit timeframe, or else you will hit your rate-limit.
 
-…use xAuth with Codebird?
--------------------------
+### …use xAuth with Codebird?
 
 Codebird supports xAuth just like every other authentication used at Twitter.
 Remember that your application needs to be whitelisted to be able to use xAuth.
@@ -571,8 +563,7 @@ When this error occurs, advise the user to
 [generate a temporary password](https://twitter.com/settings/applications)
 on twitter.com and use that to complete signing in to the application.
 
-…access and use undocumented Twitter API methods?
--------------------------------------------------
+### …access and use undocumented Twitter API methods?
 
 Besides the well-documented official methods, the Twitter API also contains
 undocumented additional methods.  They are used by official Twitter clients,
