@@ -351,7 +351,8 @@ See the [Rate Limiting FAQ](https://dev.twitter.com/docs/rate-limiting-faq)
 for more information.
 
 If you allow your callback function to accept a second parameter,
-you will receive rate-limiting details in this parameter.
+you will receive rate-limiting details in this parameter,
+if the Twitter API responds with rate-limiting HTTP headers.
 
 ```javascript
 cb.__call(
