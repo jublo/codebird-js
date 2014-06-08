@@ -843,10 +843,10 @@ var Codebird = function () {
             console.warn("To generate a signature, the consumer key must be set.");
         }
         var sign_params = {
-            consumer_key: _oauth_consumer_key,
-            version: "1.0",
-            timestamp: Math.round(new Date().getTime() / 1000),
-            nonce: _nonce(),
+            consumer_key:     _oauth_consumer_key,
+            version:          "1.0",
+            timestamp:        Math.round(new Date().getTime() / 1000),
+            nonce:            _nonce(),
             signature_method: "HMAC-SHA1"
         };
         var sign_base_params = {};
@@ -871,7 +871,7 @@ var Codebird = function () {
             sign_base_string += key + "=" + _url(value) + "&";
         }
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
-        var signature = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
+        var signature    = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
 
         params = append_to_get ? sign_base_params : oauth_params;
         params.oauth_signature = signature;
@@ -904,7 +904,7 @@ var Codebird = function () {
      */
     var _detectMethod = function (method, params) {
         // multi-HTTP method endpoints
-        switch(method) {
+        switch (method) {
         case "account/settings":
         case "account/login_verification_enrollment":
         case "account/login_verification_request":
@@ -1304,8 +1304,8 @@ var Codebird = function () {
      * @param string          method_template The templated API method to call
      * @param array  optional params          The parameters to send along
      * @param bool   optional multipart       Whether to use multipart/form-data
-     * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
-     * @param bool   optional $internal       Whether to use internal call
+     * @param bool   optional app_only_auth   Whether to use app-only bearer authentication
+     * @param bool   optional internal        Whether to use internal call
      * @param function        callback        The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
@@ -1325,7 +1325,7 @@ var Codebird = function () {
             callback = function () {};
         }
         if (internal) {
-            params.adc = "phone";
+            params.adc            = "phone";
             params.application_id = 333903271;
         }
 
