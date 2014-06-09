@@ -17,6 +17,8 @@ codebird-js - changelog
 - #57 Fix XHR in Safari
 + Add new API methods
 + #60 Multiple media per tweet
++ #66 Support Titanium
+- #71 Return rate-limiting info only if contained in response
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

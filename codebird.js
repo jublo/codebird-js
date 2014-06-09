@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.5.0-rc.1
+ * @version 2.5.0-rc.2
  * @author Jublo Solutions <support@jublo.net>
  * @copyright 2010-2014 Jublo Solutions <support@jublo.net>
  *
@@ -32,6 +32,7 @@
           document,
           navigator,
           console,
+          Ti,
           ActiveXObject,
           module,
           define,
@@ -145,7 +146,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-rc.1";
+    var _version = "2.5.0-rc.2";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -418,7 +419,6 @@ var Codebird = function () {
         return _callApi(
             httpmethod,
             method,
-            method_template,
             apiparams,
             multipart,
             app_only_auth,
@@ -521,7 +521,11 @@ var Codebird = function () {
                 try {
                     httpstatus = xml.status;
                 } catch (e) {}
-                var reply = _parseApiReply("oauth2/token", xml.responseText);
+                var response = "";
+                try {
+                    response = xml.responseText;
+                } catch (e) {}
+                var reply = _parseApiReply(response);
                 reply.httpstatus = httpstatus;
                 if (httpstatus === 200) {
                     setBearerToken(reply.access_token);
@@ -842,10 +846,10 @@ var Codebird = function () {
             console.warn("To generate a signature, the consumer key must be set.");
         }
         var sign_params = {
-            consumer_key: _oauth_consumer_key,
-            version: "1.0",
-            timestamp: Math.round(new Date().getTime() / 1000),
-            nonce: _nonce(),
+            consumer_key:     _oauth_consumer_key,
+            version:          "1.0",
+            timestamp:        Math.round(new Date().getTime() / 1000),
+            nonce:            _nonce(),
             signature_method: "HMAC-SHA1"
         };
         var sign_base_params = {};
@@ -870,7 +874,7 @@ var Codebird = function () {
             sign_base_string += key + "=" + _url(value) + "&";
         }
         sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
-        var signature = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
+        var signature    = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
 
         params = append_to_get ? sign_base_params : oauth_params;
         params.oauth_signature = signature;
@@ -903,7 +907,7 @@ var Codebird = function () {
      */
     var _detectMethod = function (method, params) {
         // multi-HTTP method endpoints
-        switch(method) {
+        switch (method) {
         case "account/settings":
         case "account/login_verification_enrollment":
         case "account/login_verification_request":
@@ -1057,6 +1061,8 @@ var Codebird = function () {
             "blocks/destroy",
             "account/update_profile_banner",
             "account/remove_profile_banner",
+            "mutes/users/create",
+            "mutes/users/destroy",
 
             // Favorites
             "favorites/destroy",
@@ -1132,7 +1138,7 @@ var Codebird = function () {
      * @param string method  The API method to call
      * @param array  params  The parameters to send along
      *
-     * @return string The built multipart request body
+     * @return null|string The built multipart request body
      */
     var _buildMultipart = function (method, params) {
         // well, files will only work in multipart methods
@@ -1252,28 +1258,41 @@ var Codebird = function () {
      */
     var _getXmlRequestObject = function () {
         var xml = null;
+        // first, try the W3-standard object
         if (typeof window === "object"
             && window
             && typeof window.XMLHttpRequest !== "undefined"
         ) {
             xml = new window.XMLHttpRequest();
+        // then, try Titanium framework object
+        } else if (typeof Ti === "object"
+            && Ti
+            && typeof Ti.Network.createHTTPClient !== "undefined"
+        ) {
+            xml = Ti.Network.createHTTPClient();
+        // are we in an old Internet Explorer?
+        } else if (typeof ActiveXObject !== "undefined"
+        ) {
+            try {
+                xml = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch (e) {
+                console.error("ActiveXObject object not defined.");
+            }
+        // now, consider RequireJS and/or Node.js objects
         } else if (typeof require === "function"
             && require
         ) {
+            // look for xmlhttprequest module
             try {
                 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
                 xml = new XMLHttpRequest();
             } catch (e1) {
+                // or maybe the user is using xhr2
                 try {
                     var XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
                 } catch (e2) {
-                    console.error("xhr2 object not defined, trying ActiveXObject.");
-                    try {
-                        xml = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch (e3) {
-                        console.error("ActiveXObject object not defined, cancelling.");
-                    }
+                    console.error("xhr2 object not defined, cancelling.");
                 }
             }
         }
@@ -1283,19 +1302,18 @@ var Codebird = function () {
     /**
      * Calls the API using cURL
      *
-     * @param string          httpmethod      The HTTP method to use for making the request
-     * @param string          method          The API method to call
-     * @param string          method_template The templated API method to call
-     * @param array  optional params          The parameters to send along
-     * @param bool   optional multipart       Whether to use multipart/form-data
-     * @param bool   optional $app_only_auth  Whether to use app-only bearer authentication
-     * @param bool   optional $internal       Whether to use internal call
-     * @param function        callback        The function to call with the API call result
+     * @param string          httpmethod    The HTTP method to use for making the request
+     * @param string          method        The API method to call
+     * @param array  optional params        The parameters to send along
+     * @param bool   optional multipart     Whether to use multipart/form-data
+     * @param bool   optional app_only_auth Whether to use app-only bearer authentication
+     * @param bool   optional internal      Whether to use internal call
+     * @param function        callback      The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, method_template, params, multipart, app_only_auth, internal, callback) {
+    var _callApi = function (httpmethod, method, params, multipart, app_only_auth, internal, callback) {
         if (typeof params === "undefined") {
             params = {};
         }
@@ -1309,7 +1327,7 @@ var Codebird = function () {
             callback = function () {};
         }
         if (internal) {
-            params.adc = "phone";
+            params.adc            = "phone";
             params.application_id = 333903271;
         }
 
@@ -1340,11 +1358,16 @@ var Codebird = function () {
                 window[callback_name] = function (reply) {
                     reply.httpstatus = 200;
 
-                    var rate = {
-                        limit: xml.getResponseHeader("x-rate-limit-limit"),
-                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
-                        reset: xml.getResponseHeader("x-rate-limit-reset")
-                    };
+                    var rate = null;
+                    if (typeof xml.getResponseHeader !== "undefined"
+                        && xml.getResponseHeader("x-rate-limit-limit") !== ""
+                    ) {
+                        rate = {
+                            limit: xml.getResponseHeader("x-rate-limit-limit"),
+                            remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                            reset: xml.getResponseHeader("x-rate-limit-reset")
+                        };
+                    }
                     callback(reply, rate);
                 };
                 params.callback = callback_name;
@@ -1403,7 +1426,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 return oauth2_token(function () {
-                    _callApi(httpmethod, method, method_template, params, multipart, app_only_auth, false, callback);
+                    _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
                 });
             }
             authorization = "Bearer " + _oauth_bearer_token;
@@ -1417,13 +1440,22 @@ var Codebird = function () {
                 try {
                     httpstatus = xml.status;
                 } catch (e) {}
-                var reply = _parseApiReply(method_template, xml.responseText);
+                var response = "";
+                try {
+                    response = xml.responseText;
+                } catch (e) {}
+                var reply = _parseApiReply(response);
                 reply.httpstatus = httpstatus;
-                var rate = {
-                    limit: xml.getResponseHeader("x-rate-limit-limit"),
-                    remaining: xml.getResponseHeader("x-rate-limit-remaining"),
-                    reset: xml.getResponseHeader("x-rate-limit-reset")
-                };
+                var rate = null;
+                if (typeof xml.getResponseHeader !== "undefined"
+                    && xml.getResponseHeader("x-rate-limit-limit") !== ""
+                ) {
+                    rate = {
+                        limit: xml.getResponseHeader("x-rate-limit-limit"),
+                        remaining: xml.getResponseHeader("x-rate-limit-remaining"),
+                        reset: xml.getResponseHeader("x-rate-limit-reset")
+                    };
+                }
                 callback(reply, rate);
             }
         };
@@ -1434,16 +1466,18 @@ var Codebird = function () {
     /**
      * Parses the API reply to encode it in the set return_format
      *
-     * @param string method The method that has been called
      * @param string reply  The actual reply, JSON-encoded or URL-encoded
      *
      * @return array|object The parsed reply
      */
-    var _parseApiReply = function (method, reply) {
+    var _parseApiReply = function (reply) {
+        if (typeof reply !== "string" || reply === "") {
+            return {};
+        }
         if (reply === "[]") {
             return [];
         }
-        var parsed = false;
+        var parsed;
         try {
             parsed = JSON.parse(reply);
         } catch (e) {
