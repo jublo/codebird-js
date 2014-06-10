@@ -186,9 +186,7 @@ if (typeof parameters.oauth_verifier !== "undefined") {
 Usage examples
 --------------
 
-### Heads up
-
-*Because the Consumer Key and Token Secret are available in the code
+:warning: *Because the Consumer Key and Token Secret are available in the code,
 it is important that you configure your app as read-only at Twitter,
 unless you are sure to know what you are doing.*
 
@@ -218,8 +216,35 @@ cb.__call(
 );
 ```
 
-For more complex parameters (see the [Twitter API documentation](https://dev.twitter.com/)),
-giving all parameters in an array is supported, too:
+:warning: *Make sure to urlencode any parameter values that contain
+query-reserved characters, like tweeting the `&` sign:*
+
+```javascript
+var params = "status=" + encodeURIComponent("Fish & chips");
+cb.__call(
+    "statuses_update",
+    params,
+    function (reply) {
+        // ...
+    }
+);
+```
+
+In most cases, giving all parameters in an array is easier,
+because no encoding is needed:
+
+```javascript
+var params = {
+    status: "Fish & chips"
+};
+cb.__call(
+    "statuses_update",
+    params,
+    function (reply) {
+        // ...
+    }
+);
+```
 
 ```javascript
 var params = {
