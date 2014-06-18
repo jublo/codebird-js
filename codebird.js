@@ -1331,7 +1331,7 @@ var Codebird = function () {
             params.application_id = 333903271;
         }
 
-        var url = _getEndpoint(method);
+        var url           = _getEndpoint(method);
         var authorization = null;
 
         var xml = _getXmlRequestObject();
@@ -1345,7 +1345,9 @@ var Codebird = function () {
             if (JSON.stringify(params) !== "{}") {
                 url_with_params += "?" + _http_build_query(params);
             }
-            authorization = _sign(httpmethod, url, params);
+            if (! app_only_auth) {
+                authorization = _sign(httpmethod, url, params);
+            }
 
             // append auth params to GET url for IE7-9, to send via JSONP
             if (_use_jsonp) {
@@ -1395,11 +1397,15 @@ var Codebird = function () {
                 return;
             }
             if (multipart) {
-                authorization = _sign(httpmethod, url, {});
-                params        = _buildMultipart(method, params);
+                if (! app_only_auth) {
+                    authorization = _sign(httpmethod, url, {});
+                }
+                params = _buildMultipart(method, params);
             } else {
-                authorization = _sign(httpmethod, url, params);
-                params        = _http_build_query(params);
+                if (! app_only_auth) {
+                    authorization = _sign(httpmethod, url, params);
+                }
+                params = _http_build_query(params);
             }
             post_fields = params;
             if (_use_proxy || multipart) { // force proxy for multipart base64
@@ -1420,8 +1426,10 @@ var Codebird = function () {
             }
         }
         if (app_only_auth) {
-            if (_oauth_consumer_key === null) {
-                console.warn("To make an app-only auth API request, the consumer key must be set.");
+            if (_oauth_consumer_key === null
+                && _oauth_bearer_token === null
+            ) {
+                console.warn("To make an app-only auth API request, consumer key or bearer token must be set.");
             }
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
