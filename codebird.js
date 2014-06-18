@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package codebird
- * @version 2.5.0-rc.2
+ * @version 2.5.0-rc.3-dev
  * @author Jublo Solutions <support@jublo.net>
  * @copyright 2010-2014 Jublo Solutions <support@jublo.net>
  *
@@ -146,7 +146,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-rc.2";
+    var _version = "2.5.0-rc.3-dev";
 
     /**
      * Sets the OAuth consumer key and secret (App key)

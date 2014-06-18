@@ -1,6 +1,6 @@
 {
   "name": "codebird",
-  "version": "2.5.0-rc.2",
+  "version": "2.5.0-rc.3-dev",
   "description": "A Twitter library in JavaScript.",
   "keywords": [
     "Twitter",
