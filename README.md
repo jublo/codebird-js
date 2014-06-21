@@ -327,6 +327,34 @@ cb.__call(
     true // this parameter required
 );
 ```
+If you want to pass a variable that contains the string you want to search tweets about, 
+use the following code:
+
+```javascript
+var tweetText = "NYC";
+cb.__call(
+    "search_tweets", {
+        q : tweetText,
+     },
+    function (reply) {
+        // returnd recent tweets containing NYC
+        
+        for(var i=0; i<15; i++) {
+        
+            //it generally returns more or less 15 tweets
+            //you can extract the entities like this:
+            
+            var name = reply.statuses[i].user.name;
+            var tweet = reply.statuses[i].text;
+            var timestamp = reply.statuses[i].created_at;
+            
+            //...
+            //and so on as you need
+        }
+    },
+    true // this parameter required
+);
+```
 
 Bear in mind that not all API methods support application-only auth.
 
