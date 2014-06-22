@@ -259,6 +259,19 @@ cb.__call(
 );
 ```
 
+```javascript
+var params = {
+    q: "NYC"
+};
+cb.__call(
+    "search_tweets",
+    params,
+    function (reply) {
+        // ...
+    }
+);
+```
+
 ### Uploading files to Twitter
 
 The array syntax is obligatory, and the media have to be base64-encoded:
