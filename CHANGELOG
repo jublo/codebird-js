@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.5.0 (not yet released)
+2.5.0 (2014-06-23)
 + #24 Add README section about xAuth
 + #46 Don't force to send base64 media uploads via proxy
 + #23 Support internal API methods
@@ -19,6 +19,7 @@ codebird-js - changelog
 + #60 Multiple media per tweet
 + #66 Support Titanium
 - #71 Return rate-limiting info only if contained in response
+- #72 Don't require consumer key if bearer token is already known
 
 2.4.3 (2013-07-24)
 - #31 HTTP error on multiple oauth_requestToken calls

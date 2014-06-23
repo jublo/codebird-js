@@ -1,23 +1,12 @@
 /**
  * A Twitter library in JavaScript
  *
- * @package codebird
- * @version 2.5.0-rc.2
- * @author Jublo Solutions <support@jublo.net>
+ * @package   codebird
+ * @version   2.5.0
+ * @author    Jublo Solutions <support@jublo.net>
  * @copyright 2010-2014 Jublo Solutions <support@jublo.net>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @license   http://opensource.org/licenses/GPL-3.0 GNU Public License 3.0
+ * @link      https://github.com/jublonet/codebird-php
  */
 
 /* jshint curly: true,
@@ -146,7 +135,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.5.0-rc.2";
+    var _version = "2.5.0";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -1331,7 +1320,7 @@ var Codebird = function () {
             params.application_id = 333903271;
         }
 
-        var url = _getEndpoint(method);
+        var url           = _getEndpoint(method);
         var authorization = null;
 
         var xml = _getXmlRequestObject();
@@ -1345,7 +1334,9 @@ var Codebird = function () {
             if (JSON.stringify(params) !== "{}") {
                 url_with_params += "?" + _http_build_query(params);
             }
-            authorization = _sign(httpmethod, url, params);
+            if (! app_only_auth) {
+                authorization = _sign(httpmethod, url, params);
+            }
 
             // append auth params to GET url for IE7-9, to send via JSONP
             if (_use_jsonp) {
@@ -1395,11 +1386,15 @@ var Codebird = function () {
                 return;
             }
             if (multipart) {
-                authorization = _sign(httpmethod, url, {});
-                params        = _buildMultipart(method, params);
+                if (! app_only_auth) {
+                    authorization = _sign(httpmethod, url, {});
+                }
+                params = _buildMultipart(method, params);
             } else {
-                authorization = _sign(httpmethod, url, params);
-                params        = _http_build_query(params);
+                if (! app_only_auth) {
+                    authorization = _sign(httpmethod, url, params);
+                }
+                params = _http_build_query(params);
             }
             post_fields = params;
             if (_use_proxy || multipart) { // force proxy for multipart base64
@@ -1420,8 +1415,10 @@ var Codebird = function () {
             }
         }
         if (app_only_auth) {
-            if (_oauth_consumer_key === null) {
-                console.warn("To make an app-only auth API request, the consumer key must be set.");
+            if (_oauth_consumer_key === null
+                && _oauth_bearer_token === null
+            ) {
+                console.warn("To make an app-only auth API request, consumer key or bearer token must be set.");
             }
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
