@@ -2,6 +2,7 @@ codebird-js - changelog
 =======================
 
 2.6.0 (not yet released)
++ Allow to get the supported API methods as array
 
 2.5.0 (2014-06-23)
 + #24 Add README section about xAuth
