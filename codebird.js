@@ -408,9 +408,6 @@ var Codebird = function () {
                 "help/tos",
                 "application/rate_limit_status",
 
-                // Tweets
-                "statuses/lookup",
-
                 // Internal
                 "users/recommendations",
                 "account/push_destinations/device",
@@ -439,6 +436,7 @@ var Codebird = function () {
                 "statuses/retweet/:id",
                 "statuses/update_with_media",
                 "media/upload",
+                "statuses/lookup",
 
                 // Direct Messages
                 "direct_messages/destroy",
