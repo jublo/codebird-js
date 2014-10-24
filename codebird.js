@@ -587,7 +587,7 @@ var Codebird = function () {
         }
         var url = _endpoint_oauth + "oauth/authenticate?oauth_token=" + _url(_oauth_token);
         if (params.force_login === true) {
-            url += "?force_login=1";
+            url += "&force_login=1";
             if (params.screen_name !== null) {
                 url += "&screen_name=" + params.screen_name;
             }
@@ -613,7 +613,7 @@ var Codebird = function () {
         }
         var url = _endpoint_oauth + "oauth/authorize?oauth_token=" + _url(_oauth_token);
         if (params.force_login === true) {
-            url += "?force_login=1";
+            url += "&force_login=1";
             if (params.screen_name !== null) {
                 url += "&screen_name=" + params.screen_name;
             }
