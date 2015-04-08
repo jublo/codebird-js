@@ -1,7 +1,7 @@
 codebird-js - changelog
 =======================
 
-2.6.0 (not yet released)
+2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
 - #79 Use POST for users/lookup and statuses/lookup, params may get too long for GET
 - #81 Special oauth_ methods: Fix force_login parameter
