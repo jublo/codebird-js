@@ -2,7 +2,7 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
-Copyright (C) 2010-2014 Jublo Solutions <support@jublo.net>
+Copyright (C) 2010-2015 Jublo Solutions <support@jublo.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -272,26 +272,11 @@ cb.__call(
 );
 ```
 
-### Uploading files to Twitter
+### Uploading media to Twitter
 
-The array syntax is obligatory, and the media have to be base64-encoded:
+Tweet media can be uploaded in a 2-step process, and the media have to be
+base64-encoded. **First** you send each image to Twitter, like this:
 
-```javascript
-var params = {
-    "status": "The bird is flying high. #larry",
-    "media[]": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
-);
-cb.__call(
-    "statuses_updateWithMedia",
-    params,
-    function (reply) {
-        // ...
-    }
-);
-```
-
-#### Multiple images
-can be uploaded in a 2-step process. **First** you send each image to Twitter, like this:
 ```javascript
 var params = {
     "media": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
@@ -303,10 +288,11 @@ cb.__call(
         // you get a media id back:
         console.log(reply.media_id_string);
 
-        // continue upload of 2nd image here
+        // continue upload of 2nd image here, if any (just 1 image works, too!)
     }
 );
 ```
+
 **Second,** you attach the collected media ids for all images to your call
 to ```statuses/update```, like this:
 
@@ -323,7 +309,7 @@ cb.__call(
 );
 ```
 
-More [documentation for tweeting with multiple media](https://dev.twitter.com/docs/api/multiple-media-extended-entities) is available on the Twitter Developer site.
+More [documentation for tweeting with media](https://dev.twitter.com/rest/public/uploading-media-multiple-photos) is available on the Twitter Developer site.
 
 ### Requests with app-only auth
 
@@ -385,7 +371,7 @@ The library returns the response HTTP status code, so you can detect rate limits
 I suggest you to check if the ```reply.httpstatus``` property is ```400```
 and check with the Twitter API to find out if you are currently being
 rate-limited.
-See the [Rate Limiting FAQ](https://dev.twitter.com/docs/rate-limiting-faq)
+See the [Rate Limiting FAQ](https://dev.twitter.com/rest/public/rate-limiting)
 for more information.
 
 If you allow your callback function to accept a second parameter,
