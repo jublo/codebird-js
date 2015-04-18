@@ -89,6 +89,20 @@ cb.__call(
 );
 ```
 
+:warning: Codebird server calls do not always go through when
+being processed in a hyperlink onclick handler. Be sure to cancel
+the default procedure before calling Codebird, like this (jQuery):
+
+```javascript
+$(function() {
+
+    $('#auth').click(function(e) {
+        e.preventDefault();
+
+        var cb = new Codebird;
+// ...
+```
+
 Now you need to add a PIN box to your website.
 After the user enters the PIN, complete the authentication:
 
