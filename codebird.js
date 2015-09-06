@@ -676,6 +676,12 @@ var Codebird = function () {
                 callback(reply);
             }
         };
+        // function called when an error occurs, including a timeout
+        xml.onerror = function(e) {
+            callback(null,e);
+        };
+        xml.timeout = 30000;  // in milliseconds
+        
         xml.send(post_fields);
 
     };
@@ -1422,6 +1428,12 @@ var Codebird = function () {
                 callback(reply, rate);
             }
         };
+        // function called when an error occurs, including a timeout
+        xml.onerror = function(e) {
+             callback(null,null,e);
+        };
+        xml.timeout = 30000;  // in milliseconds
+        
         xml.send(httpmethod === "GET" ? null : post_fields);
         return true;
     };
