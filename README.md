@@ -73,18 +73,23 @@ Or you authenticate, like this:
 cb.__call(
     "oauth_requestToken",
     {oauth_callback: "oob"},
-    function (reply) {
-        // stores it
-        cb.setToken(reply.oauth_token, reply.oauth_token_secret);
-
-        // gets the authorize screen URL
-        cb.__call(
-            "oauth_authorize",
-            {},
-            function (auth_url) {
-                window.codebird_auth = window.open(auth_url);
-            }
-        );
+    function (reply,rate,err) {
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error)
+        }
+        if(reply){
+            // stores it
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+    
+            // gets the authorize screen URL
+            cb.__call(
+                "oauth_authorize",
+                {},
+                function (auth_url) {
+                    window.codebird_auth = window.open(auth_url);
+                }
+            );
+        }
     }
 );
 ```
@@ -110,9 +115,14 @@ After the user enters the PIN, complete the authentication:
 cb.__call(
     "oauth_accessToken",
     {oauth_verifier: document.getElementById("PINFIELD").value},
-    function (reply) {
-        // store the authenticated token, which may be different from the request token (!)
-        cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+    function (reply,rate,err) {
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error)
+        }
+        if(reply){
+            // store the authenticated token, which may be different from the request token (!)
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+        }
 
         // if you need to persist the login after page reload,
         // consider storing the token in a cookie or HTML5 local storage
@@ -132,8 +142,14 @@ To obtain an app-only bearer token, call the appropriate API:
 cb.__call(
     "oauth2_token",
     {},
-    function (reply) {
-        var bearer_token = reply.access_token;
+    function (reply,err) {
+        var bearer_token;
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error)
+        }
+        if(reply){
+            bearer_token = reply.access_token;
+        }
     }
 );
 ```
@@ -186,8 +202,13 @@ if (typeof parameters.oauth_verifier !== "undefined") {
         {
             oauth_verifier: parameters.oauth_verifier
         },
-        function (reply) {
-            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+        function (reply,rate,err) {
+            if (err) {
+                console.log("error response or timeout exceeded" + err.error)
+            }
+            if(reply){
+                cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+            }
 
             // if you need to persist the login after page reload,
             // consider storing the token in a cookie or HTML5 local storage
@@ -212,8 +233,9 @@ cb.setToken("YOURTOKEN", "YOURTOKENSECRET"); // see above
 cb.__call(
     "statuses_homeTimeline",
     {},
-    function (reply) {
+    function (reply,rate,err) {
         console.log(reply);
+        console.log(err);
     }
 );
 ```
@@ -224,7 +246,7 @@ Tweeting is as easy as this:
 cb.__call(
     "statuses_update",
     {"status": "Whohoo, I just tweeted!"},
-    function (reply) {
+    function (reply,rate,err) {
         // ...
     }
 );
@@ -238,7 +260,7 @@ var params = "status=" + encodeURIComponent("Fish & chips");
 cb.__call(
     "statuses_update",
     params,
-    function (reply) {
+    function (reply,rate,err) {
         // ...
     }
 );
@@ -254,7 +276,7 @@ var params = {
 cb.__call(
     "statuses_update",
     params,
-    function (reply) {
+    function (reply,rate,err) {
         // ...
     }
 );
@@ -267,7 +289,7 @@ var params = {
 cb.__call(
     "users_show",
     params,
-    function (reply) {
+    function (reply,rate,err) {
         // ...
     }
 );
@@ -298,7 +320,7 @@ var params = {
 cb.__call(
     "media_upload",
     params,
-    function (reply) {
+    function (reply,rate,err) {
         // you get a media id back:
         console.log(reply.media_id_string);
 
@@ -317,7 +339,7 @@ cb.__call(
         "media_ids": "12345678901234567890,9876543210987654321"
         "status": "Whohoo, I just tweeted two images!"
     },
-    function (reply) {
+    function (reply,rate,err) {
         // ...
     }
 );
