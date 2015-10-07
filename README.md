@@ -75,12 +75,12 @@ cb.__call(
     {oauth_callback: "oob"},
     function (reply,rate,err) {
         if (err) {
-            console.log("error response or timeout exceeded" + err.error)
+            console.log("error response or timeout exceeded" + err.error);
         }
-        if(reply){
+        if (reply) {
             // stores it
             cb.setToken(reply.oauth_token, reply.oauth_token_secret);
-    
+
             // gets the authorize screen URL
             cb.__call(
                 "oauth_authorize",
@@ -117,9 +117,9 @@ cb.__call(
     {oauth_verifier: document.getElementById("PINFIELD").value},
     function (reply,rate,err) {
         if (err) {
-            console.log("error response or timeout exceeded" + err.error)
+            console.log("error response or timeout exceeded" + err.error);
         }
-        if(reply){
+        if (reply) {
             // store the authenticated token, which may be different from the request token (!)
             cb.setToken(reply.oauth_token, reply.oauth_token_secret);
         }
@@ -142,12 +142,12 @@ To obtain an app-only bearer token, call the appropriate API:
 cb.__call(
     "oauth2_token",
     {},
-    function (reply,err) {
+    function (reply, err) {
         var bearer_token;
         if (err) {
-            console.log("error response or timeout exceeded" + err.error)
+            console.log("error response or timeout exceeded" + err.error);
         }
-        if(reply){
+        if (reply) {
             bearer_token = reply.access_token;
         }
     }
@@ -202,11 +202,11 @@ if (typeof parameters.oauth_verifier !== "undefined") {
         {
             oauth_verifier: parameters.oauth_verifier
         },
-        function (reply,rate,err) {
+        function (reply, rate, err) {
             if (err) {
-                console.log("error response or timeout exceeded" + err.error)
+                console.log("error response or timeout exceeded" + err.error);
             }
-            if(reply){
+            if (reply) {
                 cb.setToken(reply.oauth_token, reply.oauth_token_secret);
             }
 
@@ -233,7 +233,7 @@ cb.setToken("YOURTOKEN", "YOURTOKENSECRET"); // see above
 cb.__call(
     "statuses_homeTimeline",
     {},
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         console.log(reply);
         console.log(err);
     }
@@ -246,7 +246,7 @@ Tweeting is as easy as this:
 cb.__call(
     "statuses_update",
     {"status": "Whohoo, I just tweeted!"},
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -260,7 +260,7 @@ var params = "status=" + encodeURIComponent("Fish & chips");
 cb.__call(
     "statuses_update",
     params,
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -276,7 +276,7 @@ var params = {
 cb.__call(
     "statuses_update",
     params,
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -289,7 +289,7 @@ var params = {
 cb.__call(
     "users_show",
     params,
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -320,7 +320,7 @@ var params = {
 cb.__call(
     "media_upload",
     params,
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // you get a media id back:
         console.log(reply.media_id_string);
 
@@ -339,7 +339,7 @@ cb.__call(
         "media_ids": "12345678901234567890,9876543210987654321"
         "status": "Whohoo, I just tweeted two images!"
     },
-    function (reply,rate,err) {
+    function (reply, rate, err) {
         // ...
     }
 );
