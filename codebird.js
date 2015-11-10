@@ -376,6 +376,7 @@ var Codebird = function () {
                 "users/contributors",
                 "users/profile_banner",
                 "users/search",
+                "users/lookup",
                 "users/show",
                 "users/suggestions",
                 "users/suggestions/:slug",
@@ -443,7 +444,6 @@ var Codebird = function () {
                 "statuses/retweet/:id",
                 "statuses/update",
                 "statuses/update_with_media", // deprecated, use media/upload
-                "users/lookup",
                 "users/report_spam",
 
                 // Internal
