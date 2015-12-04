@@ -373,17 +373,21 @@ var Codebird = function () {
                 "saved_searches/list",
                 "saved_searches/show/:id",
                 "search/tweets",
+                "site",
+                "statuses/firehose",
                 "statuses/home_timeline",
                 "statuses/mentions_timeline",
                 "statuses/oembed",
                 "statuses/retweeters/ids",
                 "statuses/retweets/:id",
                 "statuses/retweets_of_me",
+                "statuses/sample",
                 "statuses/show/:id",
                 "statuses/user_timeline",
                 "trends/available",
                 "trends/closest",
                 "trends/place",
+                "user",
                 "users/contributees",
                 "users/contributors",
                 "users/profile_banner",
@@ -391,28 +395,7 @@ var Codebird = function () {
                 "users/show",
                 "users/suggestions",
                 "users/suggestions/:slug",
-                "users/suggestions/:slug/members",
-
-                // Internal
-                "users/recommendations",
-                "account/push_destinations/device",
-                "activity/about_me",
-                "activity/by_friends",
-                "statuses/media_timeline",
-                "timeline/home",
-                "help/experiments",
-                "search/typeahead",
-                "search/universal",
-                "discover/universal",
-                "conversation/show",
-                "statuses/:id/activity/summary",
-                "account/login_verification_enrollment",
-                "account/login_verification_request",
-                "prompts/suggest",
-
-                "beta/timelines/custom/list",
-                "beta/timelines/timeline",
-                "beta/timelines/custom/show"
+                "users/suggestions/:slug/members"
             ],
             POST: [
                 "account/remove_profile_banner",
@@ -451,24 +434,13 @@ var Codebird = function () {
                 "saved_searches/create",
                 "saved_searches/destroy/:id",
                 "statuses/destroy/:id",
+                "statuses/filter",
                 "statuses/lookup",
                 "statuses/retweet/:id",
                 "statuses/update",
                 "statuses/update_with_media", // deprecated, use media/upload
                 "users/lookup",
-                "users/report_spam",
-
-                // Internal
-                "direct_messages/read",
-                "account/login_verification_enrollment__post",
-                "push_destinations/enable_login_verification",
-                "account/login_verification_request__post",
-
-                "beta/timelines/custom/create",
-                "beta/timelines/custom/update",
-                "beta/timelines/custom/destroy",
-                "beta/timelines/custom/add",
-                "beta/timelines/custom/remove"
+                "users/report_spam"
             ]
         };
         return httpmethods;
@@ -617,7 +589,6 @@ var Codebird = function () {
 
         var httpmethod = _detectMethod(method_template, apiparams);
         var multipart = _detectMultipart(method_template);
-        var internal = _detectInternal(method_template);
 
         return _callApi(
             httpmethod,
@@ -625,7 +596,6 @@ var Codebird = function () {
             apiparams,
             multipart,
             app_only_auth,
-            internal,
             callback
         );
     };
@@ -1258,20 +1228,6 @@ var Codebird = function () {
     };
 
     /**
-     * Detects if API call is internal
-     *
-     * @param string method The API method to call
-     *
-     * @return bool Whether the method is defined in internal API
-     */
-    var _detectInternal = function (method) {
-        var internals = [
-            "users/recommendations"
-        ];
-        return internals.join(" ").indexOf(method) > -1;
-    };
-
-    /**
      * Detects if API call should use media endpoint
      *
      * @param string method The API method to call
@@ -1376,13 +1332,12 @@ var Codebird = function () {
      * @param array  optional params        The parameters to send along
      * @param bool   optional multipart     Whether to use multipart/form-data
      * @param bool   optional app_only_auth Whether to use app-only bearer authentication
-     * @param bool   optional internal      Whether to use internal call
      * @param function        callback      The function to call with the API call result
      *
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    var _callApi = function (httpmethod, method, params, multipart, app_only_auth, internal, callback) {
+    var _callApi = function (httpmethod, method, params, multipart, app_only_auth, callback) {
         var dfd = _getDfd();
 
         if (typeof params === "undefined") {
@@ -1396,10 +1351,6 @@ var Codebird = function () {
         }
         if (typeof callback !== "function") {
             callback = function () {};
-        }
-        if (internal) {
-            params.adc            = "phone";
-            params.application_id = 333903271;
         }
 
         var url           = _getEndpoint(method);
@@ -1511,11 +1462,11 @@ var Codebird = function () {
             if (_oauth_bearer_token === null) {
                 if (dfd) {
                     return oauth2_token().then(function (token_reply) {
-                        return _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
+                        return _callApi(httpmethod, method, params, multipart, app_only_auth, callback);
                     });
                 }
                 oauth2_token(function () {
-                    _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
+                    _callApi(httpmethod, method, params, multipart, app_only_auth, callback);
                 });
                 return;
             }

@@ -632,32 +632,6 @@ When this error occurs, advise the user to
 [generate a temporary password](https://twitter.com/settings/applications)
 on twitter.com and use that to complete signing in to the application.
 
-### …access and use undocumented Twitter API methods?
-
-Besides the well-documented official methods, the Twitter API also contains
-undocumented additional methods.  They are used by official Twitter clients,
-such as Twitter for iPhone and Twitter for Mac.
-
-Access to these methods is restricted: Only white-listed applications
-(consumer keys) may access undocumented methods.  Codebird supports accessing
-internal methods, but that will only work if you provide a white-listed API key.
-By reason, the API keys and secrets for official Twitter clients are not
-provided within this package, since they should have been kept a secret.
-
-If you provide Codebird with the Twitter for iPhone consumer key and secret,
-the following example will get the latest events that happened with you:
-
-```javascript
-cb.__call(
-    "activity_aboutMe",
-    {},
-    function (reply) {
-        console.log(reply);
-        // ...
-    }
-);
-```
-
 ### …use promises instead of callback functions?
 
 Have you ever heard of the [Pyramid of Doom](http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/)?
