@@ -6,6 +6,7 @@ codebird-js - changelog
 + #96 Add logout method
 + #98 Support promises as alternative to callbacks
 - Drop support for undocumented API methods
++ Add security check hasOwnProperty
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
