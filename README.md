@@ -176,7 +176,6 @@ For sending an API request with app-only auth, see the ‘Usage examples’ sect
 
 ### Authenticating using a callback URL, without PIN
 
-
 1. Before sending your user off to Twitter, you have to store the request token and its secret, for example in a cookie.
 2. In the callback URL, extract those values and assign them to the Codebird object.
 3. Extract the ```oauth_verifier``` field from the request URI.
@@ -658,3 +657,54 @@ cb.__call(
     }
 );
 ```
+
+### …use promises instead of callback functions?
+
+Have you ever heard of the [Pyramid of Doom](http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/)?
+It’s when code progresses more to the right because of excessive nesting
+than it progresses from top to bottom.
+
+Because of the asynchronous requests, Codebird will use callbacks that you provide.
+They are called when the result from the Twitter API has arrived.
+However, to streamline code, there is a sleeker concept for this: Promises.
+
+There are several popular libraries that support promises.
+Codebird will auto-detect and use any of the following:
+
+- jQuery Deferred
+- Q
+- RSVP
+- when
+
+Here’s a usage sample for promises:
+
+```javascript
+cb.__call(
+    "statuses_update",
+    {"status": "Whohoo, I just tweeted!"}
+).then(function (reply, rate, err) {
+    // ...
+});
+```
+
+Since the app-only flag is the fourth parameter for `__call`,
+you’ll have to provide a callback stub nonetheless even with promises:
+
+```javascript
+cb.__call(
+    "search_tweets",
+    {"q": "#PHP7"},
+    null, // no callback needed, we have the promise
+    true // app-only auth
+
+).then(function (reply, rate, err) {
+    // ...
+});
+```
+
+**Tips:**
+
+- If you provide **both** (callback and promise.then),
+  Codebird will first call the callback, then resolve the promise.
+
+- If the request fails due to any errors, Codebird will reject the promise.
