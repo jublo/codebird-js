@@ -99,11 +99,6 @@
         var _endpoint_proxy = "https://api.jublo.net/codebird/";
 
         /**
-         * The API endpoint to use for old requests
-         */
-        var _endpoint_old = _endpoint_base + "1/";
-
-        /**
          * Use JSONP for GET requests in IE7-9
          */
         var _use_jsonp = (typeof navigator !== "undefined"
@@ -1340,20 +1335,6 @@
         };
 
         /**
-         * Detects if API call should use old endpoint
-         *
-         * @param string method The API method to call
-         *
-         * @return bool Whether the method is defined in old API
-         */
-        var _detectOld = function (method) {
-            var olds = [
-                "account/push_destinations/device"
-            ];
-            return olds.join(" ").indexOf(method) > -1;
-        };
-
-        /**
          * Builds the complete API endpoint url
          *
          * @param string method The API method to call
@@ -1366,8 +1347,6 @@
                 url = _endpoint_oauth + method;
             } else if (_detectMedia(method)) {
                 url = _endpoint_media + method + ".json";
-            } else if (_detectOld(method)) {
-                url = _endpoint_old + method + ".json";
             } else {
                 url = _endpoint + method + ".json";
             }
