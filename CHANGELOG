@@ -4,6 +4,7 @@ codebird-js - changelog
 3.0.0 (not yet released)
 + #106 Add error callback
 + #96 Add logout method
++ #98 Support promises as alternative to callbacks
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array

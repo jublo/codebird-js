@@ -2,7 +2,7 @@
  * A Twitter library in JavaScript
  *
  * @package   codebird
- * @version   2.6.0
+ * @version   3.0.0-dev
  * @author    Jublo Solutions <support@jublo.net>
  * @copyright 2010-2015 Jublo Solutions <support@jublo.net>
  * @license   http://opensource.org/licenses/GPL-3.0 GNU Public License 3.0
@@ -135,7 +135,7 @@ var Codebird = function () {
     /**
      * The current Codebird version
      */
-    var _version = "2.6.0";
+    var _version = "3.0.0-dev";
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -475,6 +475,54 @@ var Codebird = function () {
     };
 
     /**
+     * Promise helpers
+     */
+
+    /**
+     * Get a deferred object
+     */
+    var _getDfd = function () {
+        if (typeof jQuery !== "undefined" && jQuery.Deferred) {
+            return jQuery.Deferred();
+        }
+        if (typeof Q !== "undefined" && Q.defer) {
+            return Q.defer();
+        }
+        if (typeof RSVP !== "undefined" && RSVP.defer) {
+            return RSVP.defer();
+        }
+        if (typeof when !== "undefined" && when.defer) {
+            return when.defer();
+        }
+        if (typeof require !== "undefined") {
+            var promise_class;
+            if (promise_class = require("jquery")) {
+                return promise_class.Deferred();
+            }
+            if (promise_class = require("q")) {
+                return promise_class.defer();
+            }
+            if (promise_class = require("rsvp")) {
+                return promise_class.defer();
+            }
+            if (promise_class = require("when")) {
+                return promise_class.defer();
+            }
+        }
+        return false;
+    };
+
+    /**
+     * Get a promise from the dfd object
+     */
+    var _getPromise = function (dfd) {
+        if (typeof dfd.promise === "function") {
+            return dfd.promise();
+        }
+        return dfd.promise; // object
+    };
+
+    /**
      * Main API handler working on any requests you issue
      *
      * @param string   fn            The member function you called
@@ -482,7 +530,7 @@ var Codebird = function () {
      * @param function callback      The callback to call with the reply
      * @param bool     app_only_auth Whether to use app-only auth
      *
-     * @return mixed The API reply encoded in the set return_format
+     * @return object Promise
      */
 
     var __call = function (fn, params, callback, app_only_auth) {
@@ -585,9 +633,10 @@ var Codebird = function () {
     /**
      * Gets the OAuth authenticate URL for the current request token
      *
-     * @return string The OAuth authenticate URL
+     * @return object Promise
      */
     var oauth_authenticate = function (params, callback) {
+        var dfd = _getDfd();
         if (typeof params.force_login === "undefined") {
             params.force_login = null;
         }
@@ -595,7 +644,13 @@ var Codebird = function () {
             params.screen_name = null;
         }
         if (_oauth_token === null) {
-            console.warn("To get the authenticate URL, the OAuth token must be set.");
+            var error = "To get the authenticate URL, the OAuth token must be set.";
+            console.warn(error);
+            if (dfd) {
+                dfd.reject({ error: error });
+                return _getPromise(dfd);
+            }
+            return false;
         }
         var url = _endpoint_oauth + "oauth/authenticate?oauth_token=" + _url(_oauth_token);
         if (params.force_login === true) {
@@ -604,7 +659,14 @@ var Codebird = function () {
                 url += "&screen_name=" + params.screen_name;
             }
         }
-        callback(url);
+        if (typeof callback === "function") {
+            callback(url);
+        }
+        if (dfd) {
+            dfd.resolve(url);
+            return _getPromise(dfd);
+        }
+        // no promises
         return true;
     };
 
@@ -614,6 +676,7 @@ var Codebird = function () {
      * @return string The OAuth authorize URL
      */
     var oauth_authorize = function (params, callback) {
+        var dfd = _getDfd();
         if (typeof params.force_login === "undefined") {
             params.force_login = null;
         }
@@ -621,7 +684,13 @@ var Codebird = function () {
             params.screen_name = null;
         }
         if (_oauth_token === null) {
-            console.warn("To get the authorize URL, the OAuth token must be set.");
+            var error = "To get the authorize URL, the OAuth token must be set.";
+            console.warn(error);
+            if (dfd) {
+                dfd.reject({ error: error });
+                return _getPromise(dfd);
+            }
+            return false;
         }
         var url = _endpoint_oauth + "oauth/authorize?oauth_token=" + _url(_oauth_token);
         if (params.force_login === true) {
@@ -630,22 +699,37 @@ var Codebird = function () {
                 url += "&screen_name=" + params.screen_name;
             }
         }
-        callback(url);
+        if (typeof callback === "function") {
+            callback(url);
+        }
+        if (dfd) {
+            dfd.resolve(url);
+            return _getPromise(dfd);
+        }
+        // no promises
         return true;
     };
 
     /**
      * Gets the OAuth bearer token
      *
-     * @return string The OAuth bearer token
+     * @return object Promise
      */
 
     var oauth2_token = function (callback) {
+        var dfd = _getDfd();
+
         if (_oauth_consumer_key === null) {
-            console.warn("To obtain a bearer token, the consumer key must be set.");
+            var error = "To obtain a bearer token, the consumer key must be set.";
+            console.warn(error);
+            if (dfd) {
+                dfd.reject({ error: error });
+                return _getPromise(dfd);
+            }
+            return false;
         }
 
-        if (typeof callback === "undefined") {
+        if (!dfd && typeof callback === "undefined") {
             callback = function () {};
         }
 
@@ -685,17 +769,29 @@ var Codebird = function () {
                 if (httpstatus === 200) {
                     setBearerToken(reply.access_token);
                 }
-                callback(reply);
+                if (typeof callback === "function") {
+                    callback(reply);
+                }
+                if (dfd) {
+                    dfd.resolve(reply);
+                }
             }
         };
         // function called when an error occurs, including a timeout
-        xml.onerror = function(e) {
-            callback(null, e);
+        xml.onerror = function (e) {
+            if (typeof callback === "function") {
+                callback(null, e);
+            }
+            if (dfd) {
+                dfd.reject(e);
+            }
         };
         xml.timeout = 30000; // in milliseconds
 
         xml.send(post_fields);
-
+        if (dfd) {
+            return _getPromise(dfd);
+        }
     };
 
     /**
@@ -1287,6 +1383,8 @@ var Codebird = function () {
      */
 
     var _callApi = function (httpmethod, method, params, multipart, app_only_auth, internal, callback) {
+        var dfd = _getDfd();
+
         if (typeof params === "undefined") {
             params = {};
         }
@@ -1401,14 +1499,25 @@ var Codebird = function () {
         if (app_only_auth) {
             if (_oauth_consumer_key === null
                 && _oauth_bearer_token === null
-            ) {
-                console.warn("To make an app-only auth API request, consumer key or bearer token must be set.");
+                ) {
+                var error = "To make an app-only auth API request, consumer key or bearer token must be set.";
+                console.warn(error);
+                if (dfd) {
+                    dfd.reject({ error: error });
+                    return _getPromise(dfd);
+                }
             }
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
-                return oauth2_token(function () {
+                if (dfd) {
+                    return oauth2_token().then(function (token_reply) {
+                        return _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
+                    });
+                }
+                oauth2_token(function () {
                     _callApi(httpmethod, method, params, multipart, app_only_auth, false, callback);
                 });
+                return;
             }
             authorization = "Bearer " + _oauth_bearer_token;
         }
@@ -1437,16 +1546,29 @@ var Codebird = function () {
                         reset: xml.getResponseHeader("x-rate-limit-reset")
                     };
                 }
-                callback(reply, rate);
+                if (typeof callback === "function") {
+                    callback(reply, rate);
+                }
+                if (dfd) {
+                    dfd.resolve(reply, rate);
+                }
             }
         };
         // function called when an error occurs, including a timeout
         xml.onerror = function(e) {
-             callback(null, null, e);
+            if (typeof callback === "function") {
+                callback(null, null, e);
+            }
+            if (dfd) {
+                dfd.reject(e);
+            }
         };
         xml.timeout = 30000; // in milliseconds
 
         xml.send(httpmethod === "GET" ? null : post_fields);
+        if (dfd) {
+            return _getPromise(dfd);
+        }
         return true;
     };
 
