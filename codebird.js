@@ -454,30 +454,31 @@ var Codebird = function () {
      * Get a deferred object
      */
     var _getDfd = function () {
-        if (typeof jQuery !== "undefined" && jQuery.Deferred) {
-            return jQuery.Deferred();
+        if (typeof window.jQuery !== "undefined" && window.jQuery.Deferred) {
+            return window.jQuery.Deferred();
         }
-        if (typeof Q !== "undefined" && Q.defer) {
-            return Q.defer();
+        if (typeof window.Q !== "undefined" && window.Q.defer) {
+            return window.Q.defer();
         }
-        if (typeof RSVP !== "undefined" && RSVP.defer) {
-            return RSVP.defer();
+        if (typeof window.RSVP !== "undefined" && window.RSVP.defer) {
+            return window.RSVP.defer();
         }
-        if (typeof when !== "undefined" && when.defer) {
-            return when.defer();
+        if (typeof window.when !== "undefined" && window.when.defer) {
+            return window.when.defer();
         }
         if (typeof require !== "undefined") {
-            var promise_class;
-            if (promise_class = require("jquery")) {
+            var promise_class = require("jquery");
+            if (promise_class) {
                 return promise_class.Deferred();
             }
-            if (promise_class = require("q")) {
-                return promise_class.defer();
+            promise_class = require("q");
+            if (!promise_class) {
+                promise_class = require("rsvp");
             }
-            if (promise_class = require("rsvp")) {
-                return promise_class.defer();
+            if (!promise_class) {
+                promise_class = require("when");
             }
-            if (promise_class = require("when")) {
+            if (promise_class) {
                 return promise_class.defer();
             }
         }
@@ -594,9 +595,9 @@ var Codebird = function () {
         for (var key in apiparams) {
             value = apiparams[key];
             if (value === null) {
-                apiparams[key] = 'null';
+                apiparams[key] = "null";
             } else if (value === true || value === false) {
-                apiparams[key] = value ? 'true' : 'false';
+                apiparams[key] = value ? "true" : "false";
             }
         }
 
@@ -658,8 +659,8 @@ var Codebird = function () {
      * @return string API method to call
      */
     var _mapFnInsertSlashes = function (fn) {
-        var path = fn.split('_'),
-            method = path.join('/');
+        var path = fn.split("_"),
+            method = path.join("/");
 
         return method;
     };
@@ -738,7 +739,7 @@ var Codebird = function () {
      * @return string The OAuth authorize URL
      */
     var oauth_authorize = function (params, callback) {
-        return oauth_authenticate(params, callback, 'authorize');
+        return oauth_authenticate(params, callback, "authorize");
     };
 
     /**
@@ -1386,15 +1387,16 @@ var Codebird = function () {
         // now, consider RequireJS and/or Node.js objects
         } else if (typeof require === "function"
             && require
-        ) {
+            ) {
+            var XMLHttpRequest;
             // look for xmlhttprequest module
             try {
-                var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+                XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
                 xml = new XMLHttpRequest();
             } catch (e1) {
                 // or maybe the user is using xhr2
                 try {
-                    var XMLHttpRequest = require("xhr2");
+                    XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
                 } catch (e2) {
                     console.error("xhr2 object not defined, cancelling.");
@@ -1541,7 +1543,7 @@ var Codebird = function () {
             // automatically fetch bearer token, if necessary
             if (_oauth_bearer_token === null) {
                 if (dfd) {
-                    return oauth2_token().then(function (token_reply) {
+                    return oauth2_token().then(function () {
                         return _callApi(httpmethod, method, params, multipart, app_only_auth, callback);
                     });
                 }
