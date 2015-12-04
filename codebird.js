@@ -184,6 +184,18 @@ var Codebird = function () {
     };
 
     /**
+     * Forgets the OAuth request or access token and secret (User key)
+     *
+     * @return bool
+     */
+    var logout = function () {
+        _oauth_token =
+        _oauth_token_secret = null;
+
+        return true;
+    };
+
+    /**
      * Enables or disables CORS proxy
      *
      * @param bool use_proxy Whether to use CORS proxy or not
@@ -1483,6 +1495,7 @@ var Codebird = function () {
         setConsumerKey: setConsumerKey,
         getVersion: getVersion,
         setToken: setToken,
+        logout: logout,
         setBearerToken: setBearerToken,
         setUseProxy: setUseProxy,
         setProxy: setProxy,

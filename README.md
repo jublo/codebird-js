@@ -130,6 +130,15 @@ cb.__call(
 );
 ```
 
+### Logging out
+
+In case you want to log out the current user (to log in a different user without
+creating a new Codebird object), just call the `logout()` method.
+
+```javascript
+cb.logout();
+```
+
 ### Application-only auth
 
 Some API methods also support authenticating on a per-application level.
