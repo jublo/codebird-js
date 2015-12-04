@@ -859,7 +859,7 @@ var Codebird = function () {
      *
      * @return string The hash
      */
-    var _sha1 = function () {
+    var _sha1 = (function () {
         function n(e, b) {
             e[b >> 5] |= 128 << 24 - b % 32;
             e[(b + 64 >> 9 << 4) + 15] = b;
@@ -917,26 +917,26 @@ var Codebird = function () {
             if (c.length > 16) {
                 c = n(c, b.length * g);
             }
-            b = new Array(16);
+            var bb = new Array(16);
             for (var a = new Array(16), d = 0; d < 16; d++) {
                 a[d] = c[d] ^ 909522486;
-                b[d] = c[d] ^ 1549556828;
+                bb[d] = c[d] ^ 1549556828;
             }
             c = n(a.concat(q(e)), 512 + e.length * g);
-            b = n(b.concat(c), 672);
-            c = "";
-            for (a = 0; a < 4 * b.length; a += 3) {
-                for (d = (b[a >> 2] >> 8 * (3 - a % 4) & 255) << 16 | (b[a + 1 >> 2] >>
-                    8 * (3 - (a + 1) % 4) & 255) << 8 | b[a + 2 >> 2] >> 8 * (3 -
-                    (a + 2) % 4) & 255, e = 0; 4 > e; e++) {
-                    c = 8 * a + 6 * e > 32 * b.length ? c + "=" : c +
+            bb = n(bb.concat(c), 672);
+            b = "";
+            for (g = 0; g < 4 * bb.length; g += 3) {
+                for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >>
+                    8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 -
+                    (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
+                    b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b +
                         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
                         .charAt(d >> 6 * (3 - e) & 63);
                 }
             }
-            return c;
+            return b;
         };
-    }();
+    })();
 
     /*
      * Gets the base64 representation for the given data
@@ -973,9 +973,9 @@ var Codebird = function () {
             b &= 63;
             c[h++] = i.charAt(d) + i.charAt(e) + i.charAt(f) + i.charAt(b);
         } while (g < a.length);
-        c = c.join("");
+        i = c.join("");
         a = a.length % 3;
-        return (a ? c.slice(0, a - 3) : c) + "===".slice(a || 3);
+        return (a ? i.slice(0, a - 3) : i) + "===".slice(a || 3);
     };
 
     /*
