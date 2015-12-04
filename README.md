@@ -656,9 +656,14 @@ Here’s a usage sample for promises:
 cb.__call(
     "statuses_update",
     {"status": "Whohoo, I just tweeted!"}
-).then(function (reply, rate, err) {
-    // ...
-});
+).then(function (data) {
+        var reply = data.reply,
+            rate = data.rate;
+        // ...
+    },
+    function (err) {
+        // ...
+    });
 ```
 
 Since the app-only flag is the fourth parameter for `__call`,
@@ -671,9 +676,14 @@ cb.__call(
     null, // no callback needed, we have the promise
     true // app-only auth
 
-).then(function (reply, rate, err) {
-    // ...
-});
+).then(function (data) {
+        var reply = data.reply,
+            rate = data.rate;
+        // ...
+    },
+    function (err) {
+        // ...
+    });
 ```
 
 **Tips:**

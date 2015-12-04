@@ -529,11 +529,49 @@ var Codebird = function () {
         case "oauth2_token":
             return this[fn](callback);
         }
+
+        // parse parameters
+        var apiparams = _parseApiParams(params);
+
+        // stringify null and boolean parameters
+        apiparams = _stringifyNullBoolParams(apiparams);
+
         // reset token when requesting a new token (causes 401 for signature error on 2nd+ requests)
         if (fn === "oauth_requestToken") {
             setToken(null, null);
         }
-        // parse parameters
+
+        // map function name to API method
+        var data = _mapFnToApiMethod(fn, apiparams),
+            method = data[0],
+            method_template = data[1];
+
+        var httpmethod = _detectMethod(method_template, apiparams);
+        var multipart = _detectMultipart(method_template);
+
+        return _callApi(
+            httpmethod,
+            method,
+            apiparams,
+            multipart,
+            app_only_auth,
+            callback
+        );
+    };
+
+
+    /**
+     * __call() helpers
+     */
+
+    /**
+     * Parse given params, detect query-style params
+     *
+     * @param array|string params Parameters to parse
+     *
+     * @return array apiparams
+     */
+    var _parseApiParams = function (params) {
         var apiparams = {};
         if (typeof params === "object") {
             apiparams = params;
@@ -541,26 +579,47 @@ var Codebird = function () {
             _parse_str(params, apiparams); //TODO
         }
 
-        // map function name to API method
+        return apiparams;
+    };
+
+    /**
+     * Replace null and boolean parameters with their string representations
+     *
+     * @param array apiparams Parameter array to replace in
+     *
+     * @return array apiparams
+     */
+    var _stringifyNullBoolParams = function (apiparams) {
+        var value;
+        for (var key in apiparams) {
+            value = apiparams[key];
+            if (value === null) {
+                apiparams[key] = 'null';
+            } else if (value === true || value === false) {
+                apiparams[key] = value ? 'true' : 'false';
+            }
+        }
+
+        return apiparams;
+    };
+
+    /**
+     * Maps called PHP magic method name to Twitter API method
+     *
+     * @param string $fn              Function called
+     * @param array  $apiparams byref API parameters
+     *
+     * @return string[] (string method, string method_template)
+     */
+    var _mapFnToApiMethod = function (fn, apiparams) {
         var method = "";
         var param, i, j;
 
         // replace _ by /
-        var path = fn.split("_");
-        for (i = 0; i < path.length; i++) {
-            if (i > 0) {
-                method += "/";
-            }
-            method += path[i];
-        }
+        method = _mapFnInsertSlashes(fn);
 
         // undo replacement for URL parameters
-        var url_parameters_with_underscore = ["screen_name", "place_id"];
-        for (i = 0; i < url_parameters_with_underscore.length; i++) {
-            param = url_parameters_with_underscore[i].toUpperCase();
-            var replacement_was = param.split("_").join("/");
-            method = method.split(replacement_was).join(param);
-        }
+        method = _mapFnRestoreParamUnderscores(method);
 
         // replace AA by URL parameters
         var method_template = method;
@@ -587,25 +646,53 @@ var Codebird = function () {
             method_template = method_template.split(String.fromCharCode(65 + i)).join("_" + String.fromCharCode(97 + i));
         }
 
-        var httpmethod = _detectMethod(method_template, apiparams);
-        var multipart = _detectMultipart(method_template);
-
-        return _callApi(
-            httpmethod,
-            method,
-            apiparams,
-            multipart,
-            app_only_auth,
-            callback
-        );
+        return [method, method_template];
     };
+
+
+    /**
+     * API method mapping: Replaces _ with / character
+     *
+     * @param string fn Function called
+     *
+     * @return string API method to call
+     */
+    var _mapFnInsertSlashes = function (fn) {
+        var path = fn.split('_'),
+            method = path.join('/');
+
+        return method;
+    };
+
+    /**
+     * API method mapping: Restore _ character in named parameters
+     *
+     * @param string method API method to call
+     *
+     * @return string API method with restored underscores
+     */
+    var _mapFnRestoreParamUnderscores = function (method) {
+        var url_parameters_with_underscore = ["screen_name", "place_id"], i, param, replacement_was;
+        for (i = 0; i < url_parameters_with_underscore.length; i++) {
+            param = url_parameters_with_underscore[i].toUpperCase();
+            replacement_was = param.split("_").join("/");
+            method = method.split(replacement_was).join(param);
+        }
+
+        return method;
+    };
+
+
+    /**
+     * Uncommon API methods
+     */
 
     /**
      * Gets the OAuth authenticate URL for the current request token
      *
      * @return object Promise
      */
-    var oauth_authenticate = function (params, callback) {
+    var oauth_authenticate = function (params, callback, type) {
         var dfd = _getDfd();
         if (typeof params.force_login === "undefined") {
             params.force_login = null;
@@ -613,8 +700,13 @@ var Codebird = function () {
         if (typeof params.screen_name === "undefined") {
             params.screen_name = null;
         }
+        if (typeof type === "undefined"
+            || ["authenticate", "authorize"].indexOf(type) === -1
+            ) {
+            type = "authenticate";
+        }
         if (_oauth_token === null) {
-            var error = "To get the authenticate URL, the OAuth token must be set.";
+            var error = "To get the " + type + " URL, the OAuth token must be set.";
             console.warn(error);
             if (dfd) {
                 dfd.reject({ error: error });
@@ -622,7 +714,7 @@ var Codebird = function () {
             }
             return false;
         }
-        var url = _endpoint_oauth + "oauth/authenticate?oauth_token=" + _url(_oauth_token);
+        var url = _endpoint_oauth + "oauth/" + type + "?oauth_token=" + _url(_oauth_token);
         if (params.force_login === true) {
             url += "&force_login=1";
             if (params.screen_name !== null) {
@@ -633,7 +725,7 @@ var Codebird = function () {
             callback(url);
         }
         if (dfd) {
-            dfd.resolve(url);
+            dfd.resolve({ reply: url });
             return _getPromise(dfd);
         }
         // no promises
@@ -646,38 +738,7 @@ var Codebird = function () {
      * @return string The OAuth authorize URL
      */
     var oauth_authorize = function (params, callback) {
-        var dfd = _getDfd();
-        if (typeof params.force_login === "undefined") {
-            params.force_login = null;
-        }
-        if (typeof params.screen_name === "undefined") {
-            params.screen_name = null;
-        }
-        if (_oauth_token === null) {
-            var error = "To get the authorize URL, the OAuth token must be set.";
-            console.warn(error);
-            if (dfd) {
-                dfd.reject({ error: error });
-                return _getPromise(dfd);
-            }
-            return false;
-        }
-        var url = _endpoint_oauth + "oauth/authorize?oauth_token=" + _url(_oauth_token);
-        if (params.force_login === true) {
-            url += "&force_login=1";
-            if (params.screen_name !== null) {
-                url += "&screen_name=" + params.screen_name;
-            }
-        }
-        if (typeof callback === "function") {
-            callback(url);
-        }
-        if (dfd) {
-            dfd.resolve(url);
-            return _getPromise(dfd);
-        }
-        // no promises
-        return true;
+        return oauth_authenticate(params, callback, 'authorize');
     };
 
     /**
@@ -743,7 +804,7 @@ var Codebird = function () {
                     callback(reply);
                 }
                 if (dfd) {
-                    dfd.resolve(reply);
+                    dfd.resolve({ reply: reply });
                 }
             }
         };
@@ -1053,6 +1114,31 @@ var Codebird = function () {
     };
 
     /**
+     * Signature helper
+     *
+     * @param string httpmethod   Usually either 'GET' or 'POST' or 'DELETE'
+     * @param string method       The API method to call
+     * @param array  base_params  The signature base parameters
+     *
+     * @return string signature
+     */
+    var _getSignature = function (httpmethod, method, keys, base_params) {
+        // convert params to string
+        var base_string = "", key, value;
+        for (var i = 0; i < keys.length; i++) {
+            key = keys[i];
+            value = base_params[key];
+            base_string += key + "=" + _url(value) + "&";
+        }
+        base_string = base_string.substring(0, base_string.length - 1);
+        return _sha1(
+            httpmethod + "&" +
+            _url(method) + "&" +
+            _url(base_string)
+        );
+    };
+
+    /**
      * Generates an OAuth signature
      *
      * @param string          httpmethod    Usually either 'GET' or 'POST' or 'DELETE'
@@ -1094,19 +1180,13 @@ var Codebird = function () {
             sign_base_params[key] = value;
         }
         var keys = _ksort(sign_base_params);
-        var sign_base_string = "";
-        for (var i = 0; i < keys.length; i++) {
-            key = keys[i];
-            value = sign_base_params[key];
-            sign_base_string += key + "=" + _url(value) + "&";
-        }
-        sign_base_string = sign_base_string.substring(0, sign_base_string.length - 1);
-        var signature    = _sha1(httpmethod + "&" + _url(method) + "&" + _url(sign_base_string));
+
+        var signature = _getSignature(httpmethod, method, keys, sign_base_params);
 
         params = append_to_get ? sign_base_params : oauth_params;
         params.oauth_signature = signature;
         keys = _ksort(params);
-        var authorization = "";
+        var authorization = "", i;
         if (append_to_get) {
             for(i = 0; i < keys.length; i++) {
                 key = keys[i];
@@ -1501,7 +1581,7 @@ var Codebird = function () {
                     callback(reply, rate);
                 }
                 if (dfd) {
-                    dfd.resolve(reply, rate);
+                    dfd.resolve({ reply: reply, rate: rate });
                 }
             }
         };
