@@ -329,6 +329,9 @@
                     "application/rate_limit_status",
                     "blocks/ids",
                     "blocks/list",
+                    "collections/entries",
+                    "collections/list",
+                    "collections/show",
                     "direct_messages",
                     "direct_messages/sent",
                     "direct_messages/show",
@@ -403,6 +406,13 @@
                     "account/update_profile_image",
                     "blocks/create",
                     "blocks/destroy",
+                    "collections/create",
+                    "collections/destroy",
+                    "collections/entries/add",
+                    "collections/entries/curate",
+                    "collections/entries/move",
+                    "collections/entries/remove",
+                    "collections/update",
                     "direct_messages/destroy",
                     "direct_messages/new",
                     "favorites/create",
@@ -1331,7 +1341,21 @@
             var medias = [
                 "media/upload"
             ];
-            return medias.join(" ").indexOf(method) > -1;
+            return medias.indexOf(method) > -1;
+        };
+
+        /**
+         * Detects if API call should use JSON body
+         *
+         * @param string method The API method to call
+         *
+         * @return bool Whether the method is defined as accepting JSON body
+         */
+        var _detectJsonBody = function (method) {
+            var json_bodies = [
+                "collections/entries/curate"
+            ];
+            return json_bodies.indexOf(method) > -1;
         };
 
         /**
@@ -1501,6 +1525,9 @@
                         authorization = _sign(httpmethod, url, {});
                     }
                     params = _buildMultipart(method, params);
+                } else if (_detectJsonBody(method)) {
+                    authorization = _sign(httpmethod, url, {});
+                    params = JSON.stringify(params);
                 } else {
                     if (!app_only_auth) {
                         authorization = _sign(httpmethod, url, params);
@@ -1521,6 +1548,8 @@
                 if (multipart) {
                     xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
                         + post_fields.split("\r\n")[0].substring(2));
+                } else if (_detectJsonBody(method)) {
+                    xml.setRequestHeader("Content-Type", "application/json");
                 } else {
                     xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 }

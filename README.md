@@ -632,6 +632,38 @@ When this error occurs, advise the user to
 [generate a temporary password](https://twitter.com/settings/applications)
 on twitter.com and use that to complete signing in to the application.
 
+### …access the Collections API?
+
+Collections are a type of timeline that you control and can be hand curated
+and/or programmed using an API.
+
+Pay close attention to the differences in how collections are presented —
+often they will be decomposed, efficient objects with information about users,
+Tweets, and timelines grouped, simplified, and stripped of unnecessary repetition.
+
+Never care about the OAuth signing specialities and the JSON POST body
+for POST collections/entries/curate.json. Codebird takes off the work for you
+and will always send the correct Content-Type automatically.
+
+Find out more about the [Collections API](https://dev.twitter.com/rest/collections/about) in the Twitter API docs.
+
+Here’s a sample for adding a tweet using that API method:
+
+```javascript
+cb.__call(
+    "collections_entries_curate",
+    {
+      "id": "custom-672852634622144512",
+      "changes": [
+        {"op": "add", "tweet_id": "672727928262828032"}
+      ]
+    },
+    function (reply, rate) {
+        document.body.innerText = JSON.stringify(reply);
+    }
+);
+```
+
 ### …use promises instead of callback functions?
 
 Have you ever heard of the [Pyramid of Doom](http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/)?
