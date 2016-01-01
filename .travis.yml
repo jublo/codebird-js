@@ -1,0 +1,26 @@
+# The Travis setup:
+# - run lint for every JS version
+# - run testsuite for every JS version
+
+language: node_js
+
+node_js:
+  - "0.10"
+  - "0.12"
+  - iojs
+  - "4"
+  - "5"
+
+sudo: false
+
+script:
+  - ./node_modules/eslint/bin/eslint.js codebird.js
+  - npm test
+
+matrix:
+  fast_finish: true
+
+# trigger Buildtime Trend Service to parse Travis CI log
+notifications:
+  webhooks:
+    - https://buildtimetrend.herokuapp.com/travis

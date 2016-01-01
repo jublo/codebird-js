@@ -25,6 +25,11 @@
     "url": "https://github.com/jublonet/codebird-js.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "blue-tape -r ./codebird test/*.js | faucet"
+  },
+  "devDependencies": {
+    "blue-tape": "^0.1.11",
+    "eslint": "^1.10.3",
+    "faucet": "0.0.1"
   }
 }
