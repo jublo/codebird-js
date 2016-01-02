@@ -16,7 +16,7 @@
     "Joshua Atkins <joshua.atkins@jublo.net> (http://atkins.im/)",
     "J.M. <jm@jublo.net> (http://mynetx.net/)"
   ],
-  "main": "codebird.js",
+  "main": "codebird.es7.js",
   "directories": {
     "example": "examples"
   },
@@ -25,11 +25,17 @@
     "url": "https://github.com/jublonet/codebird-js.git"
   },
   "scripts": {
-    "test": "blue-tape -r ./codebird test/*.js | faucet"
+    "build": "babel codebird.es7.js -o codebird.js",
+    "test": "babel codebird.es7.js -o codebird.js && tape test/*.js | faucet"
   },
   "devDependencies": {
-    "blue-tape": "^0.1.11",
+    "babel-cli": "^6.3.17",
+    "babel-preset-es2015": "^6.3.13",
     "eslint": "^1.10.3",
-    "faucet": "0.0.1"
+    "faucet": "0.0.1",
+    "q": "^1.4.1",
+    "tape": "^4.4.0",
+    "tape-promise": "^1.0.1",
+    "xmlhttprequest": "^1.8.0"
   }
 }

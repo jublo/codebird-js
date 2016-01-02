@@ -8,6 +8,8 @@ codebird-js - changelog
 - Drop support for undocumented API methods
 + Add security check hasOwnProperty
 + #110 Add support for Collections API
++ Transform codebase to EcmaScript 7
++ #25 Add unit testing suite
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array

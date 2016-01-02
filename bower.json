@@ -7,7 +7,7 @@
     "J.M. <jm@jublo.net>"
   ],
   "description": "A Twitter library in JavaScript.",
-  "main": "codebird.js",
+  "main": "codebird.es7.js",
   "moduleType": [
     "amd",
     "globals",

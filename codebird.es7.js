@@ -1,9 +1,3 @@
-"use strict";
-
-var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
-
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
 /**
  * A Twitter library in JavaScript
  *
@@ -25,16 +19,16 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       define,
       require */
 
-(function () {
+(() => {
   /**
    * A Twitter library in JavaScript
    *
    * @package codebird
    * @subpackage codebird-js
    */
-  var Codebird = function Codebird() {
+  const Codebird = () => {
 
-    var props = {};
+    let props = {};
     /**
      * The OAuth consumer key of your registered app
      */
@@ -63,12 +57,12 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     /**
      * The API endpoint to use
      */
-    props._endpoint = props._endpoint_base + "1.1/";
+    props._endpoint = `${props._endpoint_base}1.1/`;
 
     /**
      * The media API endpoint to use
      */
-    props._endpoint_media = props._endpoint_base_media + "1.1/";
+    props._endpoint_media = `${props._endpoint_base_media}1.1/`;
 
     /**
      * The API endpoint base to use
@@ -84,7 +78,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      * Whether to access the API via a proxy that is allowed by CORS
      * Assume that CORS is only necessary in browsers
      */
-    props._use_proxy = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined";
+    props._use_proxy = (typeof navigator !== "undefined"
+      && typeof navigator.userAgent !== "undefined"
+      );
 
     /**
      * The Request or access token. Used to sign requests
@@ -101,7 +97,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      */
     props._version = "3.0.0-dev";
 
-    var methods = {};
+    let methods = {};
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -111,7 +107,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return void
      */
-    methods.setConsumerKey = function (key, secret) {
+    methods.setConsumerKey = (key, secret) => {
       props._oauth_consumer_key = key;
       props._oauth_consumer_secret = secret;
     };
@@ -123,7 +119,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return void
      */
-    methods.setBearerToken = function (token) {
+    methods.setBearerToken = token => {
       props._oauth_bearer_token = token;
     };
 
@@ -132,7 +128,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The version number
      */
-    methods.getVersion = function () {
+    methods.getVersion = () => {
       return props._version;
     };
 
@@ -144,7 +140,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return void
      */
-    methods.setToken = function (token, secret) {
+    methods.setToken = (token, secret) => {
       props._oauth_token = token;
       props._oauth_token_secret = secret;
     };
@@ -154,8 +150,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return bool
      */
-    methods.logout = function () {
-      props._oauth_token = props._oauth_token_secret = null;
+    methods.logout = () => {
+      props._oauth_token =
+      props._oauth_token_secret = null;
 
       return true;
     };
@@ -167,7 +164,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return void
      */
-    methods.setUseProxy = function (use_proxy) {
+    methods.setUseProxy = use_proxy => {
       props._use_proxy = !!use_proxy;
     };
 
@@ -178,7 +175,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return void
      */
-    methods.setProxy = function (proxy) {
+    methods.setProxy = proxy => {
       // add trailing slash if missing
       if (!proxy.match(/\/$/)) {
         proxy += "/";
@@ -197,15 +194,15 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return mixed The encoded data
      */
-    methods._url = function (data) {
-      if (/boolean|number|string/.test(typeof data === "undefined" ? "undefined" : _typeof(data))) {
+    methods._url = data => {
+      if ((/boolean|number|string/).test(typeof data)) {
         return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
       } else {
         return "";
       }
     };
 
-    var b64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    const b64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     /**
      * Gets the base64-encoded SHA1 hash for the given data
@@ -221,13 +218,14 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The hash
      */
-    methods._sha1 = (function () {
-      function n(e, b) {
+    methods._sha1 = (() => {
+      function n (e, b) {
         e[b >> 5] |= 128 << 24 - b % 32;
         e[(b + 64 >> 9 << 4) + 15] = b;
-        for (var c = new Array(80), a = 1732584193, d = -271733879, h = -1732584194, k = 271733878, g = -1009589776, p = 0; p < e.length; p += 16) {
+        for (var c = new Array(80), a = 1732584193, d = -271733879, h = -1732584194,
+          k = 271733878, g = -1009589776, p = 0; p < e.length; p += 16) {
           for (var o = a, q = d, r = h, s = k, t = g, f = 0; 80 > f; f++) {
-            var m = undefined;
+            let m;
 
             if (f < 16) {
               m = e[p + f];
@@ -237,7 +235,10 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
             }
 
             c[f] = m;
-            m = l(l(a << 5 | a >>> 27, 20 > f ? d & h | ~d & k : 40 > f ? d ^ h ^ k : 60 > f ? d & h | d & k | h & k : d ^ h ^ k), l(l(g, c[f]), 20 > f ? 1518500249 : 40 > f ? 1859775393 : 60 > f ? -1894007588 : -899497514));
+            m = l(l(a << 5 | a >>> 27, 20 > f ? d & h | ~d & k : 40 > f ? d ^
+              h ^ k : 60 > f ? d & h | d & k | h & k : d ^ h ^ k), l(
+                l(g, c[f]), 20 > f ? 1518500249 : 40 > f ? 1859775393 :
+                  60 > f ? -1894007588 : -899497514));
             g = k;
             k = h;
             h = d << 30 | d >>> 2;
@@ -265,16 +266,17 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         return b;
       }
       var g = 8;
-      return function (e) {
-        var b = props._oauth_consumer_secret + "&" + (null !== props._oauth_token_secret ? props._oauth_token_secret : "");
+      return e => {
+        let b = `${props._oauth_consumer_secret}&${null !== props._oauth_token_secret ?
+          props._oauth_token_secret : ""}`;
         if (props._oauth_consumer_secret === null) {
           console.warn("To generate a hash, the consumer secret must be set.");
         }
-        var c = q(b);
+        let c = q(b);
         if (c.length > 16) {
           c = n(c, b.length * g);
         }
-        var bb = new Array(16);
+        let bb = new Array(16);
         for (var a = new Array(16), d = 0; d < 16; d++) {
           a[d] = c[d] ^ 909522486;
           bb[d] = c[d] ^ 1549556828;
@@ -283,8 +285,11 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         bb = n(bb.concat(c), 672);
         b = "";
         for (g = 0; g < 4 * bb.length; g += 3) {
-          for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >> 8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 - (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
-            b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b + b64_alphabet.charAt(d >> 6 * (3 - e) & 63);
+          for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >>
+            8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 -
+              (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
+            b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b +
+              b64_alphabet.charAt(d >> 6 * (3 - e) & 63);
           }
         }
         return b;
@@ -307,15 +312,11 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The base64 representation
      */
-    methods._base64_encode = function (a) {
-      var d = undefined,
-          e = undefined,
-          f = undefined,
-          b = undefined,
-          g = 0,
-          h = 0,
-          i = b64_alphabet,
-          c = [];
+    methods._base64_encode = a => {
+      let d, e, f, b, g = 0,
+        h = 0,
+        i = b64_alphabet,
+        c = [];
       if (!a) {
         return a;
       }
@@ -353,17 +354,16 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The HTTP query
      */
-    methods._http_build_query = function (e, f, b) {
+    methods._http_build_query = (e, f, b) => {
       function g(c, a, d) {
-        var b = undefined,
-            e = [];
+        let b, e = [];
         if (a === true) {
           a = "1";
         } else if (a === false) {
           a = "0";
         }
         if (null !== a) {
-          if ((typeof a === "undefined" ? "undefined" : _typeof(a)) === "object") {
+          if (typeof a === "object") {
             for (b in a) {
               if (a.hasOwnProperty(b) && a[b] !== null) {
                 e.push(g(c + "[" + b + "]", a[b], d));
@@ -379,9 +379,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
           return "";
         }
       }
-      var d,
-          c,
-          h = [];
+      var d, c, h = [];
       if (!b) {
         b = "&";
       }
@@ -408,15 +406,13 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The random string
      */
-    methods._nonce = function () {
-      var length = arguments.length <= 0 || arguments[0] === undefined ? 8 : arguments[0];
-
+    methods._nonce = (length = 8) => {
       if (length < 1) {
         console.warn("Invalid nonce length.");
       }
-      var nonce = "";
-      for (var i = 0; i < length; i++) {
-        var character = Math.floor(Math.random() * 61);
+      let nonce = "";
+      for (let i = 0; i < length; i++) {
+        let character = Math.floor(Math.random() * 61);
         nonce += b64_alphabet.substring(character, character + 1);
       }
       return nonce;
@@ -429,16 +425,14 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return array The sorted keys
      */
-    methods._ksort = function (input_arr) {
-      var keys = [],
-          sorter = undefined,
-          k = undefined;
+    methods._ksort = input_arr => {
+      let keys = [], sorter, k;
 
-      sorter = function (a, b) {
-        var a_float = parseFloat(a),
-            b_float = parseFloat(b),
-            a_numeric = a_float + "" === a,
-            b_numeric = b_float + "" === b;
+      sorter = (a, b) => {
+        let a_float = parseFloat(a),
+          b_float = parseFloat(b),
+          a_numeric = a_float + "" === a,
+          b_numeric = b_float + "" === b;
         if (a_numeric && b_numeric) {
           return a_float > b_float ? 1 : a_float < b_float ? -1 : 0;
         } else if (a_numeric && !b_numeric) {
@@ -466,10 +460,10 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return object clone The cloned object
      */
-    methods._clone = function (obj) {
-      var clone = {};
-      for (var i in obj) {
-        if (_typeof(obj[i]) === "object") {
+    methods._clone = obj => {
+      let clone = {};
+      for (let i in obj) {
+        if (typeof (obj[i]) === "object") {
           clone[i] = methods._clone(obj[i]);
         } else {
           clone[i] = obj[i];
@@ -483,38 +477,47 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return object The XMLHttpRequest object instance
      */
-    methods._getXmlRequestObject = function () {
-      var xml = null;
+    methods._getXmlRequestObject = () => {
+      let xml = null;
       // first, try the W3-standard object
-      if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object" && window && typeof window.XMLHttpRequest !== "undefined") {
+      if (typeof window === "object"
+        && window
+        && typeof window.XMLHttpRequest !== "undefined"
+        ) {
         xml = new window.XMLHttpRequest();
         // then, try Titanium framework object
-      } else if ((typeof Ti === "undefined" ? "undefined" : _typeof(Ti)) === "object" && Ti && typeof Ti.Network.createHTTPClient !== "undefined") {
-          xml = Ti.Network.createHTTPClient();
-          // are we in an old Internet Explorer?
-        } else if (typeof ActiveXObject !== "undefined") {
-            try {
-              xml = new ActiveXObject("Microsoft.XMLHTTP");
-            } catch (e) {
-              console.error("ActiveXObject object not defined.");
-            }
-            // now, consider RequireJS and/or Node.js objects
-          } else if (typeof require === "function" && require) {
-              var XMLHttpRequest;
-              // look for xmlhttprequest module
-              try {
-                XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-                xml = new XMLHttpRequest();
-              } catch (e1) {
-                // or maybe the user is using xhr2
-                try {
-                  XMLHttpRequest = require("xhr2");
-                  xml = new XMLHttpRequest();
-                } catch (e2) {
-                  console.error("xhr2 object not defined, cancelling.");
-                }
-              }
-            }
+      } else if (typeof Ti === "object"
+        && Ti
+        && typeof Ti.Network.createHTTPClient !== "undefined"
+        ) {
+        xml = Ti.Network.createHTTPClient();
+        // are we in an old Internet Explorer?
+      } else if (typeof ActiveXObject !== "undefined"
+        ) {
+        try {
+          xml = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+          console.error("ActiveXObject object not defined.");
+        }
+        // now, consider RequireJS and/or Node.js objects
+      } else if (typeof require === "function"
+        && require
+        ) {
+        var XMLHttpRequest;
+        // look for xmlhttprequest module
+        try {
+          XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+          xml = new XMLHttpRequest();
+        } catch (e1) {
+          // or maybe the user is using xhr2
+          try {
+            XMLHttpRequest = require("xhr2");
+            xml = new XMLHttpRequest();
+          } catch (e2) {
+            console.error("xhr2 object not defined, cancelling.");
+          }
+        }
+      }
       return xml;
     };
 
@@ -540,24 +543,16 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return object
      */
-    methods._parse_str = function (str, array) {
+    methods._parse_str = (str, array) => {
       var glue1 = "=",
-          glue2 = "&",
-          array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
-          i,
-          j,
-          chr,
-          tmp,
-          key,
-          value,
-          bracket,
-          keys,
-          evalStr,
-          fixStr = function fixStr(str) {
-        return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
-      };
+        glue2 = "&",
+        array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
+        i, j, chr, tmp, key, value, bracket, keys, evalStr,
+        fixStr = str => {
+          return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+        };
       if (!array) {
-        array = undefined.window;
+        array = this.window;
       }
 
       for (i = 0; i < array2.length; i++) {
@@ -607,12 +602,12 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
           evalStr = "array";
           for (j = 0; j < keys.length; j++) {
             key = keys[j];
-            if (key !== "" && key !== " " || j === 0) {
-              key = "'" + key + "'";
+            if ((key !== "" && key !== " ") || j === 0) {
+              key = `'${key}'`;
             } else {
               key = eval(evalStr + ".push([]);") - 1;
             }
-            evalStr += "[" + key + "']";
+            evalStr += `[${key}']`;
             if (j !== keys.length - 1 && eval("typeof " + evalStr) === "undefined") {
               eval(evalStr + " = [];");
             }
@@ -629,11 +624,132 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return array $apimethods
      */
-    methods.getApiMethods = function () {
-      var httpmethods = {
-        GET: ["account/settings", "account/verify_credentials", "application/rate_limit_status", "blocks/ids", "blocks/list", "collections/entries", "collections/list", "collections/show", "direct_messages", "direct_messages/sent", "direct_messages/show", "favorites/list", "followers/ids", "followers/list", "friends/ids", "friends/list", "friendships/incoming", "friendships/lookup", "friendships/lookup", "friendships/no_retweets/ids", "friendships/outgoing", "friendships/show", "geo/id/:place_id", "geo/reverse_geocode", "geo/search", "geo/similar_places", "help/configuration", "help/languages", "help/privacy", "help/tos", "lists/list", "lists/members", "lists/members/show", "lists/memberships", "lists/ownerships", "lists/show", "lists/statuses", "lists/subscribers", "lists/subscribers/show", "lists/subscriptions", "mutes/users/ids", "mutes/users/list", "oauth/authenticate", "oauth/authorize", "saved_searches/list", "saved_searches/show/:id", "search/tweets", "site", "statuses/firehose", "statuses/home_timeline", "statuses/mentions_timeline", "statuses/oembed", "statuses/retweeters/ids", "statuses/retweets/:id", "statuses/retweets_of_me", "statuses/sample", "statuses/show/:id", "statuses/user_timeline", "trends/available", "trends/closest", "trends/place", "user", "users/contributees", "users/contributors", "users/profile_banner", "users/search", "users/show", "users/suggestions", "users/suggestions/:slug", "users/suggestions/:slug/members"],
-        POST: ["account/remove_profile_banner", "account/settings__post", "account/update_delivery_device", "account/update_profile", "account/update_profile_background_image", "account/update_profile_banner", "account/update_profile_colors", "account/update_profile_image", "blocks/create", "blocks/destroy", "collections/create", "collections/destroy", "collections/entries/add", "collections/entries/curate", "collections/entries/move", "collections/entries/remove", "collections/update", "direct_messages/destroy", "direct_messages/new", "favorites/create", "favorites/destroy", "friendships/create", "friendships/destroy", "friendships/update", "lists/create", "lists/destroy", "lists/members/create", "lists/members/create_all", "lists/members/destroy", "lists/members/destroy_all", "lists/subscribers/create", "lists/subscribers/destroy", "lists/update", "media/upload", "mutes/users/create", "mutes/users/destroy", "oauth/access_token", "oauth/request_token", "oauth2/invalidate_token", "oauth2/token", "saved_searches/create", "saved_searches/destroy/:id", "statuses/destroy/:id", "statuses/filter", "statuses/lookup", "statuses/retweet/:id", "statuses/update", "statuses/update_with_media", // deprecated, use media/upload
-        "users/lookup", "users/report_spam"]
+    methods.getApiMethods = () => {
+      const httpmethods = {
+        GET: [
+          "account/settings",
+          "account/verify_credentials",
+          "application/rate_limit_status",
+          "blocks/ids",
+          "blocks/list",
+          "collections/entries",
+          "collections/list",
+          "collections/show",
+          "direct_messages",
+          "direct_messages/sent",
+          "direct_messages/show",
+          "favorites/list",
+          "followers/ids",
+          "followers/list",
+          "friends/ids",
+          "friends/list",
+          "friendships/incoming",
+          "friendships/lookup",
+          "friendships/lookup",
+          "friendships/no_retweets/ids",
+          "friendships/outgoing",
+          "friendships/show",
+          "geo/id/:place_id",
+          "geo/reverse_geocode",
+          "geo/search",
+          "geo/similar_places",
+          "help/configuration",
+          "help/languages",
+          "help/privacy",
+          "help/tos",
+          "lists/list",
+          "lists/members",
+          "lists/members/show",
+          "lists/memberships",
+          "lists/ownerships",
+          "lists/show",
+          "lists/statuses",
+          "lists/subscribers",
+          "lists/subscribers/show",
+          "lists/subscriptions",
+          "mutes/users/ids",
+          "mutes/users/list",
+          "oauth/authenticate",
+          "oauth/authorize",
+          "saved_searches/list",
+          "saved_searches/show/:id",
+          "search/tweets",
+          "site",
+          "statuses/firehose",
+          "statuses/home_timeline",
+          "statuses/mentions_timeline",
+          "statuses/oembed",
+          "statuses/retweeters/ids",
+          "statuses/retweets/:id",
+          "statuses/retweets_of_me",
+          "statuses/sample",
+          "statuses/show/:id",
+          "statuses/user_timeline",
+          "trends/available",
+          "trends/closest",
+          "trends/place",
+          "user",
+          "users/contributees",
+          "users/contributors",
+          "users/profile_banner",
+          "users/search",
+          "users/show",
+          "users/suggestions",
+          "users/suggestions/:slug",
+          "users/suggestions/:slug/members"
+        ],
+        POST: [
+          "account/remove_profile_banner",
+          "account/settings__post",
+          "account/update_delivery_device",
+          "account/update_profile",
+          "account/update_profile_background_image",
+          "account/update_profile_banner",
+          "account/update_profile_colors",
+          "account/update_profile_image",
+          "blocks/create",
+          "blocks/destroy",
+          "collections/create",
+          "collections/destroy",
+          "collections/entries/add",
+          "collections/entries/curate",
+          "collections/entries/move",
+          "collections/entries/remove",
+          "collections/update",
+          "direct_messages/destroy",
+          "direct_messages/new",
+          "favorites/create",
+          "favorites/destroy",
+          "friendships/create",
+          "friendships/destroy",
+          "friendships/update",
+          "lists/create",
+          "lists/destroy",
+          "lists/members/create",
+          "lists/members/create_all",
+          "lists/members/destroy",
+          "lists/members/destroy_all",
+          "lists/subscribers/create",
+          "lists/subscribers/destroy",
+          "lists/update",
+          "media/upload",
+          "mutes/users/create",
+          "mutes/users/destroy",
+          "oauth/access_token",
+          "oauth/request_token",
+          "oauth2/invalidate_token",
+          "oauth2/token",
+          "saved_searches/create",
+          "saved_searches/destroy/:id",
+          "statuses/destroy/:id",
+          "statuses/filter",
+          "statuses/lookup",
+          "statuses/retweet/:id",
+          "statuses/update",
+          "statuses/update_with_media", // deprecated, use media/upload
+          "users/lookup",
+          "users/report_spam"
+        ]
       };
       return httpmethods;
     };
@@ -645,7 +761,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     /**
      * Get a deferred object
      */
-    methods._getDfd = function () {
+    methods._getDfd = () => {
       if (typeof window !== "undefined") {
         if (typeof window.jQuery !== "undefined" && window.jQuery.Deferred) {
           return window.jQuery.Deferred();
@@ -661,30 +777,30 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         }
       }
       if (typeof require !== "undefined") {
-        var promise_class = false;
+        let promise_class = false;
         try {
           promise_class = require("jquery");
-        } catch (e) {}
+        } catch (e) { }
         if (promise_class) {
           return promise_class.Deferred();
         }
         try {
           promise_class = require("q");
-        } catch (e) {}
+        } catch (e) { }
         if (!promise_class) {
           try {
             promise_class = require("rsvp");
-          } catch (e) {}
+          } catch (e) { }
         }
         if (!promise_class) {
           try {
             promise_class = require("when");
-          } catch (e) {}
+          } catch (e) { }
         }
         if (promise_class) {
           try {
             return promise_class.defer();
-          } catch (e) {}
+          } catch (e) { }
         }
       }
       return false;
@@ -693,7 +809,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     /**
      * Get a promise from the dfd object
      */
-    methods._getPromise = function (dfd) {
+    methods._getPromise = dfd => {
       if (typeof dfd.promise === "function") {
         return dfd.promise();
       }
@@ -711,9 +827,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return array apiparams
      */
-    methods._parseApiParams = function (params) {
-      var apiparams = {};
-      if ((typeof params === "undefined" ? "undefined" : _typeof(params)) === "object") {
+    methods._parseApiParams = params => {
+      let apiparams = {};
+      if (typeof params === "object") {
         apiparams = params;
       } else {
         methods._parse_str(params, apiparams); //TODO
@@ -729,12 +845,12 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return array apiparams
      */
-    methods._stringifyNullBoolParams = function (apiparams) {
-      for (var key in apiparams) {
+    methods._stringifyNullBoolParams = apiparams => {
+      for (let key in apiparams) {
         if (!apiparams.hasOwnProperty(key)) {
           continue;
         }
-        var value = apiparams[key];
+        let value = apiparams[key];
         if (value === null) {
           apiparams[key] = "null";
         } else if (value === true || value === false) {
@@ -752,9 +868,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string API method to call
      */
-    methods._mapFnInsertSlashes = function (fn) {
-      return fn.split("_").join("/");
-    };
+    methods._mapFnInsertSlashes = fn => fn.split("_").join("/");
 
     /**
      * API method mapping: Restore _ character in named parameters
@@ -763,11 +877,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string API method with restored underscores
      */
-    methods._mapFnRestoreParamUnderscores = function (method) {
-      var url_parameters_with_underscore = ["screen_name", "place_id"];
-      var i = undefined,
-          param = undefined,
-          replacement_was = undefined;
+    methods._mapFnRestoreParamUnderscores = method => {
+      const url_parameters_with_underscore = ["screen_name", "place_id"];
+      let i, param, replacement_was;
       for (i = 0; i < url_parameters_with_underscore.length; i++) {
         param = url_parameters_with_underscore[i].toUpperCase();
         replacement_was = param.split("_").join("/");
@@ -777,6 +889,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       return method;
     };
 
+
     /**
      * Maps called PHP magic method name to Twitter API method
      *
@@ -785,11 +898,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string[] (string method, string method_template)
      */
-    methods._mapFnToApiMethod = function (fn, apiparams) {
-      var method = "",
-          param = undefined,
-          i = undefined,
-          j = undefined;
+    methods._mapFnToApiMethod = (fn, apiparams) => {
+      let method = "",
+        param, i, j;
 
       // replace _ by /
       method = methods._mapFnInsertSlashes(fn);
@@ -798,18 +909,18 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       method = methods._mapFnRestoreParamUnderscores(method);
 
       // replace AA by URL parameters
-      var method_template = method;
-      var match = method.match(/[A-Z_]{2,}/);
+      let method_template = method;
+      const match = method.match(/[A-Z_]{2,}/);
       if (match) {
         for (i = 0; i < match.length; i++) {
           param = match[i];
-          var param_l = param.toLowerCase();
+          let param_l = param.toLowerCase();
           method_template = method_template.split(param).join(":" + param_l);
           if (typeof apiparams[param_l] === "undefined") {
             for (j = 0; j < 26; j++) {
               method_template = method_template.split(String.fromCharCode(65 + j)).join("_" + String.fromCharCode(97 + j));
             }
-            console.warn("To call the templated method \"" + method_template + "\", specify the parameter value for \"" + param_l + "\".");
+            console.warn(`To call the templated method "${method_template}", specify the parameter value for "${param_l}".`);
           }
           method = method.split(param).join(apiparams[param_l]);
           delete apiparams[param_l];
@@ -825,6 +936,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       return [method, method_template];
     };
 
+
     /**
      * Detects HTTP method to use for API call
      *
@@ -833,9 +945,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The HTTP method that should be used
      */
-    methods._detectMethod = function (method, params) {
+    methods._detectMethod = (method, params) => {
       if (typeof params.httpmethod !== "undefined") {
-        var httpmethod = params.httpmethod;
+        let httpmethod = params.httpmethod;
         delete params.httpmethod;
         return httpmethod;
       }
@@ -845,17 +957,19 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         case "account/settings":
         case "account/login_verification_enrollment":
         case "account/login_verification_request":
-          method = Object.keys(params).length ? method + "__post" : method;
+          method = Object.keys(params).length ? `${method}__post` : method;
           break;
       }
 
-      var apimethods = methods.getApiMethods();
-      for (var httpmethod in apimethods) {
-        if (apimethods.hasOwnProperty(httpmethod) && apimethods[httpmethod].indexOf(method) > -1) {
+      const apimethods = methods.getApiMethods();
+      for (let httpmethod in apimethods) {
+        if (apimethods.hasOwnProperty(httpmethod)
+          && apimethods[httpmethod].indexOf(method) > -1
+          ) {
           return httpmethod;
         }
       }
-      throw "Can't find HTTP method to use for \"" + method + "\".";
+      throw `Can't find HTTP method to use for "${method}".`;
     };
 
     /**
@@ -865,13 +979,17 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return bool Whether the method should be sent as multipart
      */
-    methods._detectMultipart = function (method) {
-      var multiparts = [
+    methods._detectMultipart = method => {
+      const multiparts = [
       // Tweets
-      "statuses/update_with_media", "media/upload",
+        "statuses/update_with_media",
+        "media/upload",
 
       // Users
-      "account/update_profile_background_image", "account/update_profile_image", "account/update_profile_banner"];
+        "account/update_profile_background_image",
+        "account/update_profile_image",
+        "account/update_profile_banner"
+      ];
       return multiparts.indexOf(method) > -1;
     };
 
@@ -884,29 +1002,23 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string signature
      */
-    methods._getSignature = function (httpmethod, method, keys, base_params) {
-      var _url = methods._url;
-      var _sha1 = methods._sha1;
+    methods._getSignature = (httpmethod, method, keys, base_params) => {
+      const {_url, _sha1} = methods;
       // convert params to string
-
-      var base_string = "",
-          key = undefined,
-          value = undefined;
-      for (var i = 0; i < keys.length; i++) {
+      let base_string = "", key, value;
+      for (let i = 0; i < keys.length; i++) {
         key = keys[i];
         value = base_params[key];
-        base_string += key + "=" + _url(value) + "&";
+        base_string += `${key}=${_url(value)}&`;
       }
       base_string = base_string.substring(0, base_string.length - 1);
-      return _sha1(httpmethod + "&" + _url(method) + "&" + _url(base_string));
+      return _sha1(`${httpmethod}&${_url(method)}&${_url(base_string)}`);
     };
 
     /**
      * Generates the UNIX timestamp
      */
-    methods._time = function () {
-      return Math.round(new Date().getTime() / 1000);
-    };
+    methods._time = () => Math.round(new Date().getTime() / 1000);
 
     /**
      * Generates an OAuth signature
@@ -917,52 +1029,47 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string Authorization HTTP header
      */
-    methods._sign = function (httpmethod, method) {
-      var params = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-      var _url = methods._url;
-      var _ksort = methods._ksort;
-      var _clone = methods._clone;
-      var _getSignature = methods._getSignature;
-
+    methods._sign = (httpmethod, method, params = {}) => {
+      const {_url, _ksort, _clone, _getSignature} = methods;
       if (props._oauth_consumer_key === null) {
         console.warn("To generate a signature, the consumer key must be set.");
       }
-      var sign_params = {
+      const sign_params = {
         consumer_key: props._oauth_consumer_key,
         version: "1.0",
         timestamp: methods._time(),
         nonce: methods._nonce(),
         signature_method: "HMAC-SHA1"
       };
-      var sign_base_params = {};
+      let sign_base_params = {};
       for (var key in sign_params) {
         if (!sign_params.hasOwnProperty(key)) {
           continue;
         }
-        var value = sign_params[key];
-        sign_base_params["oauth_" + key] = _url(value);
+        let value = sign_params[key];
+        sign_base_params[`oauth_${key}`] = _url(value);
       }
       if (props._oauth_token !== null) {
         sign_base_params.oauth_token = _url(props._oauth_token);
       }
-      var oauth_params = _clone(sign_base_params);
+      const oauth_params = _clone(sign_base_params);
       for (key in params) {
         if (!params.hasOwnProperty(key)) {
           continue;
         }
         sign_base_params[key] = params[key];
       }
-      var keys = _ksort(sign_base_params);
+      let keys = _ksort(sign_base_params);
 
-      var signature = _getSignature(httpmethod, method, keys, sign_base_params);
+      const signature = _getSignature(httpmethod, method, keys, sign_base_params);
 
       params = oauth_params;
       params.oauth_signature = signature;
       keys = _ksort(params);
-      var authorization = "OAuth ";
-      for (var i = 0; i < keys.length; i++) {
+      let authorization = "OAuth ";
+      for (let i = 0; i < keys.length; i++) {
         key = keys[i];
-        authorization += key + "=\"" + _url(params[key]) + "\", ";
+        authorization += `${key}="${_url(params[key])}", `;
       }
       return authorization.substring(0, authorization.length - 2);
     };
@@ -975,26 +1082,29 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return null|string The built multipart request body
      */
-    methods._buildMultipart = function (method, params) {
+    methods._buildMultipart = (method, params) => {
       // well, files will only work in multipart methods
       if (!methods._detectMultipart(method)) {
         return;
       }
 
       // only check specific parameters
-      var possible_methods = [
-      // Tweets
-      "statuses/update_with_media",
-      // Accounts
-      "account/update_profile_background_image", "account/update_profile_image", "account/update_profile_banner"];
-      var possible_files = {
-        // Tweets
-        "statuses/update_with_media": "media[]",
-        // Accounts
-        "account/update_profile_background_image": "image",
-        "account/update_profile_image": "image",
-        "account/update_profile_banner": "banner"
-      };
+      const possible_methods = [
+          // Tweets
+          "statuses/update_with_media",
+          // Accounts
+          "account/update_profile_background_image",
+          "account/update_profile_image",
+          "account/update_profile_banner"
+        ];
+      let possible_files = {
+          // Tweets
+          "statuses/update_with_media": "media[]",
+          // Accounts
+          "account/update_profile_background_image": "image",
+          "account/update_profile_image": "image",
+          "account/update_profile_banner": "banner"
+        };
       // method might have files?
       if (possible_methods.indexOf(method) === -1) {
         return;
@@ -1003,19 +1113,20 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       // check for filenames
       possible_files = possible_files[method].split(" ");
 
-      var multipart_border = "--------------------" + methods._nonce();
-      var multipart_request = "";
-      for (var key in params) {
+      const multipart_border = `--------------------${methods._nonce()}`;
+      let multipart_request = "";
+      for (let key in params) {
         if (!params.hasOwnProperty(key)) {
           continue;
         }
-        multipart_request += "--" + multipart_border + "\r\nContent-Disposition: form-data; name=\"" + key + "\"";
+        multipart_request +=
+          `--${multipart_border}\r\nContent-Disposition: form-data; name="${key}"`;
         if (possible_files.indexOf(key) === -1) {
           multipart_request += "\r\nContent-Transfer-Encoding: base64";
         }
-        multipart_request += "\r\n\r\n" + params[key] + "\r\n";
+        multipart_request += `\r\n\r\n${params[key]}\r\n`;
       }
-      multipart_request += "--" + multipart_border + "--";
+      multipart_request += `--${multipart_border}--`;
       return multipart_request;
     };
 
@@ -1026,8 +1137,10 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return bool Whether the method is defined in media API
      */
-    methods._detectMedia = function (method) {
-      var medias = ["media/upload"];
+    methods._detectMedia = method => {
+      const medias = [
+        "media/upload"
+      ];
       return medias.indexOf(method) > -1;
     };
 
@@ -1038,8 +1151,10 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return bool Whether the method is defined as accepting JSON body
      */
-    methods._detectJsonBody = function (method) {
-      var json_bodies = ["collections/entries/curate"];
+    methods._detectJsonBody = method => {
+      const json_bodies = [
+        "collections/entries/curate"
+      ];
       return json_bodies.indexOf(method) > -1;
     };
 
@@ -1050,8 +1165,8 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The URL to send the request to
      */
-    methods._getEndpoint = function (method) {
-      var url = undefined;
+    methods._getEndpoint = method => {
+      let url;
       if (method.substring(0, 5) === "oauth") {
         url = props._endpoint_oauth + method;
       } else if (methods._detectMedia(method)) {
@@ -1069,31 +1184,32 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return array|object The parsed reply
      */
-    methods._parseApiReply = function (reply) {
+    methods._parseApiReply = reply => {
       if (typeof reply !== "string" || reply === "") {
         return {};
       }
       if (reply === "[]") {
         return [];
       }
-      var parsed = undefined;
+      let parsed;
       try {
         parsed = JSON.parse(reply);
       } catch (e) {
         parsed = {};
         // assume query format
-        var elements = reply.split("&");
-        for (var i = 0; i < elements.length; i++) {
-          var element = elements[i].split("=", 2);
-          if (element.length > 1) {
+        let elements = reply.split("&");
+        for (let i = 0; i < elements.length; i++) {
+        let element = elements[i].split("=", 2);
+        if (element.length > 1) {
             parsed[element[0]] = decodeURIComponent(element[1]);
-          } else {
+        } else {
             parsed[element[0]] = null;
-          }
+        }
         }
       }
       return parsed;
     };
+
 
     /**
      * Uncommon API methods
@@ -1104,12 +1220,8 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return object Promise
      */
-    methods.oauth_authenticate = function () {
-      var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-      var callback = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
-      var type = arguments.length <= 2 || arguments[2] === undefined ? "authenticate" : arguments[2];
-
-      var dfd = methods._getDfd();
+    methods.oauth_authenticate = (params = {}, callback = undefined, type = "authenticate") => {
+      const dfd = methods._getDfd();
       if (typeof params.force_login === "undefined") {
         params.force_login = null;
       }
@@ -1120,20 +1232,20 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         type = "authenticate";
       }
       if (props._oauth_token === null) {
-        var error = "To get the " + type + " URL, the OAuth token must be set.";
+        const error = `To get the ${type} URL, the OAuth token must be set.`;
         console.warn(error);
         if (dfd) {
-          dfd.reject({ error: error });
+          dfd.reject({ error });
           return methods._getPromise(dfd);
         }
         throw error;
       }
-      var url = props._endpoint_oauth + "oauth/" + type + "?oauth_token=" + methods._url(props._oauth_token);
+      let url = `${props._endpoint_oauth}oauth/${type}?oauth_token=${methods._url(props._oauth_token)}`;
       if (params.force_login === true) {
         url += "&force_login=1";
       }
       if (params.screen_name !== null) {
-        url += "&screen_name=" + params.screen_name;
+        url += `&screen_name=${params.screen_name}`;
       }
       if (typeof callback === "function") {
         callback(url);
@@ -1151,7 +1263,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      *
      * @return string The OAuth authorize URL
      */
-    methods.oauth_authorize = function (params, callback) {
+    methods.oauth_authorize = (params, callback) => {
       return methods.oauth_authenticate(params, callback, "authorize");
     };
 
@@ -1161,49 +1273,55 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      * @return object Promise
      */
 
-    methods.oauth2_token = function (callback) {
-      var dfd = methods._getDfd();
+    methods.oauth2_token = callback => {
+      const dfd = methods._getDfd();
 
       if (props._oauth_consumer_key === null) {
-        var error = "To obtain a bearer token, the consumer key must be set.";
+        const error = "To obtain a bearer token, the consumer key must be set.";
         console.warn(error);
         if (dfd) {
-          dfd.reject({ error: error });
+          dfd.reject({ error });
           return methods._getPromise(dfd);
         }
         return false;
       }
 
       if (!dfd && typeof callback === "undefined") {
-        callback = function () {};
+        callback = () => {};
       }
 
-      var post_fields = "grant_type=client_credentials";
-      var url = props._endpoint_oauth + "oauth2/token";
+      const post_fields = "grant_type=client_credentials";
+      let url = props._endpoint_oauth + "oauth2/token";
 
       if (props._use_proxy) {
-        url = url.replace(props._endpoint_base, props._endpoint_proxy);
+        url = url.replace(
+          props._endpoint_base,
+          props._endpoint_proxy
+          );
       }
 
-      var xml = methods._getXmlRequestObject();
+      const xml = methods._getXmlRequestObject();
       if (xml === null) {
         return;
       }
       xml.open("POST", url, true);
       xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xml.setRequestHeader((props._use_proxy ? "X-" : "") + "Authorization", "Basic " + methods._base64_encode(props._oauth_consumer_key + ":" + props._oauth_consumer_secret));
+      xml.setRequestHeader(
+        `${props._use_proxy ? "X-" : ""}Authorization`,
+        "Basic " + methods._base64_encode(`${props._oauth_consumer_key}:${props._oauth_consumer_secret}`)
+        );
 
-      xml.onreadystatechange = function () {
+      xml.onreadystatechange = () => {
         if (xml.readyState >= 4) {
-          var httpstatus = 12027;
+          let httpstatus = 12027;
           try {
             httpstatus = xml.status;
-          } catch (e) {}
-          var response = "";
+          } catch (e) { }
+          let response = "";
           try {
             response = xml.responseText;
-          } catch (e) {}
-          var reply = methods._parseApiReply(response);
+          } catch (e) { }
+          let reply = methods._parseApiReply(response);
           reply.httpstatus = httpstatus;
           if (httpstatus === 200) {
             methods.setBearerToken(reply.access_token);
@@ -1212,12 +1330,12 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
             callback(reply);
           }
           if (dfd) {
-            dfd.resolve({ reply: reply });
+            dfd.resolve({ reply });
           }
         }
       };
       // function called when an error occurs, including a timeout
-      xml.onerror = function (e) {
+      xml.onerror = e => {
         if (typeof callback === "function") {
           callback(null, e);
         }
@@ -1246,26 +1364,28 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      * @return mixed The API reply, encoded in the set return_format
      */
 
-    methods._callApi = function (httpmethod, method) {
-      var params = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-      var multipart = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-      var app_only_auth = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
-      var callback = arguments.length <= 5 || arguments[5] === undefined ? function () {} : arguments[5];
+    methods._callApi = (
+        httpmethod,
+        method,
+        params = {},
+        multipart = false,
+        app_only_auth = false,
+        callback = () => {}
+      ) => {
+      const dfd = methods._getDfd();
 
-      var dfd = methods._getDfd();
+      let url         = methods._getEndpoint(method),
+        authorization = null;
 
-      var url = methods._getEndpoint(method),
-          authorization = null;
-
-      var xml = methods._getXmlRequestObject();
+      const xml = methods._getXmlRequestObject();
       if (xml === null) {
         return;
       }
-      var post_fields = undefined;
-      var _sign = methods._sign;
+      let post_fields;
+      const _sign = methods._sign;
 
       if (httpmethod === "GET") {
-        var url_with_params = url;
+        let url_with_params = url;
         if (JSON.stringify(params) !== "{}") {
           url_with_params += "?" + methods._http_build_query(params);
         }
@@ -1274,7 +1394,13 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         }
 
         if (props._use_proxy) {
-          url_with_params = url_with_params.replace(props._endpoint_base, props._endpoint_proxy).replace(props._endpoint_base_media, props._endpoint_proxy);
+          url_with_params = url_with_params.replace(
+            props._endpoint_base,
+            props._endpoint_proxy
+            ).replace(
+              props._endpoint_base_media,
+              props._endpoint_proxy
+              );
         }
         xml.open(httpmethod, url_with_params, true);
       } else {
@@ -1293,13 +1419,19 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
           params = methods._http_build_query(params);
         }
         post_fields = params;
-        if (props._use_proxy || multipart) {
-          // force proxy for multipart base64
-          url = url.replace(props._endpoint_base, props._endpoint_proxy).replace(props._endpoint_base_media, props._endpoint_proxy);
+        if (props._use_proxy || multipart) { // force proxy for multipart base64
+          url = url.replace(
+            props._endpoint_base,
+            props._endpoint_proxy
+            ).replace(
+              props._endpoint_base_media,
+              props._endpoint_proxy
+              );
         }
         xml.open(httpmethod, url, true);
         if (multipart) {
-          xml.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + post_fields.split("\r\n")[0].substring(2));
+          xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
+            + post_fields.split("\r\n")[0].substring(2));
         } else if (methods._detectJsonBody(method)) {
           xml.setRequestHeader("Content-Type", "application/json");
         } else {
@@ -1307,22 +1439,24 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         }
       }
       if (app_only_auth) {
-        if (props._oauth_consumer_key === null && props._oauth_bearer_token === null) {
-          var error = "To make an app-only auth API request, consumer key or bearer token must be set.";
+        if (props._oauth_consumer_key === null
+          && props._oauth_bearer_token === null
+          ) {
+          const error = "To make an app-only auth API request, consumer key or bearer token must be set.";
           console.warn(error);
           if (dfd) {
-            dfd.reject({ error: error });
+            dfd.reject({ error });
             return methods._getPromise(dfd);
           }
         }
         // automatically fetch bearer token, if necessary
         if (props._oauth_bearer_token === null) {
           if (dfd) {
-            return methods.oauth2_token().then(function () {
+            return methods.oauth2_token().then(() => {
               return methods._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
             });
           }
-          methods.oauth2_token(function () {
+          methods.oauth2_token(() => {
             methods._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
           });
           return;
@@ -1330,22 +1464,24 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         authorization = "Bearer " + props._oauth_bearer_token;
       }
       if (authorization !== null) {
-        xml.setRequestHeader((props._use_proxy ? "X-" : "") + "Authorization", authorization);
+        xml.setRequestHeader(`${props._use_proxy ? "X-" : ""}Authorization`, authorization);
       }
-      xml.onreadystatechange = function () {
+      xml.onreadystatechange = () => {
         if (xml.readyState >= 4) {
-          var httpstatus = 12027;
+          let httpstatus = 12027;
           try {
             httpstatus = xml.status;
-          } catch (e) {}
-          var response = "";
+          } catch (e) { }
+          let response = "";
           try {
             response = xml.responseText;
-          } catch (e) {}
-          var reply = methods._parseApiReply(response);
+          } catch (e) { }
+          let reply = methods._parseApiReply(response);
           reply.httpstatus = httpstatus;
-          var rate = null;
-          if (typeof xml.getResponseHeader !== "undefined" && xml.getResponseHeader("x-rate-limit-limit") !== "") {
+          let rate = null;
+          if (typeof xml.getResponseHeader !== "undefined"
+            && xml.getResponseHeader("x-rate-limit-limit") !== ""
+            ) {
             rate = {
               limit: xml.getResponseHeader("x-rate-limit-limit"),
               remaining: xml.getResponseHeader("x-rate-limit-remaining"),
@@ -1356,12 +1492,12 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
             callback(reply, rate);
           }
           if (dfd) {
-            dfd.resolve({ reply: reply, rate: rate });
+            dfd.resolve({ reply, rate });
           }
         }
       };
       // function called when an error occurs, including a timeout
-      xml.onerror = function (e) {
+      xml.onerror = e => {
         if (typeof callback === "function") {
           callback(null, null, e);
         }
@@ -1389,11 +1525,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
      * @return object Promise
      */
 
-    methods.__call = function (fn) {
-      var params = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-      var callback = arguments[2];
-      var app_only_auth = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-
+    methods.__call = (fn, params = {}, callback, app_only_auth = false) => {
       if (typeof callback !== "function" && typeof params === "function") {
         callback = params;
         params = {};
@@ -1401,19 +1533,19 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
           app_only_auth = callback;
         }
       } else if (typeof callback === "undefined") {
-        callback = function () {};
+        callback = () => {};
       }
       switch (fn) {
         case "oauth_authenticate":
         case "oauth_authorize":
-          return undefined[fn](params, callback);
+          return this[fn](params, callback);
 
         case "oauth2_token":
-          return undefined[fn](callback);
+          return this[fn](callback);
       }
 
       // parse parameters
-      var apiparams = methods._parseApiParams(params);
+      let apiparams = methods._parseApiParams(params);
 
       // stringify null and boolean parameters
       apiparams = methods._stringifyNullBoolParams(apiparams);
@@ -1424,30 +1556,26 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
       }
 
       // map function name to API method
+      const [method, method_template] = methods._mapFnToApiMethod(fn, apiparams),
+        httpmethod                    = methods._detectMethod(method_template, apiparams),
+        multipart                     = methods._detectMultipart(method_template);
 
-      var _methods$_mapFnToApiM = methods._mapFnToApiMethod(fn, apiparams);
-
-      var _methods$_mapFnToApiM2 = _slicedToArray(_methods$_mapFnToApiM, 2);
-
-      var method = _methods$_mapFnToApiM2[0];
-      var method_template = _methods$_mapFnToApiM2[1];
-      var httpmethod = methods._detectMethod(method_template, apiparams);
-      var multipart = methods._detectMultipart(method_template);
-
-      return methods._callApi(httpmethod, method, apiparams, multipart, app_only_auth, callback);
+      return methods._callApi(
+          httpmethod,
+          method,
+          apiparams,
+          multipart,
+          app_only_auth,
+          callback
+        );
     };
 
     // Unit testing code
-    var __test = {
-      call: function call(name) {
-        var params = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
-        return methods[name].apply(undefined, params);
-      },
-      get: function get(name) {
-        return props[name];
-      },
-      mock: function mock(methods_to_mock) {
-        for (var name in methods_to_mock) {
+    const __test = {
+      call: (name, params = []) => methods[name].apply(undefined, params),
+      get: name => props[name],
+      mock: methods_to_mock => {
+        for (let name in methods_to_mock) {
           if (methods_to_mock.hasOwnProperty(name)) {
             methods[name] = methods_to_mock[name];
           }
@@ -1457,7 +1585,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 
     return {
       __call: methods.__call,
-      __test: __test,
+      __test,
       getApiMethods: methods.getApiMethods,
       getVersion: methods.getVersion,
       logout: methods.logout,
@@ -1472,7 +1600,10 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     };
   };
 
-  if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module && _typeof(module.exports) === "object") {
+  if (typeof module === "object"
+    && module
+    && typeof module.exports === "object"
+    ) {
     // Expose codebird as module.exports in loaders that implement the Node
     // module pattern (including browserify). Do not create the global, since
     // the user will be storing it themselves locally, and globals are frowned
@@ -1480,7 +1611,8 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     module.exports = Codebird;
   } else {
     // Otherwise expose codebird to the global object as usual
-    if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object" && window) {
+    if (typeof window === "object"
+      && window) {
       window.Codebird = Codebird;
     }
 
@@ -1492,9 +1624,8 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     // file name. Do this after creating the global so that if an AMD module wants
     // to call noConflict to hide this version of codebird, it will work.
     if (typeof define === "function" && define.amd) {
-      define("codebird", [], function () {
-        return Codebird;
-      });
+      define("codebird", [], () => Codebird);
     }
   }
+
 })();

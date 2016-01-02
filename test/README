@@ -1,0 +1,9 @@
+The following methods are covered by unit tests:
+
+_detectMethod
+_detectMultipart
+_detectMedia
+_getEndpoint
+oauth_authenticate
+oauth_authorize
+oauth2_token
