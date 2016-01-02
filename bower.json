@@ -1,6 +1,6 @@
 {
   "name": "codebird-js",
-  "version": "2.6.0",
+  "version": "3.0.0-dev",
   "homepage": "http://www.jublo.net/projects/codebird/js",
   "authors": [
     "Joshua Atkins <joshua.atkins@jublo.net>",
@@ -25,7 +25,6 @@
     "node_modules",
     "bower_components",
     "RELEASE_MESSAGE*",
-    "test",
-    "tests"
+    "test"
   ]
 }

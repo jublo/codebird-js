@@ -4,7 +4,7 @@
 - New features are added to the develop branch, too.
 
 ### Code style
-- Please use 4 soft spaces per indent level.
+- Please use 2 soft spaces per indent level.
 - Take a look at the coding style used in codebird.js and apply the same convention to your contributed code.
 
 ### License
