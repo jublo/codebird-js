@@ -44,7 +44,7 @@ test("Tests _detectMethod", (t) => {
   t.end();
 });
 
-test("Tests _detectMultipart", (t) => {
+test("Tests _detectMultipart", function (t) {
   const cb = new Codebird;
 
   t.false(cb.__test.call("_detectMultipart", ["statuses/update"]));
@@ -54,7 +54,7 @@ test("Tests _detectMultipart", (t) => {
   t.end();
 });
 
-test("Tests _detectMedia", (t) => {
+test("Tests _detectMedia", function (t) {
   const cb = new Codebird;
 
   t.false(cb.__test.call("_detectMedia", ["statuses/update"]));
@@ -63,7 +63,7 @@ test("Tests _detectMedia", (t) => {
   t.end();
 });
 
-test("Tests _getEndpoint", (t) => {
+test("Tests _getEndpoint", function (t) {
   const cb = new Codebird;
 
   t.equal(
