@@ -3,11 +3,13 @@ const tape = require("tape"),
   test = _test(tape), // decorate tape
   Codebird = require("../codebird");
 
-test("Tests _detectMethod", (t) => {
+test("Tests _detectMethod", function (t) {
   const cb = new Codebird;
 
   t.throws(
-    () => cb.__test.call("_detectMethod", ["non-existent", {}]),
+    function () {
+      cb.__test.call("_detectMethod", ["non-existent", {}]);
+    },
     /^Can't find HTTP method to use for "non-existent".$/
   );
 
