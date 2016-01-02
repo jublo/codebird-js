@@ -10,10 +10,12 @@ function mock() {
   var xml = {
     readyState: 4,
     status: 200,
-    open: url => {
+    open: function (url) {
       this.url = url
     },
-    setRequestHeader: function () { return true; },
+    setRequestHeader: function () {
+      return true;
+    },
     responseText: "{\"token_type\":\"bearer\",\"access_token\":\"VqiO0n2HrKE\"}"
   };
   xml.send = function () {
