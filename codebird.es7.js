@@ -269,7 +269,7 @@
       let b = `${this._oauth_consumer_secret}&${null !== this._oauth_token_secret ?
         this._oauth_token_secret : ""}`;
       if (this._oauth_consumer_secret === null) {
-        console.warn("To generate a hash, the consumer secret must be set.");
+        throw "To generate a hash, the consumer secret must be set.";
       }
       let c = q(b);
       if (c.length > 16) {
@@ -372,7 +372,7 @@
           if (typeof a !== "function") {
             return this._url(c) + "=" + this._url(a);
           }
-          console.warn("There was an error processing for http_build_query().");
+          throw "There was an error processing for http_build_query().";
         } else {
           return "";
         }
@@ -406,7 +406,7 @@
      */
     _nonce(length = 8) {
       if (length < 1) {
-        console.warn("Invalid nonce length.");
+        throw "Invalid nonce length.";
       }
       let nonce = "";
       for (let i = 0; i < length; i++) {
@@ -920,7 +920,7 @@
             for (j = 0; j < 26; j++) {
               method_template = method_template.split(String.fromCharCode(65 + j)).join("_" + String.fromCharCode(97 + j));
             }
-            console.warn(`To call the templated method "${method_template}", specify the parameter value for "${param_l}".`);
+            throw `To call the templated method "${method_template}", specify the parameter value for "${param_l}".`;
           }
           method = method.split(param).join(apiparams[param_l]);
           delete apiparams[param_l];
@@ -1034,7 +1034,7 @@
     _sign(httpmethod, method, params = {}) {
       const {_url, _ksort, _clone, _getSignature} = this;
       if (this._oauth_consumer_key === null) {
-        console.warn("To generate a signature, the consumer key must be set.");
+        throw "To generate a signature, the consumer key must be set.";
       }
       const sign_params = {
         consumer_key: this._oauth_consumer_key,
@@ -1235,7 +1235,6 @@
       }
       if (this._oauth_token === null) {
         const error = `To get the ${type} URL, the OAuth token must be set.`;
-        console.warn(error);
         if (dfd) {
           dfd.reject({ error });
           return this._getPromise(dfd);
@@ -1279,12 +1278,11 @@
 
       if (this._oauth_consumer_key === null) {
         const error = "To obtain a bearer token, the consumer key must be set.";
-        console.warn(error);
         if (dfd) {
           dfd.reject({ error });
           return this._getPromise(dfd);
         }
-        return false;
+        throw error;
       }
 
       if (!dfd && typeof callback === "undefined") {
@@ -1443,11 +1441,11 @@
           && this._oauth_bearer_token === null
           ) {
           const error = "To make an app-only auth API request, consumer key or bearer token must be set.";
-          console.warn(error);
           if (dfd) {
             dfd.reject({ error });
             return this._getPromise(dfd);
           }
+          throw error;
         }
         // automatically fetch bearer token, if necessary
         if (this._oauth_bearer_token === null) {
