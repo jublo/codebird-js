@@ -1,4 +1,6 @@
 node_modules
 RELEASE_MESSAGE*
+test/codebirdm.js
+test/codebirdt.js
 test*.html
 *.jpg

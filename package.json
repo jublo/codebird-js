@@ -25,8 +25,12 @@
     "url": "https://github.com/jublonet/codebird-js.git"
   },
   "scripts": {
-    "build": "babel codebird.es7.js -o codebird.js",
-    "test": "babel codebird.es7.js -o codebird.js && tape test/*.js | faucet"
+    "build-cb": "babel codebird.es7.js -o codebird.js",
+    "build-cbt": "babel test/codebirdt.es7.js -o test/codebirdt.js",
+    "build-cbm": "babel test/codebirdm.es7.js -o test/codebirdm.js",
+    "build": "npm run build-cb && npm run build-cbt && npm run build-cbm",
+    "test-run": "tape test/*_tests.js | faucet",
+    "test": "npm run build && npm run test-run"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",

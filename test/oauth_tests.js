@@ -1,38 +1,17 @@
 const tape = require("tape"),
   _test = require("tape-promise"),
   test = _test(tape), // decorate tape
-  Codebird = require("../codebird");
+  CodebirdM = require("./codebirdm");
 
-function mock() {
-  var cb = new Codebird();
+function getCB() {
+  var cb = new CodebirdM.default;
   cb.setConsumerKey("123", "456");
-
-  var xml = {
-    readyState: 4,
-    status: 200,
-    open: function (url) {
-      this.url = url
-    },
-    setRequestHeader: function () {
-      return true;
-    },
-    responseText: "{\"token_type\":\"bearer\",\"access_token\":\"VqiO0n2HrKE\"}"
-  };
-  xml.send = function () {
-    setTimeout(xml.onreadystatechange, 200);
-  };
-
-  cb.__test.mock({
-    _getXmlRequestObject: function () {
-      return xml
-    }
-  });
 
   return cb;
 }
 
 test("Tests oauth_authenticate Promise", function (t) {
-  const cb = mock();
+  const cb = getCB();
   t.plan(1);
 
   cb.setToken("123", "456");
@@ -45,7 +24,7 @@ test("Tests oauth_authenticate Promise", function (t) {
 });
 
 test("Tests oauth_authenticate callback", function (t) {
-  const cb = mock();
+  const cb = getCB();
   t.plan(4);
 
   cb.setToken("123", "456");
@@ -72,7 +51,7 @@ test("Tests oauth_authenticate callback", function (t) {
 });
 
 test("Tests oauth_authorize callback", function (t) {
-  const cb = mock();
+  const cb = getCB();
   t.plan(4);
 
   cb.setToken("123", "456");
@@ -99,7 +78,7 @@ test("Tests oauth_authorize callback", function (t) {
 });
 
 test("Tests oauth2_token", function (t) {
-  const cb = mock();
+  const cb = getCB();
   t.plan(1);
 
   cb.oauth2_token(

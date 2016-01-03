@@ -26,78 +26,79 @@
    * @package codebird
    * @subpackage codebird-js
    */
-  const Codebird = () => {
+  class Codebird {
 
-    let props = {};
-    /**
-     * The OAuth consumer key of your registered app
-     */
-    props._oauth_consumer_key = null;
+    constructor() {
+      /**
+       * The OAuth consumer key of your registered app
+       */
+      this._oauth_consumer_key = null;
 
-    /**
-     * The corresponding consumer secret
-     */
-    props._oauth_consumer_secret = null;
+      /**
+       * The corresponding consumer secret
+       */
+      this._oauth_consumer_secret = null;
 
-    /**
-     * The app-only bearer token. Used to authorize app-only requests
-     */
-    props._oauth_bearer_token = null;
+      /**
+       * The app-only bearer token. Used to authorize app-only requests
+       */
+      this._oauth_bearer_token = null;
 
-    /**
-     * The API endpoint base to use
-     */
-    props._endpoint_base = "https://api.twitter.com/";
+      /**
+       * The API endpoint base to use
+       */
+      this._endpoint_base = "https://api.twitter.com/";
 
-    /**
-     * The media API endpoint base to use
-     */
-    props._endpoint_base_media = "https://upload.twitter.com/";
+      /**
+       * The media API endpoint base to use
+       */
+      this._endpoint_base_media = "https://upload.twitter.com/";
 
-    /**
-     * The API endpoint to use
-     */
-    props._endpoint = `${props._endpoint_base}1.1/`;
+      /**
+       * The API endpoint to use
+       */
+      this._endpoint = `${this._endpoint_base}1.1/`;
 
-    /**
-     * The media API endpoint to use
-     */
-    props._endpoint_media = `${props._endpoint_base_media}1.1/`;
+      /**
+       * The media API endpoint to use
+       */
+      this._endpoint_media = `${this._endpoint_base_media}1.1/`;
 
-    /**
-     * The API endpoint base to use
-     */
-    props._endpoint_oauth = props._endpoint_base;
+      /**
+       * The API endpoint base to use
+       */
+      this._endpoint_oauth = this._endpoint_base;
 
-    /**
-     * API proxy endpoint
-     */
-    props._endpoint_proxy = "https://api.jublo.net/codebird/";
+      /**
+       * API proxy endpoint
+       */
+      this._endpoint_proxy = "https://api.jublo.net/codebird/";
 
-    /**
-     * Whether to access the API via a proxy that is allowed by CORS
-     * Assume that CORS is only necessary in browsers
-     */
-    props._use_proxy = (typeof navigator !== "undefined"
+      /**
+       * Whether to access the API via a proxy that is allowed by CORS
+       * Assume that CORS is only necessary in browsers
+       */
+      this._use_proxy = (typeof navigator !== "undefined"
       && typeof navigator.userAgent !== "undefined"
       );
 
-    /**
-     * The Request or access token. Used to sign requests
-     */
-    props._oauth_token = null;
+      /**
+       * The Request or access token. Used to sign requests
+       */
+      this._oauth_token = null;
 
-    /**
-     * The corresponding request or access token secret
-     */
-    props._oauth_token_secret = null;
+      /**
+       * The corresponding request or access token secret
+       */
+      this._oauth_token_secret = null;
 
-    /**
-     * The current Codebird version
-     */
-    props._version = "3.0.0-dev";
+      /**
+       * The current Codebird version
+       */
+      this._version = "3.0.0-dev";
 
-    let methods = {};
+      this.b64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    }
 
     /**
      * Sets the OAuth consumer key and secret (App key)
@@ -107,10 +108,10 @@
      *
      * @return void
      */
-    methods.setConsumerKey = (key, secret) => {
-      props._oauth_consumer_key = key;
-      props._oauth_consumer_secret = secret;
-    };
+    setConsumerKey(key, secret) {
+      this._oauth_consumer_key = key;
+      this._oauth_consumer_secret = secret;
+    }
 
     /**
      * Sets the OAuth2 app-only auth bearer token
@@ -119,18 +120,18 @@
      *
      * @return void
      */
-    methods.setBearerToken = token => {
-      props._oauth_bearer_token = token;
-    };
+    setBearerToken(token) {
+      this._oauth_bearer_token = token;
+    }
 
     /**
      * Gets the current Codebird version
      *
      * @return string The version number
      */
-    methods.getVersion = () => {
-      return props._version;
-    };
+    getVersion() {
+      return this._version;
+    }
 
     /**
      * Sets the OAuth request or access token and secret (User key)
@@ -140,22 +141,22 @@
      *
      * @return void
      */
-    methods.setToken = (token, secret) => {
-      props._oauth_token = token;
-      props._oauth_token_secret = secret;
-    };
+    setToken(token, secret) {
+      this._oauth_token = token;
+      this._oauth_token_secret = secret;
+    }
 
     /**
      * Forgets the OAuth request or access token and secret (User key)
      *
      * @return bool
      */
-    methods.logout = () => {
-      props._oauth_token =
-      props._oauth_token_secret = null;
+    logout() {
+      this._oauth_token =
+      this._oauth_token_secret = null;
 
       return true;
-    };
+    }
 
     /**
      * Enables or disables CORS proxy
@@ -164,9 +165,9 @@
      *
      * @return void
      */
-    methods.setUseProxy = use_proxy => {
-      props._use_proxy = !!use_proxy;
-    };
+    setUseProxy(use_proxy) {
+      this._use_proxy = !!use_proxy;
+    }
 
     /**
      * Sets custom CORS proxy server
@@ -175,13 +176,13 @@
      *
      * @return void
      */
-    methods.setProxy = proxy => {
+    setProxy(proxy) {
       // add trailing slash if missing
       if (!proxy.match(/\/$/)) {
         proxy += "/";
       }
-      props._endpoint_proxy = proxy;
-    };
+      this._endpoint_proxy = proxy;
+    }
 
     /**
      * Signing helpers
@@ -194,15 +195,13 @@
      *
      * @return mixed The encoded data
      */
-    methods._url = data => {
+    _url(data) {
       if ((/boolean|number|string/).test(typeof data)) {
         return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
       } else {
         return "";
       }
-    };
-
-    const b64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    }
 
     /**
      * Gets the base64-encoded SHA1 hash for the given data
@@ -218,7 +217,7 @@
      *
      * @return string The hash
      */
-    methods._sha1 = (() => {
+    _sha1(e) {
       function n (e, b) {
         e[b >> 5] |= 128 << 24 - b % 32;
         e[(b + 64 >> 9 << 4) + 15] = b;
@@ -266,35 +265,34 @@
         return b;
       }
       var g = 8;
-      return e => {
-        let b = `${props._oauth_consumer_secret}&${null !== props._oauth_token_secret ?
-          props._oauth_token_secret : ""}`;
-        if (props._oauth_consumer_secret === null) {
-          console.warn("To generate a hash, the consumer secret must be set.");
+
+      let b = `${this._oauth_consumer_secret}&${null !== this._oauth_token_secret ?
+        this._oauth_token_secret : ""}`;
+      if (this._oauth_consumer_secret === null) {
+        console.warn("To generate a hash, the consumer secret must be set.");
+      }
+      let c = q(b);
+      if (c.length > 16) {
+        c = n(c, b.length * g);
+      }
+      let bb = new Array(16);
+      for (var a = new Array(16), d = 0; d < 16; d++) {
+        a[d] = c[d] ^ 909522486;
+        bb[d] = c[d] ^ 1549556828;
+      }
+      c = n(a.concat(q(e)), 512 + e.length * g);
+      bb = n(bb.concat(c), 672);
+      b = "";
+      for (g = 0; g < 4 * bb.length; g += 3) {
+        for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >>
+          8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 -
+            (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
+          b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b +
+            this.b64_alphabet.charAt(d >> 6 * (3 - e) & 63);
         }
-        let c = q(b);
-        if (c.length > 16) {
-          c = n(c, b.length * g);
-        }
-        let bb = new Array(16);
-        for (var a = new Array(16), d = 0; d < 16; d++) {
-          a[d] = c[d] ^ 909522486;
-          bb[d] = c[d] ^ 1549556828;
-        }
-        c = n(a.concat(q(e)), 512 + e.length * g);
-        bb = n(bb.concat(c), 672);
-        b = "";
-        for (g = 0; g < 4 * bb.length; g += 3) {
-          for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >>
-            8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 -
-              (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
-            b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b +
-              b64_alphabet.charAt(d >> 6 * (3 - e) & 63);
-          }
-        }
-        return b;
-      };
-    })();
+      }
+      return b;
+    }
 
     /*
      * Gets the base64 representation for the given data
@@ -312,10 +310,10 @@
      *
      * @return string The base64 representation
      */
-    methods._base64_encode = a => {
+    _base64_encode(a) {
       let d, e, f, b, g = 0,
         h = 0,
-        i = b64_alphabet,
+        i = this.b64_alphabet,
         c = [];
       if (!a) {
         return a;
@@ -334,7 +332,7 @@
       i = c.join("");
       a = a.length % 3;
       return (a ? i.slice(0, a - 3) : i) + "===".slice(a || 3);
-    };
+    }
 
     /*
      * Builds a HTTP query string from the given data
@@ -354,7 +352,7 @@
      *
      * @return string The HTTP query
      */
-    methods._http_build_query = (e, f, b) => {
+    _http_build_query(e, f, b) {
       function g(c, a, d) {
         let b, e = [];
         if (a === true) {
@@ -372,7 +370,7 @@
             return e.join(d);
           }
           if (typeof a !== "function") {
-            return methods._url(c) + "=" + methods._url(a);
+            return this._url(c) + "=" + this._url(a);
           }
           console.warn("There was an error processing for http_build_query().");
         } else {
@@ -397,7 +395,7 @@
         }
       }
       return h.join(b);
-    };
+    }
 
     /**
      * Generates a (hopefully) unique random string
@@ -406,17 +404,17 @@
      *
      * @return string The random string
      */
-    methods._nonce = (length = 8) => {
+    _nonce(length = 8) {
       if (length < 1) {
         console.warn("Invalid nonce length.");
       }
       let nonce = "";
       for (let i = 0; i < length; i++) {
         let character = Math.floor(Math.random() * 61);
-        nonce += b64_alphabet.substring(character, character + 1);
+        nonce += this.b64_alphabet.substring(character, character + 1);
       }
       return nonce;
-    };
+    }
 
     /**
      * Sort array elements by key
@@ -425,7 +423,7 @@
      *
      * @return array The sorted keys
      */
-    methods._ksort = input_arr => {
+    _ksort(input_arr) {
       let keys = [], sorter, k;
 
       sorter = (a, b) => {
@@ -451,7 +449,7 @@
       }
       keys.sort(sorter);
       return keys;
-    };
+    }
 
     /**
      * Clone objects
@@ -460,24 +458,24 @@
      *
      * @return object clone The cloned object
      */
-    methods._clone = obj => {
+    _clone(obj) {
       let clone = {};
       for (let i in obj) {
         if (typeof (obj[i]) === "object") {
-          clone[i] = methods._clone(obj[i]);
+          clone[i] = this._clone(obj[i]);
         } else {
           clone[i] = obj[i];
         }
       }
       return clone;
-    };
+    }
 
     /**
      * Gets the XML HTTP Request object, trying to load it in various ways
      *
      * @return object The XMLHttpRequest object instance
      */
-    methods._getXmlRequestObject = () => {
+    _getXmlRequestObject() {
       let xml = null;
       // first, try the W3-standard object
       if (typeof window === "object"
@@ -519,7 +517,7 @@
         }
       }
       return xml;
-    };
+    }
 
     /**
      * Parse URL-style parameters into object
@@ -543,7 +541,7 @@
      *
      * @return object
      */
-    methods._parse_str = (str, array) => {
+    _parse_str(str, array) {
       var glue1 = "=",
         glue2 = "&",
         array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
@@ -616,7 +614,7 @@
           eval(evalStr);
         }
       }
-    };
+    }
 
     /**
      * Get allowed API methods, sorted by GET or POST
@@ -624,7 +622,7 @@
      *
      * @return array $apimethods
      */
-    methods.getApiMethods = () => {
+    getApiMethods() {
       const httpmethods = {
         GET: [
           "account/settings",
@@ -752,7 +750,7 @@
         ]
       };
       return httpmethods;
-    };
+    }
 
     /**
      * Promise helpers
@@ -761,7 +759,7 @@
     /**
      * Get a deferred object
      */
-    methods._getDfd = () => {
+    _getDfd() {
       if (typeof window !== "undefined") {
         if (typeof window.jQuery !== "undefined" && window.jQuery.Deferred) {
           return window.jQuery.Deferred();
@@ -804,17 +802,17 @@
         }
       }
       return false;
-    };
+    }
 
     /**
      * Get a promise from the dfd object
      */
-    methods._getPromise = dfd => {
+    _getPromise(dfd) {
       if (typeof dfd.promise === "function") {
         return dfd.promise();
       }
       return dfd.promise; // object
-    };
+    }
 
     /**
      * __call() helpers
@@ -827,16 +825,16 @@
      *
      * @return array apiparams
      */
-    methods._parseApiParams = params => {
+    _parseApiParams(params) {
       let apiparams = {};
       if (typeof params === "object") {
         apiparams = params;
       } else {
-        methods._parse_str(params, apiparams); //TODO
+        this._parse_str(params, apiparams); //TODO
       }
 
       return apiparams;
-    };
+    }
 
     /**
      * Replace null and boolean parameters with their string representations
@@ -845,7 +843,7 @@
      *
      * @return array apiparams
      */
-    methods._stringifyNullBoolParams = apiparams => {
+    _stringifyNullBoolParams(apiparams) {
       for (let key in apiparams) {
         if (!apiparams.hasOwnProperty(key)) {
           continue;
@@ -859,7 +857,7 @@
       }
 
       return apiparams;
-    };
+    }
 
     /**
      * API method mapping: Replaces _ with / character
@@ -868,7 +866,9 @@
      *
      * @return string API method to call
      */
-    methods._mapFnInsertSlashes = fn => fn.split("_").join("/");
+    _mapFnInsertSlashes(fn) {
+      return fn.split("_").join("/");
+    }
 
     /**
      * API method mapping: Restore _ character in named parameters
@@ -877,7 +877,7 @@
      *
      * @return string API method with restored underscores
      */
-    methods._mapFnRestoreParamUnderscores = method => {
+    _mapFnRestoreParamUnderscores(method) {
       const url_parameters_with_underscore = ["screen_name", "place_id"];
       let i, param, replacement_was;
       for (i = 0; i < url_parameters_with_underscore.length; i++) {
@@ -887,7 +887,7 @@
       }
 
       return method;
-    };
+    }
 
 
     /**
@@ -898,15 +898,15 @@
      *
      * @return string[] (string method, string method_template)
      */
-    methods._mapFnToApiMethod = (fn, apiparams) => {
+    _mapFnToApiMethod(fn, apiparams) {
       let method = "",
         param, i, j;
 
       // replace _ by /
-      method = methods._mapFnInsertSlashes(fn);
+      method = this._mapFnInsertSlashes(fn);
 
       // undo replacement for URL parameters
-      method = methods._mapFnRestoreParamUnderscores(method);
+      method = this._mapFnRestoreParamUnderscores(method);
 
       // replace AA by URL parameters
       let method_template = method;
@@ -934,7 +934,7 @@
       }
 
       return [method, method_template];
-    };
+    }
 
 
     /**
@@ -945,7 +945,7 @@
      *
      * @return string The HTTP method that should be used
      */
-    methods._detectMethod = (method, params) => {
+    _detectMethod(method, params) {
       if (typeof params.httpmethod !== "undefined") {
         let httpmethod = params.httpmethod;
         delete params.httpmethod;
@@ -961,7 +961,7 @@
           break;
       }
 
-      const apimethods = methods.getApiMethods();
+      const apimethods = this.getApiMethods();
       for (let httpmethod in apimethods) {
         if (apimethods.hasOwnProperty(httpmethod)
           && apimethods[httpmethod].indexOf(method) > -1
@@ -970,7 +970,7 @@
         }
       }
       throw `Can't find HTTP method to use for "${method}".`;
-    };
+    }
 
     /**
      * Detects if API call should use multipart/form-data
@@ -979,7 +979,7 @@
      *
      * @return bool Whether the method should be sent as multipart
      */
-    methods._detectMultipart = method => {
+    _detectMultipart(method) {
       const multiparts = [
       // Tweets
         "statuses/update_with_media",
@@ -991,7 +991,7 @@
         "account/update_profile_banner"
       ];
       return multiparts.indexOf(method) > -1;
-    };
+    }
 
     /**
      * Signature helper
@@ -1002,8 +1002,8 @@
      *
      * @return string signature
      */
-    methods._getSignature = (httpmethod, method, keys, base_params) => {
-      const {_url, _sha1} = methods;
+    _getSignature(httpmethod, method, keys, base_params) {
+      const {_url, _sha1} = this;
       // convert params to string
       let base_string = "", key, value;
       for (let i = 0; i < keys.length; i++) {
@@ -1013,12 +1013,14 @@
       }
       base_string = base_string.substring(0, base_string.length - 1);
       return _sha1(`${httpmethod}&${_url(method)}&${_url(base_string)}`);
-    };
+    }
 
     /**
      * Generates the UNIX timestamp
      */
-    methods._time = () => Math.round(new Date().getTime() / 1000);
+    _time() {
+      Math.round(new Date().getTime() / 1000);
+    }
 
     /**
      * Generates an OAuth signature
@@ -1029,16 +1031,16 @@
      *
      * @return string Authorization HTTP header
      */
-    methods._sign = (httpmethod, method, params = {}) => {
-      const {_url, _ksort, _clone, _getSignature} = methods;
-      if (props._oauth_consumer_key === null) {
+    _sign(httpmethod, method, params = {}) {
+      const {_url, _ksort, _clone, _getSignature} = this;
+      if (this._oauth_consumer_key === null) {
         console.warn("To generate a signature, the consumer key must be set.");
       }
       const sign_params = {
-        consumer_key: props._oauth_consumer_key,
+        consumer_key: this._oauth_consumer_key,
         version: "1.0",
-        timestamp: methods._time(),
-        nonce: methods._nonce(),
+        timestamp: this._time(),
+        nonce: this._nonce(),
         signature_method: "HMAC-SHA1"
       };
       let sign_base_params = {};
@@ -1049,8 +1051,8 @@
         let value = sign_params[key];
         sign_base_params[`oauth_${key}`] = _url(value);
       }
-      if (props._oauth_token !== null) {
-        sign_base_params.oauth_token = _url(props._oauth_token);
+      if (this._oauth_token !== null) {
+        sign_base_params.oauth_token = _url(this._oauth_token);
       }
       const oauth_params = _clone(sign_base_params);
       for (key in params) {
@@ -1072,7 +1074,7 @@
         authorization += `${key}="${_url(params[key])}", `;
       }
       return authorization.substring(0, authorization.length - 2);
-    };
+    }
 
     /**
      * Build multipart request from upload params
@@ -1082,9 +1084,9 @@
      *
      * @return null|string The built multipart request body
      */
-    methods._buildMultipart = (method, params) => {
+    _buildMultipart(method, params) {
       // well, files will only work in multipart methods
-      if (!methods._detectMultipart(method)) {
+      if (!this._detectMultipart(method)) {
         return;
       }
 
@@ -1113,7 +1115,7 @@
       // check for filenames
       possible_files = possible_files[method].split(" ");
 
-      const multipart_border = `--------------------${methods._nonce()}`;
+      const multipart_border = `--------------------${this._nonce()}`;
       let multipart_request = "";
       for (let key in params) {
         if (!params.hasOwnProperty(key)) {
@@ -1128,7 +1130,7 @@
       }
       multipart_request += `--${multipart_border}--`;
       return multipart_request;
-    };
+    }
 
     /**
      * Detects if API call should use media endpoint
@@ -1137,12 +1139,12 @@
      *
      * @return bool Whether the method is defined in media API
      */
-    methods._detectMedia = method => {
+    _detectMedia(method) {
       const medias = [
         "media/upload"
       ];
       return medias.indexOf(method) > -1;
-    };
+    }
 
     /**
      * Detects if API call should use JSON body
@@ -1151,12 +1153,12 @@
      *
      * @return bool Whether the method is defined as accepting JSON body
      */
-    methods._detectJsonBody = method => {
+    _detectJsonBody(method) {
       const json_bodies = [
         "collections/entries/curate"
       ];
       return json_bodies.indexOf(method) > -1;
-    };
+    }
 
     /**
      * Builds the complete API endpoint url
@@ -1165,17 +1167,17 @@
      *
      * @return string The URL to send the request to
      */
-    methods._getEndpoint = method => {
+    _getEndpoint(method) {
       let url;
       if (method.substring(0, 5) === "oauth") {
-        url = props._endpoint_oauth + method;
-      } else if (methods._detectMedia(method)) {
-        url = props._endpoint_media + method + ".json";
+        url = this._endpoint_oauth + method;
+      } else if (this._detectMedia(method)) {
+        url = this._endpoint_media + method + ".json";
       } else {
-        url = props._endpoint + method + ".json";
+        url = this._endpoint + method + ".json";
       }
       return url;
-    };
+    }
 
     /**
      * Parses the API reply to encode it in the set return_format
@@ -1184,7 +1186,7 @@
      *
      * @return array|object The parsed reply
      */
-    methods._parseApiReply = reply => {
+    _parseApiReply(reply) {
       if (typeof reply !== "string" || reply === "") {
         return {};
       }
@@ -1208,7 +1210,7 @@
         }
       }
       return parsed;
-    };
+    }
 
 
     /**
@@ -1220,8 +1222,8 @@
      *
      * @return object Promise
      */
-    methods.oauth_authenticate = (params = {}, callback = undefined, type = "authenticate") => {
-      const dfd = methods._getDfd();
+    oauth_authenticate(params = {}, callback = undefined, type = "authenticate") {
+      const dfd = this._getDfd();
       if (typeof params.force_login === "undefined") {
         params.force_login = null;
       }
@@ -1231,16 +1233,16 @@
       if (["authenticate", "authorize"].indexOf(type) === -1) {
         type = "authenticate";
       }
-      if (props._oauth_token === null) {
+      if (this._oauth_token === null) {
         const error = `To get the ${type} URL, the OAuth token must be set.`;
         console.warn(error);
         if (dfd) {
           dfd.reject({ error });
-          return methods._getPromise(dfd);
+          return this._getPromise(dfd);
         }
         throw error;
       }
-      let url = `${props._endpoint_oauth}oauth/${type}?oauth_token=${methods._url(props._oauth_token)}`;
+      let url = `${this._endpoint_oauth}oauth/${type}?oauth_token=${this._url(this._oauth_token)}`;
       if (params.force_login === true) {
         url += "&force_login=1";
       }
@@ -1252,36 +1254,35 @@
       }
       if (dfd) {
         dfd.resolve({ reply: url });
-        return methods._getPromise(dfd);
+        return this._getPromise(dfd);
       }
       // no promises
       return true;
-    };
+    }
 
     /**
      * Gets the OAuth authorize URL for the current request token
      *
      * @return string The OAuth authorize URL
      */
-    methods.oauth_authorize = (params, callback) => {
-      return methods.oauth_authenticate(params, callback, "authorize");
-    };
+    oauth_authorize(params, callback) {
+      return this.oauth_authenticate(params, callback, "authorize");
+    }
 
     /**
      * Gets the OAuth bearer token
      *
      * @return object Promise
      */
+    oauth2_token(callback) {
+      const dfd = this._getDfd();
 
-    methods.oauth2_token = callback => {
-      const dfd = methods._getDfd();
-
-      if (props._oauth_consumer_key === null) {
+      if (this._oauth_consumer_key === null) {
         const error = "To obtain a bearer token, the consumer key must be set.";
         console.warn(error);
         if (dfd) {
           dfd.reject({ error });
-          return methods._getPromise(dfd);
+          return this._getPromise(dfd);
         }
         return false;
       }
@@ -1291,24 +1292,24 @@
       }
 
       const post_fields = "grant_type=client_credentials";
-      let url = props._endpoint_oauth + "oauth2/token";
+      let url = this._endpoint_oauth + "oauth2/token";
 
-      if (props._use_proxy) {
+      if (this._use_proxy) {
         url = url.replace(
-          props._endpoint_base,
-          props._endpoint_proxy
+          this._endpoint_base,
+          this._endpoint_proxy
           );
       }
 
-      const xml = methods._getXmlRequestObject();
+      const xml = this._getXmlRequestObject();
       if (xml === null) {
         return;
       }
       xml.open("POST", url, true);
       xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xml.setRequestHeader(
-        `${props._use_proxy ? "X-" : ""}Authorization`,
-        "Basic " + methods._base64_encode(`${props._oauth_consumer_key}:${props._oauth_consumer_secret}`)
+        `${this._use_proxy ? "X-" : ""}Authorization`,
+        "Basic " + this._base64_encode(`${this._oauth_consumer_key}:${this._oauth_consumer_secret}`)
         );
 
       xml.onreadystatechange = () => {
@@ -1321,10 +1322,10 @@
           try {
             response = xml.responseText;
           } catch (e) { }
-          let reply = methods._parseApiReply(response);
+          let reply = this._parseApiReply(response);
           reply.httpstatus = httpstatus;
           if (httpstatus === 200) {
-            methods.setBearerToken(reply.access_token);
+            this.setBearerToken(reply.access_token);
           }
           if (typeof callback === "function") {
             callback(reply);
@@ -1347,9 +1348,9 @@
 
       xml.send(post_fields);
       if (dfd) {
-        return methods._getPromise(dfd);
+        return this._getPromise(dfd);
       }
-    };
+    }
 
     /**
      * Calls the API using cURL
@@ -1363,43 +1364,42 @@
      *
      * @return mixed The API reply, encoded in the set return_format
      */
-
-    methods._callApi = (
+    _callApi(
         httpmethod,
         method,
         params = {},
         multipart = false,
         app_only_auth = false,
         callback = () => {}
-      ) => {
-      const dfd = methods._getDfd();
+      ) {
+      const dfd = this._getDfd();
 
-      let url         = methods._getEndpoint(method),
+      let url         = this._getEndpoint(method),
         authorization = null;
 
-      const xml = methods._getXmlRequestObject();
+      const xml = this._getXmlRequestObject();
       if (xml === null) {
         return;
       }
       let post_fields;
-      const _sign = methods._sign;
+      const _sign = this._sign;
 
       if (httpmethod === "GET") {
         let url_with_params = url;
         if (JSON.stringify(params) !== "{}") {
-          url_with_params += "?" + methods._http_build_query(params);
+          url_with_params += "?" + this._http_build_query(params);
         }
         if (!app_only_auth) {
           authorization = _sign(httpmethod, url, params);
         }
 
-        if (props._use_proxy) {
+        if (this._use_proxy) {
           url_with_params = url_with_params.replace(
-            props._endpoint_base,
-            props._endpoint_proxy
+            this._endpoint_base,
+            this._endpoint_proxy
             ).replace(
-              props._endpoint_base_media,
-              props._endpoint_proxy
+              this._endpoint_base_media,
+              this._endpoint_proxy
               );
         }
         xml.open(httpmethod, url_with_params, true);
@@ -1408,63 +1408,63 @@
           if (!app_only_auth) {
             authorization = _sign(httpmethod, url, {});
           }
-          params = methods._buildMultipart(method, params);
-        } else if (methods._detectJsonBody(method)) {
+          params = this._buildMultipart(method, params);
+        } else if (this._detectJsonBody(method)) {
           authorization = _sign(httpmethod, url, {});
           params = JSON.stringify(params);
         } else {
           if (!app_only_auth) {
             authorization = _sign(httpmethod, url, params);
           }
-          params = methods._http_build_query(params);
+          params = this._http_build_query(params);
         }
         post_fields = params;
-        if (props._use_proxy || multipart) { // force proxy for multipart base64
+        if (this._use_proxy || multipart) { // force proxy for multipart base64
           url = url.replace(
-            props._endpoint_base,
-            props._endpoint_proxy
+            this._endpoint_base,
+            this._endpoint_proxy
             ).replace(
-              props._endpoint_base_media,
-              props._endpoint_proxy
+              this._endpoint_base_media,
+              this._endpoint_proxy
               );
         }
         xml.open(httpmethod, url, true);
         if (multipart) {
           xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
             + post_fields.split("\r\n")[0].substring(2));
-        } else if (methods._detectJsonBody(method)) {
+        } else if (this._detectJsonBody(method)) {
           xml.setRequestHeader("Content-Type", "application/json");
         } else {
           xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         }
       }
       if (app_only_auth) {
-        if (props._oauth_consumer_key === null
-          && props._oauth_bearer_token === null
+        if (this._oauth_consumer_key === null
+          && this._oauth_bearer_token === null
           ) {
           const error = "To make an app-only auth API request, consumer key or bearer token must be set.";
           console.warn(error);
           if (dfd) {
             dfd.reject({ error });
-            return methods._getPromise(dfd);
+            return this._getPromise(dfd);
           }
         }
         // automatically fetch bearer token, if necessary
-        if (props._oauth_bearer_token === null) {
+        if (this._oauth_bearer_token === null) {
           if (dfd) {
-            return methods.oauth2_token().then(() => {
-              return methods._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+            return this.oauth2_token().then(() => {
+              return this._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
             });
           }
-          methods.oauth2_token(() => {
-            methods._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+          this.oauth2_token(() => {
+            this._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
           });
           return;
         }
-        authorization = "Bearer " + props._oauth_bearer_token;
+        authorization = "Bearer " + this._oauth_bearer_token;
       }
       if (authorization !== null) {
-        xml.setRequestHeader(`${props._use_proxy ? "X-" : ""}Authorization`, authorization);
+        xml.setRequestHeader(`${this._use_proxy ? "X-" : ""}Authorization`, authorization);
       }
       xml.onreadystatechange = () => {
         if (xml.readyState >= 4) {
@@ -1476,7 +1476,7 @@
           try {
             response = xml.responseText;
           } catch (e) { }
-          let reply = methods._parseApiReply(response);
+          let reply = this._parseApiReply(response);
           reply.httpstatus = httpstatus;
           let rate = null;
           if (typeof xml.getResponseHeader !== "undefined"
@@ -1509,10 +1509,10 @@
 
       xml.send(httpmethod === "GET" ? null : post_fields);
       if (dfd) {
-        return methods._getPromise(dfd);
+        return this._getPromise(dfd);
       }
       return true;
-    };
+    }
 
     /**
      * Main API handler working on any requests you issue
@@ -1524,8 +1524,7 @@
      *
      * @return object Promise
      */
-
-    methods.__call = (fn, params = {}, callback, app_only_auth = false) => {
+    __call(fn, params = {}, callback, app_only_auth = false) {
       if (typeof callback !== "function" && typeof params === "function") {
         callback = params;
         params = {};
@@ -1545,22 +1544,22 @@
       }
 
       // parse parameters
-      let apiparams = methods._parseApiParams(params);
+      let apiparams = this._parseApiParams(params);
 
       // stringify null and boolean parameters
-      apiparams = methods._stringifyNullBoolParams(apiparams);
+      apiparams = this._stringifyNullBoolParams(apiparams);
 
       // reset token when requesting a new token (causes 401 for signature error on 2nd+ requests)
       if (fn === "oauth_requestToken") {
-        methods.setToken(null, null);
+        this.setToken(null, null);
       }
 
       // map function name to API method
-      const [method, method_template] = methods._mapFnToApiMethod(fn, apiparams),
-        httpmethod                    = methods._detectMethod(method_template, apiparams),
-        multipart                     = methods._detectMultipart(method_template);
+      const [method, method_template] = this._mapFnToApiMethod(fn, apiparams),
+        httpmethod                    = this._detectMethod(method_template, apiparams),
+        multipart                     = this._detectMultipart(method_template);
 
-      return methods._callApi(
+      return this._callApi(
           httpmethod,
           method,
           apiparams,
@@ -1568,36 +1567,7 @@
           app_only_auth,
           callback
         );
-    };
-
-    // Unit testing code
-    const __test = {
-      call: (name, params = []) => methods[name].apply(undefined, params),
-      get: name => props[name],
-      mock: methods_to_mock => {
-        for (let name in methods_to_mock) {
-          if (methods_to_mock.hasOwnProperty(name)) {
-            methods[name] = methods_to_mock[name];
-          }
-        }
-      }
-    };
-
-    return {
-      __call: methods.__call,
-      __test,
-      getApiMethods: methods.getApiMethods,
-      getVersion: methods.getVersion,
-      logout: methods.logout,
-      oauth2_token: methods.oauth2_token,
-      oauth_authenticate: methods.oauth_authenticate,
-      oauth_authorize: methods.oauth_authorize,
-      setBearerToken: methods.setBearerToken,
-      setConsumerKey: methods.setConsumerKey,
-      setProxy: methods.setProxy,
-      setToken: methods.setToken,
-      setUseProxy: methods.setUseProxy
-    };
+    }
   };
 
   if (typeof module === "object"
