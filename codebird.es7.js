@@ -12,7 +12,6 @@
 /* global window,
       document,
       navigator,
-      console,
       Ti,
       ActiveXObject,
       module,
@@ -495,7 +494,7 @@
         try {
           xml = new ActiveXObject("Microsoft.XMLHTTP");
         } catch (e) {
-          console.error("ActiveXObject object not defined.");
+          throw "ActiveXObject object not defined.";
         }
         // now, consider RequireJS and/or Node.js objects
       } else if (typeof require === "function"
@@ -512,7 +511,7 @@
             XMLHttpRequest = require("xhr2");
             xml = new XMLHttpRequest();
           } catch (e2) {
-            console.error("xhr2 object not defined, cancelling.");
+            throw "xhr2 object not defined, cancelling.";
           }
         }
       }
