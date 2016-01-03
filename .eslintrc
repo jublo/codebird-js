@@ -48,7 +48,6 @@
 
     ////////// Stylistic Issues //////////
 
-    "consistent-this": 2,           // enforces consistent naming when capturing the current execution context (off by default)
     "eol-last": 2,                  // enforce newline at the end of file, with no multiple empty lines
     "no-lonely-if": 2,              // disallow if as the only statement in an else block (off by default)
     "no-mixed-spaces-and-tabs": 2,  // disallow mixed spaces and tabs for indentation
