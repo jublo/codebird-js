@@ -10,6 +10,7 @@ codebird-js - changelog
 + #110 Add support for Collections API
 + Transform codebase to EcmaScript 7
 + #25 Add unit testing suite
++ Add POST statuses/unretweet/:id
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
