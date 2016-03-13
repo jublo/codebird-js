@@ -604,7 +604,7 @@
             } else {
               key = eval(evalStr + ".push([]);") - 1;
             }
-            evalStr += `[${key}']`;
+            evalStr += `[${key}]`;
             if (j !== keys.length - 1 && eval("typeof " + evalStr) === "undefined") {
               eval(evalStr + " = [];");
             }
