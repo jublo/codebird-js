@@ -1,4 +1,5 @@
 node_modules
+npm-debug.log
 RELEASE_MESSAGE*
 test/codebirdm.js
 test/codebirdt.js
