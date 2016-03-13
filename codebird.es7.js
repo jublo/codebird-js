@@ -363,7 +363,7 @@
           if (typeof a === "object") {
             for (b in a) {
               if (a.hasOwnProperty(b) && a[b] !== null) {
-                e.push(g(c + "[" + b + "]", a[b], d));
+                e.push(g.call(this, c + "[" + b + "]", a[b], d));
               }
             }
             return e.join(d);
@@ -388,7 +388,7 @@
         if (f && !isNaN(c)) {
           c = String(f) + c;
         }
-        d = g(c, d, b);
+        d = g.call(this, c, d, b);
         if (d !== "") {
           h.push(d);
         }
@@ -1003,16 +1003,15 @@
      * @return string signature
      */
     _getSignature(httpmethod, method, keys, base_params) {
-      const {_url, _sha1} = this;
       // convert params to string
       let base_string = "", key, value;
       for (let i = 0; i < keys.length; i++) {
         key = keys[i];
         value = base_params[key];
-        base_string += `${key}=${_url(value)}&`;
+        base_string += `${key}=${this._url(value)}&`;
       }
       base_string = base_string.substring(0, base_string.length - 1);
-      return _sha1(`${httpmethod}&${_url(method)}&${_url(base_string)}`);
+      return this._sha1(`${httpmethod}&${this._url(method)}&${this._url(base_string)}`);
     }
 
     /**
@@ -1032,7 +1031,6 @@
      * @return string Authorization HTTP header
      */
     _sign(httpmethod, method, params = {}) {
-      const {_url, _ksort, _clone, _getSignature} = this;
       if (this._oauth_consumer_key === null) {
         throw "To generate a signature, the consumer key must be set.";
       }
@@ -1049,29 +1047,29 @@
           continue;
         }
         let value = sign_params[key];
-        sign_base_params[`oauth_${key}`] = _url(value);
+        sign_base_params[`oauth_${key}`] = this._url(value);
       }
       if (this._oauth_token !== null) {
-        sign_base_params.oauth_token = _url(this._oauth_token);
+        sign_base_params.oauth_token = this._url(this._oauth_token);
       }
-      const oauth_params = _clone(sign_base_params);
+      const oauth_params = this._clone(sign_base_params);
       for (key in params) {
         if (!params.hasOwnProperty(key)) {
           continue;
         }
         sign_base_params[key] = params[key];
       }
-      let keys = _ksort(sign_base_params);
+      let keys = this._ksort(sign_base_params);
 
-      const signature = _getSignature(httpmethod, method, keys, sign_base_params);
+      const signature = this._getSignature(httpmethod, method, keys, sign_base_params);
 
       params = oauth_params;
       params.oauth_signature = signature;
-      keys = _ksort(params);
+      keys = this._ksort(params);
       let authorization = "OAuth ";
       for (let i = 0; i < keys.length; i++) {
         key = keys[i];
-        authorization += `${key}="${_url(params[key])}", `;
+        authorization += `${key}="${this._url(params[key])}", `;
       }
       return authorization.substring(0, authorization.length - 2);
     }
@@ -1380,7 +1378,6 @@
         return;
       }
       let post_fields;
-      const _sign = this._sign;
 
       if (httpmethod === "GET") {
         let url_with_params = url;
@@ -1388,7 +1385,7 @@
           url_with_params += "?" + this._http_build_query(params);
         }
         if (!app_only_auth) {
-          authorization = _sign(httpmethod, url, params);
+          authorization = this._sign(httpmethod, url, params);
         }
 
         if (this._use_proxy) {
@@ -1404,15 +1401,15 @@
       } else {
         if (multipart) {
           if (!app_only_auth) {
-            authorization = _sign(httpmethod, url, {});
+            authorization = this._sign(httpmethod, url, {});
           }
           params = this._buildMultipart(method, params);
         } else if (this._detectJsonBody(method)) {
-          authorization = _sign(httpmethod, url, {});
+          authorization = this._sign(httpmethod, url, {});
           params = JSON.stringify(params);
         } else {
           if (!app_only_auth) {
-            authorization = _sign(httpmethod, url, params);
+            authorization = this._sign(httpmethod, url, params);
           }
           params = this._http_build_query(params);
         }

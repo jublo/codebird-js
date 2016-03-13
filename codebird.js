@@ -22,7 +22,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 /* global window,
       document,
       navigator,
-      console,
       Ti,
       ActiveXObject,
       module,
@@ -300,7 +299,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         var b = this._oauth_consumer_secret + "&" + (null !== this._oauth_token_secret ? this._oauth_token_secret : "");
         if (this._oauth_consumer_secret === null) {
-          console.warn("To generate a hash, the consumer secret must be set.");
+          throw "To generate a hash, the consumer secret must be set.";
         }
         var c = q(b);
         if (c.length > 16) {
@@ -403,7 +402,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if ((typeof a === "undefined" ? "undefined" : _typeof(a)) === "object") {
               for (b in a) {
                 if (a.hasOwnProperty(b) && a[b] !== null) {
-                  e.push(g(c + "[" + b + "]", a[b], d));
+                  e.push(g.call(this, c + "[" + b + "]", a[b], d));
                 }
               }
               return e.join(d);
@@ -411,7 +410,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (typeof a !== "function") {
               return this._url(c) + "=" + this._url(a);
             }
-            console.warn("There was an error processing for http_build_query().");
+            throw "There was an error processing for http_build_query().";
           } else {
             return "";
           }
@@ -430,7 +429,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           if (f && !isNaN(c)) {
             c = String(f) + c;
           }
-          d = g(c, d, b);
+          d = g.call(this, c, d, b);
           if (d !== "") {
             h.push(d);
           }
@@ -452,7 +451,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var length = arguments.length <= 0 || arguments[0] === undefined ? 8 : arguments[0];
 
         if (length < 1) {
-          console.warn("Invalid nonce length.");
+          throw "Invalid nonce length.";
         }
         var nonce = "";
         for (var i = 0; i < length; i++) {
@@ -545,7 +544,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               try {
                 xml = new ActiveXObject("Microsoft.XMLHTTP");
               } catch (e) {
-                console.error("ActiveXObject object not defined.");
+                throw "ActiveXObject object not defined.";
               }
               // now, consider RequireJS and/or Node.js objects
             } else if (typeof require === "function" && require) {
@@ -560,7 +559,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     XMLHttpRequest = require("xhr2");
                     xml = new XMLHttpRequest();
                   } catch (e2) {
-                    console.error("xhr2 object not defined, cancelling.");
+                    throw "xhr2 object not defined, cancelling.";
                   }
                 }
               }
@@ -664,7 +663,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               } else {
                 key = eval(evalStr + ".push([]);") - 1;
               }
-              evalStr += "[" + key + "']";
+              evalStr += "[" + key + "]";
               if (j !== keys.length - 1 && eval("typeof " + evalStr) === "undefined") {
                 eval(evalStr + " = [];");
               }
@@ -687,7 +686,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function getApiMethods() {
         var httpmethods = {
           GET: ["account/settings", "account/verify_credentials", "application/rate_limit_status", "blocks/ids", "blocks/list", "collections/entries", "collections/list", "collections/show", "direct_messages", "direct_messages/sent", "direct_messages/show", "favorites/list", "followers/ids", "followers/list", "friends/ids", "friends/list", "friendships/incoming", "friendships/lookup", "friendships/lookup", "friendships/no_retweets/ids", "friendships/outgoing", "friendships/show", "geo/id/:place_id", "geo/reverse_geocode", "geo/search", "geo/similar_places", "help/configuration", "help/languages", "help/privacy", "help/tos", "lists/list", "lists/members", "lists/members/show", "lists/memberships", "lists/ownerships", "lists/show", "lists/statuses", "lists/subscribers", "lists/subscribers/show", "lists/subscriptions", "mutes/users/ids", "mutes/users/list", "oauth/authenticate", "oauth/authorize", "saved_searches/list", "saved_searches/show/:id", "search/tweets", "site", "statuses/firehose", "statuses/home_timeline", "statuses/mentions_timeline", "statuses/oembed", "statuses/retweeters/ids", "statuses/retweets/:id", "statuses/retweets_of_me", "statuses/sample", "statuses/show/:id", "statuses/user_timeline", "trends/available", "trends/closest", "trends/place", "user", "users/contributees", "users/contributors", "users/profile_banner", "users/search", "users/show", "users/suggestions", "users/suggestions/:slug", "users/suggestions/:slug/members"],
-          POST: ["account/remove_profile_banner", "account/settings__post", "account/update_delivery_device", "account/update_profile", "account/update_profile_background_image", "account/update_profile_banner", "account/update_profile_colors", "account/update_profile_image", "blocks/create", "blocks/destroy", "collections/create", "collections/destroy", "collections/entries/add", "collections/entries/curate", "collections/entries/move", "collections/entries/remove", "collections/update", "direct_messages/destroy", "direct_messages/new", "favorites/create", "favorites/destroy", "friendships/create", "friendships/destroy", "friendships/update", "lists/create", "lists/destroy", "lists/members/create", "lists/members/create_all", "lists/members/destroy", "lists/members/destroy_all", "lists/subscribers/create", "lists/subscribers/destroy", "lists/update", "media/upload", "mutes/users/create", "mutes/users/destroy", "oauth/access_token", "oauth/request_token", "oauth2/invalidate_token", "oauth2/token", "saved_searches/create", "saved_searches/destroy/:id", "statuses/destroy/:id", "statuses/filter", "statuses/lookup", "statuses/retweet/:id", "statuses/update", "statuses/update_with_media", // deprecated, use media/upload
+          POST: ["account/remove_profile_banner", "account/settings__post", "account/update_delivery_device", "account/update_profile", "account/update_profile_background_image", "account/update_profile_banner", "account/update_profile_colors", "account/update_profile_image", "blocks/create", "blocks/destroy", "collections/create", "collections/destroy", "collections/entries/add", "collections/entries/curate", "collections/entries/move", "collections/entries/remove", "collections/update", "direct_messages/destroy", "direct_messages/new", "favorites/create", "favorites/destroy", "friendships/create", "friendships/destroy", "friendships/update", "lists/create", "lists/destroy", "lists/members/create", "lists/members/create_all", "lists/members/destroy", "lists/members/destroy_all", "lists/subscribers/create", "lists/subscribers/destroy", "lists/update", "media/upload", "mutes/users/create", "mutes/users/destroy", "oauth/access_token", "oauth/request_token", "oauth2/invalidate_token", "oauth2/token", "saved_searches/create", "saved_searches/destroy/:id", "statuses/destroy/:id", "statuses/filter", "statuses/lookup", "statuses/retweet/:id", "statuses/unretweet/:id", "statuses/update", "statuses/update_with_media", // deprecated, use media/upload
           "users/lookup", "users/report_spam"]
         };
         return httpmethods;
@@ -885,7 +884,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               for (j = 0; j < 26; j++) {
                 method_template = method_template.split(String.fromCharCode(65 + j)).join("_" + String.fromCharCode(97 + j));
               }
-              console.warn("To call the templated method \"" + method_template + "\", specify the parameter value for \"" + param_l + "\".");
+              throw "To call the templated method \"" + method_template + "\", specify the parameter value for \"" + param_l + "\".";
             }
             method = method.split(param).join(apiparams[param_l]);
             delete apiparams[param_l];
@@ -970,20 +969,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "_getSignature",
       value: function _getSignature(httpmethod, method, keys, base_params) {
-        var _url = this._url;
-        var _sha1 = this._sha1;
         // convert params to string
-
         var base_string = "",
             key = undefined,
             value = undefined;
         for (var i = 0; i < keys.length; i++) {
           key = keys[i];
           value = base_params[key];
-          base_string += key + "=" + _url(value) + "&";
+          base_string += key + "=" + this._url(value) + "&";
         }
         base_string = base_string.substring(0, base_string.length - 1);
-        return _sha1(httpmethod + "&" + _url(method) + "&" + _url(base_string));
+        return this._sha1(httpmethod + "&" + this._url(method) + "&" + this._url(base_string));
       }
 
       /**
@@ -1010,13 +1006,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       key: "_sign",
       value: function _sign(httpmethod, method) {
         var params = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-        var _url = this._url;
-        var _ksort = this._ksort;
-        var _clone = this._clone;
-        var _getSignature = this._getSignature;
 
         if (this._oauth_consumer_key === null) {
-          console.warn("To generate a signature, the consumer key must be set.");
+          throw "To generate a signature, the consumer key must be set.";
         }
         var sign_params = {
           consumer_key: this._oauth_consumer_key,
@@ -1031,29 +1023,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             continue;
           }
           var value = sign_params[key];
-          sign_base_params["oauth_" + key] = _url(value);
+          sign_base_params["oauth_" + key] = this._url(value);
         }
         if (this._oauth_token !== null) {
-          sign_base_params.oauth_token = _url(this._oauth_token);
+          sign_base_params.oauth_token = this._url(this._oauth_token);
         }
-        var oauth_params = _clone(sign_base_params);
+        var oauth_params = this._clone(sign_base_params);
         for (key in params) {
           if (!params.hasOwnProperty(key)) {
             continue;
           }
           sign_base_params[key] = params[key];
         }
-        var keys = _ksort(sign_base_params);
+        var keys = this._ksort(sign_base_params);
 
-        var signature = _getSignature(httpmethod, method, keys, sign_base_params);
+        var signature = this._getSignature(httpmethod, method, keys, sign_base_params);
 
         params = oauth_params;
         params.oauth_signature = signature;
-        keys = _ksort(params);
+        keys = this._ksort(params);
         var authorization = "OAuth ";
         for (var i = 0; i < keys.length; i++) {
           key = keys[i];
-          authorization += key + "=\"" + _url(params[key]) + "\", ";
+          authorization += key + "=\"" + this._url(params[key]) + "\", ";
         }
         return authorization.substring(0, authorization.length - 2);
       }
@@ -1230,7 +1222,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
         if (this._oauth_token === null) {
           var error = "To get the " + type + " URL, the OAuth token must be set.";
-          console.warn(error);
           if (dfd) {
             dfd.reject({ error: error });
             return this._getPromise(dfd);
@@ -1282,12 +1273,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         if (this._oauth_consumer_key === null) {
           var error = "To obtain a bearer token, the consumer key must be set.";
-          console.warn(error);
           if (dfd) {
             dfd.reject({ error: error });
             return this._getPromise(dfd);
           }
-          return false;
+          throw error;
         }
 
         if (!dfd && typeof callback === "undefined") {
@@ -1383,7 +1373,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return;
         }
         var post_fields = undefined;
-        var _sign = this._sign;
 
         if (httpmethod === "GET") {
           var url_with_params = url;
@@ -1391,7 +1380,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             url_with_params += "?" + this._http_build_query(params);
           }
           if (!app_only_auth) {
-            authorization = _sign(httpmethod, url, params);
+            authorization = this._sign(httpmethod, url, params);
           }
 
           if (this._use_proxy) {
@@ -1401,15 +1390,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         } else {
           if (multipart) {
             if (!app_only_auth) {
-              authorization = _sign(httpmethod, url, {});
+              authorization = this._sign(httpmethod, url, {});
             }
             params = this._buildMultipart(method, params);
           } else if (this._detectJsonBody(method)) {
-            authorization = _sign(httpmethod, url, {});
+            authorization = this._sign(httpmethod, url, {});
             params = JSON.stringify(params);
           } else {
             if (!app_only_auth) {
-              authorization = _sign(httpmethod, url, params);
+              authorization = this._sign(httpmethod, url, params);
             }
             params = this._http_build_query(params);
           }
@@ -1430,11 +1419,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (app_only_auth) {
           if (this._oauth_consumer_key === null && this._oauth_bearer_token === null) {
             var error = "To make an app-only auth API request, consumer key or bearer token must be set.";
-            console.warn(error);
             if (dfd) {
               dfd.reject({ error: error });
               return this._getPromise(dfd);
             }
+            throw error;
           }
           // automatically fetch bearer token, if necessary
           if (this._oauth_bearer_token === null) {
