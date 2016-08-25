@@ -989,7 +989,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "_time",
       value: function _time() {
-        Math.round(new Date().getTime() / 1000);
+        return Math.round(new Date().getTime() / 1000);
       }
 
       /**
