@@ -92,3 +92,14 @@ test("Tests oauth2_token", function (t) {
       );
     });
 });
+
+test("Tests signing of boolean parameters", function (t) {
+  const cb = getCB();
+
+  t.equal(
+    cb.call("_getSignature", ["GET", "friends/ids", ["stringify_ids"], [true]]),
+    "OFNuMTEnE82pfI0cAdJPgtO4xzY="
+  );
+
+  t.end();
+});

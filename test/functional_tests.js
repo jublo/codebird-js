@@ -27,9 +27,9 @@ test("Tests statuses/update", function (t) {
         },
         reply: {
           errors: [
-            { code: 215, message: "Bad Authentication data." }
+            { code: 89, message: "Invalid or expired token." }
           ],
-          httpstatus: 400
+          httpstatus: 401
         }
       }
     )
