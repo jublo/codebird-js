@@ -88,6 +88,10 @@ test("Tests _getEndpoint", function (t) {
     cb.call("_getEndpoint", ["media/upload", "media/upload"]),
     "https://upload.twitter.com/1.1/media/upload.json"
   );
+  t.equal(
+    cb.call("_getEndpoint", ["statuses/oembed", "statuses/oembed"]),
+    "https://publish.twitter.com/oembed"
+  );
 
   t.end();
 });

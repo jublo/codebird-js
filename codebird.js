@@ -76,6 +76,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       this._endpoint_media = this._endpoint_base_media + "1.1/";
 
       /**
+       * The publish API endpoint to use
+       */
+      this._endpoint_publish = "https://publish.twitter.com/";
+
+      /**
        * The API endpoint base to use
        */
       this._endpoint_oauth = this._endpoint_base;
@@ -989,7 +994,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "_time",
       value: function _time() {
-        return Math.round(new Date().getTime() / 1000);
+        Math.round(new Date().getTime() / 1000);
       }
 
       /**
@@ -1151,6 +1156,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           url = this._endpoint_oauth + method;
         } else if (this._detectMedia(method)) {
           url = this._endpoint_media + method + ".json";
+        } else if (method === "statuses/oembed") {
+          url = this._endpoint_publish + "oembed";
         } else {
           url = this._endpoint + method + ".json";
         }

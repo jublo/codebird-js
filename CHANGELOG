@@ -11,6 +11,7 @@ codebird-js - changelog
 + Transform codebase to EcmaScript 7
 + #25 Add unit testing suite
 + Add POST statuses/unretweet/:id
++ #116 Update GET statuses/oembed with new endpoint
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
