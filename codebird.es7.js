@@ -1096,6 +1096,7 @@
       // only check specific parameters
       const possible_methods = [
           // Tweets
+          "media/upload",
           "statuses/update_with_media",
           // Accounts
           "account/update_profile_background_image",
@@ -1104,6 +1105,7 @@
         ];
       let possible_files = {
           // Tweets
+          "media/upload": "media",
           "statuses/update_with_media": "media[]",
           // Accounts
           "account/update_profile_background_image": "image",

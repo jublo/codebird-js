@@ -1075,11 +1075,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         // only check specific parameters
         var possible_methods = [
         // Tweets
-        "statuses/update_with_media",
+        "media/upload", "statuses/update_with_media",
         // Accounts
         "account/update_profile_background_image", "account/update_profile_image", "account/update_profile_banner"];
         var possible_files = {
           // Tweets
+          "media/upload": "media",
           "statuses/update_with_media": "media[]",
           // Accounts
           "account/update_profile_background_image": "image",
