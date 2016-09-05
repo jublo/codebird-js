@@ -552,7 +552,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 throw "ActiveXObject object not defined.";
               }
               // now, consider RequireJS and/or Node.js objects
-            } else if (typeof require === "function" && require) {
+            } else if (typeof require === "function") {
                 var XMLHttpRequest;
                 // look for xmlhttprequest module
                 try {

@@ -13,6 +13,7 @@ codebird-js - changelog
 + Add POST statuses/unretweet/:id
 + #116 Update GET statuses/oembed with new endpoint
 + Support POST media/upload with media_data base64
+- Fix check for require for webpack compatibility
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
