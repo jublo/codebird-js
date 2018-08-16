@@ -667,7 +667,6 @@
           "geo/id/:place_id",
           "geo/reverse_geocode",
           "geo/search",
-          "geo/similar_places",
           "help/configuration",
           "help/languages",
           "help/privacy",
@@ -689,8 +688,6 @@
           "saved_searches/list",
           "saved_searches/show/:id",
           "search/tweets",
-          "site",
-          "statuses/firehose",
           "statuses/home_timeline",
           "statuses/mentions_timeline",
           "statuses/oembed",
@@ -703,9 +700,6 @@
           "trends/available",
           "trends/closest",
           "trends/place",
-          "user",
-          "users/contributees",
-          "users/contributors",
           "users/profile_banner",
           "users/search",
           "users/show",
@@ -716,11 +710,8 @@
         POST: [
           "account/remove_profile_banner",
           "account/settings__post",
-          "account/update_delivery_device",
           "account/update_profile",
-          "account/update_profile_background_image",
           "account/update_profile_banner",
-          "account/update_profile_colors",
           "account/update_profile_image",
           "account_activity/all/:env_name/subscriptions",
           "account_activity/all/:env_name/webhooks",
@@ -756,6 +747,7 @@
           "lists/subscribers/create",
           "lists/subscribers/destroy",
           "lists/update",
+          "media/metadata/create",
           "media/upload",
           "mutes/users/create",
           "mutes/users/destroy",
@@ -771,7 +763,6 @@
           "statuses/retweet/:id",
           "statuses/unretweet/:id",
           "statuses/update",
-          "statuses/update_with_media", // deprecated, use media/upload
           "users/lookup",
           "users/report_spam"
         ]
@@ -1009,11 +1000,9 @@
     _detectMultipart(method) {
       const multiparts = [
       // Tweets
-        "statuses/update_with_media",
         "media/upload",
 
       // Users
-        "account/update_profile_background_image",
         "account/update_profile_image",
         "account/update_profile_banner"
       ];
@@ -1119,18 +1108,14 @@
       const possible_methods = [
           // Tweets
           "media/upload",
-          "statuses/update_with_media",
           // Accounts
-          "account/update_profile_background_image",
           "account/update_profile_image",
           "account/update_profile_banner"
         ];
       let possible_files = {
           // Tweets
           "media/upload": "media",
-          "statuses/update_with_media": "media[]",
           // Accounts
-          "account/update_profile_background_image": "image",
           "account/update_profile_image": "image",
           "account/update_profile_banner": "banner"
         };
@@ -1168,6 +1153,7 @@
      */
     _detectMedia(method) {
       const medias = [
+        "media/metadata/create",
         "media/upload"
       ];
       return medias.indexOf(method) > -1;

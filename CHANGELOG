@@ -16,6 +16,10 @@ codebird-js - changelog
 - Fix check for require for webpack compatibility
 + Add Account Activity API methods
 + Add new Direct Messages API
+- Remove sunsetting Direct Messages API
+- Remove contributor API methods
+- Remove deprecated statuses/update_with_media method
+- Remove deprecated statuses/update_profile_background_image method
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
