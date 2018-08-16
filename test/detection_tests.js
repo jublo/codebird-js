@@ -14,7 +14,7 @@ test("Tests _detectMethod", function (t) {
     function () {
       cb.call("_detectMethod", ["non-existent", {}]);
     },
-    /^Can't find HTTP method to use for "non-existent".$/
+    "Can't find HTTP method to use for \"non-existent\"."
   );
 
   // forced httpmethod
@@ -24,6 +24,10 @@ test("Tests _detectMethod", function (t) {
   );
 
   // normal detection
+  t.equal(
+    cb.call("_detectMethod", ["account_activity/all/:env_name/subscriptions", {}]),
+    "GET"
+  );
   t.equal(
     cb.call("_detectMethod", ["search/tweets", {}]),
     "GET"
@@ -54,7 +58,6 @@ test("Tests _detectMultipart", function (t) {
   const cb = getCB();
 
   t.false(cb.call("_detectMultipart", ["statuses/update"]));
-  t.true(cb.call("_detectMultipart", ["statuses/update_with_media"]));
   t.true(cb.call("_detectMultipart", ["media/upload"]));
 
   t.end();
