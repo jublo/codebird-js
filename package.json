@@ -11,7 +11,7 @@
   "homepage": "http://www.jublo.net/projects/codebird/js",
   "bugs": "https://github.com/jublonet/codebird-js/issues",
   "license": "GPL-3.0+",
-  "author": "Jublo Solutions <support@jublo.net> (http://jublo.net/)",
+  "author": "Jublo Limited <support@jublo.net> (http://jublo.net/)",
   "contributors": [
     "Joshua Atkins <joshua.atkins@jublo.net> (http://atkins.im/)",
     "J.M. <jm@jublo.net> (http://mynetx.net/)"
@@ -33,13 +33,13 @@
     "test": "npm run build && npm run test-run"
   },
   "devDependencies": {
-    "babel-cli": "^6.3.17",
-    "babel-preset-es2015": "^6.3.13",
-    "eslint": "^1.10.3",
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "eslint": "^5.3.0",
     "faucet": "0.0.1",
-    "q": "^1.4.1",
-    "tape": "^4.4.0",
-    "tape-promise": "^1.0.1",
+    "q": "^1.5.1",
+    "tape": "^4.9.1",
+    "tape-promise": "^1.1.0",
     "xmlhttprequest": "^1.8.0"
   }
 }
