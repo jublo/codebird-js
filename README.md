@@ -2,7 +2,7 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
-Copyright (C) 2010-2016 Jublo Solutions <support@jublo.net>
+Copyright (C) 2010-2018 Jublo Limited <support@jublo.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -355,7 +355,7 @@ cb.__call(
 );
 ```
 
-More [documentation for tweeting with media](https://dev.twitter.com/rest/public/uploading-media-multiple-photos) is available on the Twitter Developer site.
+More [documentation for uploading media](https://developer.twitter.com/en/docs/media/upload-media/overview) is available on the Twitter Developer site.
 
 ### Requests with app-only auth
 
@@ -417,7 +417,7 @@ The library returns the response HTTP status code, so you can detect rate limits
 I suggest you to check if the ```reply.httpstatus``` property is ```400```
 and check with the Twitter API to find out if you are currently being
 rate-limited.
-See the [Rate Limiting FAQ](https://dev.twitter.com/rest/public/rate-limiting)
+See the [Rate Limiting FAQ](https://developer.twitter.com/en/docs/basics/rate-limiting)
 for more information.
 
 If you allow your callback function to accept a second parameter,
@@ -644,12 +644,13 @@ often they will be decomposed, efficient objects with information about users,
 Tweets, and timelines grouped, simplified, and stripped of unnecessary repetition.
 
 Never care about the OAuth signing specialities and the JSON POST body
-for POST collections/entries/curate.json. Codebird takes off the work for you
+for POST and PUT calls to these special APIs. Codebird takes off the work for you
 and will always send the correct Content-Type automatically.
 
-Find out more about the [Collections API](https://dev.twitter.com/rest/collections/about) in the Twitter API docs.
+Find out more about the [Collections API](https://developer.twitter.com/en/docs/tweets/curate-a-collection/overview/about_collections) in the Twitter API docs.
+More information on the [Direct Messages API](https://developer.twitter.com/en/docs/direct-messages/api-features) and the [Account Activity API](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview) is available there as well.
 
-Here’s a sample for adding a tweet using that API method:
+Here’s a sample for adding a Tweet using the Collections API:
 
 ```javascript
 cb.__call(
