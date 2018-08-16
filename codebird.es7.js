@@ -3,8 +3,8 @@
  *
  * @package   codebird
  * @version   3.0.0-dev
- * @author    Jublo Solutions <support@jublo.net>
- * @copyright 2010-2016 Jublo Solutions <support@jublo.net>
+ * @author    Jublo Limited <support@jublo.net>
+ * @copyright 2010-2018 Jublo Limited <support@jublo.net>
  * @license   http://opensource.org/licenses/GPL-3.0 GNU Public License 3.0
  * @link      https://github.com/jublonet/codebird-php
  */
