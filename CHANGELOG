@@ -15,6 +15,7 @@ codebird-js - changelog
 + Support POST media/upload with media_data base64
 - Fix check for require for webpack compatibility
 + Add Account Activity API methods
++ Add new Direct Messages API
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array

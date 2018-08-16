@@ -643,10 +643,17 @@
           "collections/entries",
           "collections/list",
           "collections/show",
-          "direct_messages",
-          "direct_messages/sent",
-          "direct_messages/show",
+          "custom_profiles/:id",
+          "custom_profiles/list",
+          "direct_messages/events/list",
+          "direct_messages/events/show",
+          "direct_messages/welcome_messages/list",
+          "direct_messages/welcome_messages/rules/list",
+          "direct_messages/welcome_messages/rules/show",
+          "direct_messages/welcome_messages/show",
           "favorites/list",
+          "feedback/events",
+          "feedback/show/:id",
           "followers/ids",
           "followers/list",
           "friends/ids",
@@ -728,10 +735,15 @@
           "collections/entries/move",
           "collections/entries/remove",
           "collections/update",
-          "direct_messages/destroy",
-          "direct_messages/new",
+          "custom_profiles/new",
+          "direct_messages/events/new",
+          "direct_messages/indicate_typing",
+          "direct_messages/mark_read",
+          "direct_messages/welcome_messages/new",
+          "direct_messages/welcome_messages/rules/new",
           "favorites/create",
           "favorites/destroy",
+          "feedback/create",
           "friendships/create",
           "friendships/destroy",
           "friendships/update",
@@ -1170,7 +1182,15 @@
      */
     _detectJsonBody(method) {
       const json_bodies = [
-        "collections/entries/curate"
+        "collections/entries/curate",
+        "custom_profiles/new",
+        "direct_messages/events/new",
+        "direct_messages/indicate_typing",
+        "direct_messages/mark_read",
+        "direct_messages/welcome_messages/new",
+        "direct_messages/welcome_messages/rules/new",
+        "direct_messages/welcome_messages/update",
+        "media/metadata/create"
       ];
       return json_bodies.indexOf(method) > -1;
     }
