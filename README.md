@@ -2,7 +2,7 @@ codebird-js
 ===========
 *A Twitter library in JavaScript.*
 
-Copyright (C) 2010-2015 Jublo Solutions <support@jublo.net>
+Copyright (C) 2010-2018 Jublo Limited <support@jublo.net>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+[![Travis Status](https://img.shields.io/travis/jublonet/codebird-js/develop.svg)](https://travis-ci.org/jublonet/codebird-js/branches)
 
 
 Including Codebird
@@ -73,20 +75,39 @@ Or you authenticate, like this:
 cb.__call(
     "oauth_requestToken",
     {oauth_callback: "oob"},
-    function (reply) {
-        // stores it
-        cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+    function (reply,rate,err) {
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error);
+        }
+        if (reply) {
+            // stores it
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
 
-        // gets the authorize screen URL
-        cb.__call(
-            "oauth_authorize",
-            {},
-            function (auth_url) {
-                window.codebird_auth = window.open(auth_url);
-            }
-        );
+            // gets the authorize screen URL
+            cb.__call(
+                "oauth_authorize",
+                {},
+                function (auth_url) {
+                    window.codebird_auth = window.open(auth_url);
+                }
+            );
+        }
     }
 );
+```
+
+:warning: Codebird server calls do not always go through when
+being processed in a hyperlink onclick handler. Be sure to cancel
+the default procedure before calling Codebird, like this (jQuery):
+
+```javascript
+$(function() {
+
+    $('#auth').click(function(e) {
+        e.preventDefault();
+
+        var cb = new Codebird;
+// ...
 ```
 
 Now you need to add a PIN box to your website.
@@ -96,14 +117,28 @@ After the user enters the PIN, complete the authentication:
 cb.__call(
     "oauth_accessToken",
     {oauth_verifier: document.getElementById("PINFIELD").value},
-    function (reply) {
-        // store the authenticated token, which may be different from the request token (!)
-        cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+    function (reply,rate,err) {
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error);
+        }
+        if (reply) {
+            // store the authenticated token, which may be different from the request token (!)
+            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+        }
 
         // if you need to persist the login after page reload,
         // consider storing the token in a cookie or HTML5 local storage
     }
 );
+```
+
+### Logging out
+
+In case you want to log out the current user (to log in a different user without
+creating a new Codebird object), just call the `logout()` method.
+
+```javascript
+cb.logout();
 ```
 
 ### Application-only auth
@@ -118,8 +153,14 @@ To obtain an app-only bearer token, call the appropriate API:
 cb.__call(
     "oauth2_token",
     {},
-    function (reply) {
-        var bearer_token = reply.access_token;
+    function (reply, err) {
+        var bearer_token;
+        if (err) {
+            console.log("error response or timeout exceeded" + err.error);
+        }
+        if (reply) {
+            bearer_token = reply.access_token;
+        }
     }
 );
 ```
@@ -136,7 +177,6 @@ In this case, you don't need to set the consumer key and secret.
 For sending an API request with app-only auth, see the ‘Usage examples’ section.
 
 ### Authenticating using a callback URL, without PIN
-
 
 1. Before sending your user off to Twitter, you have to store the request token and its secret, for example in a cookie.
 2. In the callback URL, extract those values and assign them to the Codebird object.
@@ -172,8 +212,13 @@ if (typeof parameters.oauth_verifier !== "undefined") {
         {
             oauth_verifier: parameters.oauth_verifier
         },
-        function (reply) {
-            cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+        function (reply, rate, err) {
+            if (err) {
+                console.log("error response or timeout exceeded" + err.error);
+            }
+            if (reply) {
+                cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+            }
 
             // if you need to persist the login after page reload,
             // consider storing the token in a cookie or HTML5 local storage
@@ -198,8 +243,9 @@ cb.setToken("YOURTOKEN", "YOURTOKENSECRET"); // see above
 cb.__call(
     "statuses_homeTimeline",
     {},
-    function (reply) {
+    function (reply, rate, err) {
         console.log(reply);
+        console.log(err);
     }
 );
 ```
@@ -210,7 +256,7 @@ Tweeting is as easy as this:
 cb.__call(
     "statuses_update",
     {"status": "Whohoo, I just tweeted!"},
-    function (reply) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -224,7 +270,7 @@ var params = "status=" + encodeURIComponent("Fish & chips");
 cb.__call(
     "statuses_update",
     params,
-    function (reply) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -240,7 +286,7 @@ var params = {
 cb.__call(
     "statuses_update",
     params,
-    function (reply) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -253,7 +299,7 @@ var params = {
 cb.__call(
     "users_show",
     params,
-    function (reply) {
+    function (reply, rate, err) {
         // ...
     }
 );
@@ -279,12 +325,12 @@ base64-encoded. **First** you send each image to Twitter, like this:
 
 ```javascript
 var params = {
-    "media": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
+    "media_data": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+0lEQVR42mP8//8/Ay0BEwONwagFoxZQDljI0PP8x7/Z93/e+PxXmpMpXp5dh4+ZgYHh0bd/clxYnMuINaMtfvRLgp3RVZwVU+rkuz+eRz+//wXVxcrEkKnEceXTX0dRlhoNTmKDaOvzXwHHv6x9+gtN/M9/hpjTX+GmMzAw/P7HMOnOj+ff//35x/Ds+z9iLfjPwPDt7//QE1/Sz319/RNh3PkPf+58+Yup/t7Xf9p8zFKcTMRa4CLGCrFm1v2fSjs+pJ/7uuvl7w+//yO7HRkUq3GEyrCREMk+kqy2IiyH3/xhYGD48uf/rPs/Z93/yczIwM3CiFU9Hw5xnD4ouvTt4Tf0AP37n+HTb+w+UOBmIs2CICm2R9/+EZlqGRkYzIVYSLMgRIYtUYGdSAsMBFgUuJhIy2iMDAwt2pysjAwLHv78RcgnOcrs5BQVHEyMG579Imi6Nh9zrBxZFgixMW624pXnwldYcTAzLjDhZmUit7AzE2K54c7fp8eF1QhWRobFptwmgiwkF3b//jMwMjJ8+P3/zPs/yx/9Wvr412+MgBJlZ1xsyuOOrbAibMHH3/87b32fce/nR2ypnpuFMVGevU6TQ5SdqKKeEVez5cuf/7te/j727s+9L/++/v3PzcyowM1kIcTiLs7Kz8pIfNnOONouGrVg1AIGAJ6gvN4J6V9GAAAAAElFTkSuQmCC"
 );
 cb.__call(
     "media_upload",
     params,
-    function (reply) {
+    function (reply, rate, err) {
         // you get a media id back:
         console.log(reply.media_id_string);
 
@@ -303,13 +349,13 @@ cb.__call(
         "media_ids": "12345678901234567890,9876543210987654321"
         "status": "Whohoo, I just tweeted two images!"
     },
-    function (reply) {
+    function (reply, rate, err) {
         // ...
     }
 );
 ```
 
-More [documentation for tweeting with media](https://dev.twitter.com/rest/public/uploading-media-multiple-photos) is available on the Twitter Developer site.
+More [documentation for uploading media](https://developer.twitter.com/en/docs/media/upload-media/overview) is available on the Twitter Developer site.
 
 ### Requests with app-only auth
 
@@ -371,7 +417,7 @@ The library returns the response HTTP status code, so you can detect rate limits
 I suggest you to check if the ```reply.httpstatus``` property is ```400```
 and check with the Twitter API to find out if you are currently being
 rate-limited.
-See the [Rate Limiting FAQ](https://dev.twitter.com/rest/public/rate-limiting)
+See the [Rate Limiting FAQ](https://developer.twitter.com/en/docs/basics/rate-limiting)
 for more information.
 
 If you allow your callback function to accept a second parameter,
@@ -588,28 +634,96 @@ When this error occurs, advise the user to
 [generate a temporary password](https://twitter.com/settings/applications)
 on twitter.com and use that to complete signing in to the application.
 
-### …access and use undocumented Twitter API methods?
+### …access the Collections API?
 
-Besides the well-documented official methods, the Twitter API also contains
-undocumented additional methods.  They are used by official Twitter clients,
-such as Twitter for iPhone and Twitter for Mac.
+Collections are a type of timeline that you control and can be hand curated
+and/or programmed using an API.
 
-Access to these methods is restricted: Only white-listed applications
-(consumer keys) may access undocumented methods.  Codebird supports accessing
-internal methods, but that will only work if you provide a white-listed API key.
-By reason, the API keys and secrets for official Twitter clients are not
-provided within this package, since they should have been kept a secret.
+Pay close attention to the differences in how collections are presented —
+often they will be decomposed, efficient objects with information about users,
+Tweets, and timelines grouped, simplified, and stripped of unnecessary repetition.
 
-If you provide Codebird with the Twitter for iPhone consumer key and secret,
-the following example will get the latest events that happened with you:
+Never care about the OAuth signing specialities and the JSON POST body
+for POST and PUT calls to these special APIs. Codebird takes off the work for you
+and will always send the correct Content-Type automatically.
+
+Find out more about the [Collections API](https://developer.twitter.com/en/docs/tweets/curate-a-collection/overview/about_collections) in the Twitter API docs.
+More information on the [Direct Messages API](https://developer.twitter.com/en/docs/direct-messages/api-features) and the [Account Activity API](https://developer.twitter.com/en/docs/accounts-and-users/subscribe-account-activity/overview) is available there as well.
+
+Here’s a sample for adding a Tweet using the Collections API:
 
 ```javascript
 cb.__call(
-    "activity_aboutMe",
-    {},
-    function (reply) {
-        console.log(reply);
-        // ...
+    "collections_entries_curate",
+    {
+      "id": "custom-672852634622144512",
+      "changes": [
+        {"op": "add", "tweet_id": "672727928262828032"}
+      ]
+    },
+    function (reply, rate) {
+        document.body.innerText = JSON.stringify(reply);
     }
 );
 ```
+
+### …use promises instead of callback functions?
+
+Have you ever heard of the [Pyramid of Doom](http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/)?
+It’s when code progresses more to the right because of excessive nesting
+than it progresses from top to bottom.
+
+Because of the asynchronous requests, Codebird will use callbacks that you provide.
+They are called when the result from the Twitter API has arrived.
+However, to streamline code, there is a sleeker concept for this: Promises.
+
+There are several popular libraries that support promises.
+Codebird will auto-detect and use any of the following:
+
+- jQuery Deferred
+- Q
+- RSVP
+- when
+
+Here’s a usage sample for promises:
+
+```javascript
+cb.__call(
+    "statuses_update",
+    {"status": "Whohoo, I just tweeted!"}
+).then(function (data) {
+        var reply = data.reply,
+            rate = data.rate;
+        // ...
+    },
+    function (err) {
+        // ...
+    });
+```
+
+Since the app-only flag is the fourth parameter for `__call`,
+you’ll have to provide a callback stub nonetheless even with promises:
+
+```javascript
+cb.__call(
+    "search_tweets",
+    {"q": "#PHP7"},
+    null, // no callback needed, we have the promise
+    true // app-only auth
+
+).then(function (data) {
+        var reply = data.reply,
+            rate = data.rate;
+        // ...
+    },
+    function (err) {
+        // ...
+    });
+```
+
+**Tips:**
+
+- If you provide **both** (callback and promise.then),
+  Codebird will first call the callback, then resolve the promise.
+
+- If the request fails due to any errors, Codebird will reject the promise.

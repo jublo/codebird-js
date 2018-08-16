@@ -1,0 +1,62 @@
+{
+  // http://eslint.org/docs/rules/
+
+  "ecmaFeatures": {
+    "binaryLiterals": false,                    // enable binary literals
+    "blockBindings": true,                      // enable let and const (aka block bindings)
+    "defaultParams": false,                     // enable default function parameters
+    "forOf": true,                              // enable for-of loops
+    "generators": false,                        // enable generators
+    "objectLiteralComputedProperties": false,   // enable computed object literal property names
+    "objectLiteralDuplicateProperties": false,  // enable duplicate object literal properties in strict mode
+    "objectLiteralShorthandMethods": false,     // enable object literal shorthand methods
+    "objectLiteralShorthandProperties": false,  // enable object literal shorthand properties
+    "octalLiterals": false,                     // enable octal literals
+    "regexUFlag": false,                        // enable the regular expression u flag
+    "regexYFlag": false,                        // enable the regular expression y flag
+    "templateStrings": true ,                   // enable template strings
+    "unicodeCodePointEscapes": false,           // enable code point escapes
+    "jsx": false,                               // enable JSX
+    "modules": true
+  },
+
+  "env": {
+    "browser": true,      // browser global variables.
+    "node": true,         // Node.js global variables and Node.js-specific rules.
+    "amd": true,          // defines require() and define() as global variables as per the amd spec.
+    "es6": true           // EcmaScript 6
+  },
+
+  "globals": {
+    // e.g. "angular": true
+  },
+
+  "plugins": [
+    // e.g. "react" (must run `npm install eslint-plugin-react` first)
+  ],
+
+  "rules": {
+    ////////// Possible Errors //////////
+
+    "valid-typeof": 2,            // Ensure that the results of typeof are compared against a valid string
+
+
+    ////////// Best Practices //////////
+
+    "eqeqeq": 2,                // require the use of === and !==
+    "no-alert": 2,              // disallow the use of alert, confirm, and prompt
+
+    ////////// Stylistic Issues //////////
+
+    "eol-last": 2,                  // enforce newline at the end of file, with no multiple empty lines
+    "no-lonely-if": 2,              // disallow if as the only statement in an else block (off by default)
+    "no-mixed-spaces-and-tabs": 2,  // disallow mixed spaces and tabs for indentation
+    "no-multiple-empty-lines": 2,   // disallow multiple empty lines (off by default)
+    "no-trailing-spaces": 2,        // disallow trailing whitespace at the end of lines
+
+    "quotes": [
+      2,
+      "double"
+    ]
+  }
+}

@@ -1,6 +1,26 @@
 codebird-js - changelog
 =======================
 
+3.0.0 (not yet released)
++ #106 Add error callback
++ #96 Add logout method
++ #98 Support promises as alternative to callbacks
+- Drop support for undocumented API methods
++ Add security check hasOwnProperty
++ #110 Add support for Collections API
++ Transform codebase to EcmaScript 7
++ #25 Add unit testing suite
++ Add POST statuses/unretweet/:id
++ #116 Update GET statuses/oembed with new endpoint
++ Support POST media/upload with media_data base64
+- Fix check for require for webpack compatibility
++ Add Account Activity API methods
++ Add new Direct Messages API
+- Remove sunsetting Direct Messages API
+- Remove contributor API methods
+- Remove deprecated statuses/update_with_media method
+- Remove deprecated statuses/update_profile_background_image method
+
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array
 - #79 Use POST for users/lookup and statuses/lookup, params may get too long for GET

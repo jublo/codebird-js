@@ -1,3 +1,7 @@
+node_modules
+npm-debug.log
 RELEASE_MESSAGE*
-test*
+test/codebirdm.js
+test/codebirdt.js
+test*.html
 *.jpg
