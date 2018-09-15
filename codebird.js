@@ -1184,10 +1184,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           parsed = JSON.parse(reply);
         } catch (e) {
           parsed = {};
+          // assume XML
+          if (reply.match(/^<\?xml/)) {
+            var errors = void 0;
+            if (errors = reply.match(/<errors>(.+)<\/errors>/)) {
+              parsed.errors = {};
+              errors = errors[1].match(/<error [^<]+/g);
+              for (var i = 0; i < errors.length; i++) {
+                var error = errors[i].match(/code="(\d+)">(.+)/);
+                parsed.errors[error[1]] = error[2];
+              }
+            }
+            return parsed;
+          }
           // assume query format
           var elements = reply.split("&");
-          for (var i = 0; i < elements.length; i++) {
-            var element = elements[i].split("=", 2);
+          for (var _i = 0; _i < elements.length; _i++) {
+            var element = elements[_i].split("=", 2);
             if (element.length > 1) {
               parsed[element[0]] = decodeURIComponent(element[1]);
             } else {
@@ -1555,8 +1568,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     return Codebird;
   }();
-
-  ;
 
   if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module && _typeof(module.exports) === "object") {
     // Expose codebird as module.exports in loaders that implement the Node

@@ -20,6 +20,7 @@ codebird-js - changelog
 - Remove contributor API methods
 - Remove deprecated statuses/update_with_media method
 - Remove deprecated statuses/update_profile_background_image method
++ Detect XML error replies (re-implemented detection)
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array

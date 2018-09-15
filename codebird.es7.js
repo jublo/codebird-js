@@ -26,7 +26,6 @@
    * @subpackage codebird-js
    */
   class Codebird {
-
     constructor() {
       /**
        * The OAuth consumer key of your registered app
@@ -82,9 +81,9 @@
        * Whether to access the API via a proxy that is allowed by CORS
        * Assume that CORS is only necessary in browsers
        */
-      this._use_proxy = (typeof navigator !== "undefined"
-      && typeof navigator.userAgent !== "undefined"
-      );
+      this._use_proxy =
+        typeof navigator !== "undefined" &&
+        typeof navigator.userAgent !== "undefined";
 
       /**
        * The Request or access token. Used to sign requests
@@ -101,7 +100,8 @@
        */
       this._version = "3.0.0-dev";
 
-      this.b64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      this.b64_alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     }
 
     /**
@@ -156,8 +156,7 @@
      * @return bool
      */
     logout() {
-      this._oauth_token =
-      this._oauth_token_secret = null;
+      this._oauth_token = this._oauth_token_secret = null;
 
       return true;
     }
@@ -200,8 +199,13 @@
      * @return mixed The encoded data
      */
     _url(data) {
-      if ((/boolean|number|string/).test(typeof data)) {
-        return encodeURIComponent(data).replace(/!/g, "%21").replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A");
+      if (/boolean|number|string/.test(typeof data)) {
+        return encodeURIComponent(data)
+          .replace(/!/g, "%21")
+          .replace(/'/g, "%27")
+          .replace(/\(/g, "%28")
+          .replace(/\)/g, "%29")
+          .replace(/\*/g, "%2A");
       } else {
         return "";
       }
@@ -222,11 +226,20 @@
      * @return string The hash
      */
     _sha1(e) {
-      function n (e, b) {
-        e[b >> 5] |= 128 << 24 - b % 32;
-        e[(b + 64 >> 9 << 4) + 15] = b;
-        for (var c = new Array(80), a = 1732584193, d = -271733879, h = -1732584194,
-          k = 271733878, g = -1009589776, p = 0; p < e.length; p += 16) {
+      function n(e, b) {
+        e[b >> 5] |= 128 << (24 - (b % 32));
+        e[(((b + 64) >> 9) << 4) + 15] = b;
+        for (
+          var c = new Array(80),
+            a = 1732584193,
+            d = -271733879,
+            h = -1732584194,
+            k = 271733878,
+            g = -1009589776,
+            p = 0;
+          p < e.length;
+          p += 16
+        ) {
           for (var o = a, q = d, r = h, s = k, t = g, f = 0; 80 > f; f++) {
             let m;
 
@@ -234,17 +247,35 @@
               m = e[p + f];
             } else {
               m = c[f - 3] ^ c[f - 8] ^ c[f - 14] ^ c[f - 16];
-              m = m << 1 | m >>> 31;
+              m = (m << 1) | (m >>> 31);
             }
 
             c[f] = m;
-            m = l(l(a << 5 | a >>> 27, 20 > f ? d & h | ~d & k : 40 > f ? d ^
-              h ^ k : 60 > f ? d & h | d & k | h & k : d ^ h ^ k), l(
-                l(g, c[f]), 20 > f ? 1518500249 : 40 > f ? 1859775393 :
-                  60 > f ? -1894007588 : -899497514));
+            m = l(
+              l(
+                (a << 5) | (a >>> 27),
+                20 > f
+                  ? (d & h) | (~d & k)
+                  : 40 > f
+                    ? d ^ h ^ k
+                    : 60 > f
+                      ? (d & h) | (d & k) | (h & k)
+                      : d ^ h ^ k
+              ),
+              l(
+                l(g, c[f]),
+                20 > f
+                  ? 1518500249
+                  : 40 > f
+                    ? 1859775393
+                    : 60 > f
+                      ? -1894007588
+                      : -899497514
+              )
+            );
             g = k;
             k = h;
-            h = d << 30 | d >>> 2;
+            h = (d << 30) | (d >>> 2);
             d = a;
             a = m;
           }
@@ -259,19 +290,20 @@
 
       function l(e, b) {
         var c = (e & 65535) + (b & 65535);
-        return (e >> 16) + (b >> 16) + (c >> 16) << 16 | c & 65535;
+        return (((e >> 16) + (b >> 16) + (c >> 16)) << 16) | (c & 65535);
       }
 
       function q(e) {
         for (var b = [], c = (1 << g) - 1, a = 0; a < e.length * g; a += g) {
-          b[a >> 5] |= (e.charCodeAt(a / g) & c) << 24 - a % 32;
+          b[a >> 5] |= (e.charCodeAt(a / g) & c) << (24 - (a % 32));
         }
         return b;
       }
       var g = 8;
 
-      let b = `${this._oauth_consumer_secret}&${null !== this._oauth_token_secret ?
-        this._oauth_token_secret : ""}`;
+      let b = `${this._oauth_consumer_secret}&${
+        null !== this._oauth_token_secret ? this._oauth_token_secret : ""
+      }`;
       if (this._oauth_consumer_secret === null) {
         throw "To generate a hash, the consumer secret must be set.";
       }
@@ -288,11 +320,19 @@
       bb = n(bb.concat(c), 672);
       b = "";
       for (g = 0; g < 4 * bb.length; g += 3) {
-        for (d = (bb[g >> 2] >> 8 * (3 - g % 4) & 255) << 16 | (bb[g + 1 >> 2] >>
-          8 * (3 - (g + 1) % 4) & 255) << 8 | bb[g + 2 >> 2] >> 8 * (3 -
-            (g + 2) % 4) & 255, e = 0; 4 > e; e++) {
-          b = 8 * g + 6 * e > 32 * bb.length ? b + "=" : b +
-            this.b64_alphabet.charAt(d >> 6 * (3 - e) & 63);
+        for (
+          d =
+            (((bb[g >> 2] >> (8 * (3 - (g % 4)))) & 255) << 16) |
+            (((bb[(g + 1) >> 2] >> (8 * (3 - ((g + 1) % 4)))) & 255) << 8) |
+            ((bb[(g + 2) >> 2] >> (8 * (3 - ((g + 2) % 4)))) & 255),
+            e = 0;
+          4 > e;
+          e++
+        ) {
+          b =
+            8 * g + 6 * e > 32 * bb.length
+              ? b + "="
+              : b + this.b64_alphabet.charAt((d >> (6 * (3 - e))) & 63);
         }
       }
       return b;
@@ -315,7 +355,11 @@
      * @return string The base64 representation
      */
     _base64_encode(a) {
-      let d, e, f, b, g = 0,
+      let d,
+        e,
+        f,
+        b,
+        g = 0,
         h = 0,
         i = this.b64_alphabet,
         c = [];
@@ -326,10 +370,10 @@
         d = a.charCodeAt(g++);
         e = a.charCodeAt(g++);
         f = a.charCodeAt(g++);
-        b = d << 16 | e << 8 | f;
-        d = b >> 18 & 63;
-        e = b >> 12 & 63;
-        f = b >> 6 & 63;
+        b = (d << 16) | (e << 8) | f;
+        d = (b >> 18) & 63;
+        e = (b >> 12) & 63;
+        f = (b >> 6) & 63;
         b &= 63;
         c[h++] = i.charAt(d) + i.charAt(e) + i.charAt(f) + i.charAt(b);
       } while (g < a.length);
@@ -358,7 +402,8 @@
      */
     _http_build_query(e, f, b) {
       function g(c, a, d) {
-        let b, e = [];
+        let b,
+          e = [];
         if (a === true) {
           a = "1";
         } else if (a === false) {
@@ -381,7 +426,9 @@
           return "";
         }
       }
-      var d, c, h = [];
+      var d,
+        c,
+        h = [];
       if (!b) {
         b = "&";
       }
@@ -428,7 +475,9 @@
      * @return array The sorted keys
      */
     _ksort(input_arr) {
-      let keys = [], sorter, k;
+      let keys = [],
+        sorter,
+        k;
 
       sorter = (a, b) => {
         let a_float = parseFloat(a),
@@ -465,7 +514,7 @@
     _clone(obj) {
       let clone = {};
       for (let i in obj) {
-        if (typeof (obj[i]) === "object") {
+        if (typeof obj[i] === "object") {
           clone[i] = this._clone(obj[i]);
         } else {
           clone[i] = obj[i];
@@ -482,20 +531,21 @@
     _getXmlRequestObject() {
       let xml = null;
       // first, try the W3-standard object
-      if (typeof window === "object"
-        && window
-        && typeof window.XMLHttpRequest !== "undefined"
-        ) {
+      if (
+        typeof window === "object" &&
+        window &&
+        typeof window.XMLHttpRequest !== "undefined"
+      ) {
         xml = new window.XMLHttpRequest();
         // then, try Titanium framework object
-      } else if (typeof Ti === "object"
-        && Ti
-        && typeof Ti.Network.createHTTPClient !== "undefined"
-        ) {
+      } else if (
+        typeof Ti === "object" &&
+        Ti &&
+        typeof Ti.Network.createHTTPClient !== "undefined"
+      ) {
         xml = Ti.Network.createHTTPClient();
         // are we in an old Internet Explorer?
-      } else if (typeof ActiveXObject !== "undefined"
-        ) {
+      } else if (typeof ActiveXObject !== "undefined") {
         try {
           xml = new ActiveXObject("Microsoft.XMLHTTP");
         } catch (e) {
@@ -546,10 +596,23 @@
     _parse_str(str, array) {
       var glue1 = "=",
         glue2 = "&",
-        array2 = String(str).replace(/^&?([\s\S]*?)&?$/, "$1").split(glue2),
-        i, j, chr, tmp, key, value, bracket, keys, evalStr,
+        array2 = String(str)
+          .replace(/^&?([\s\S]*?)&?$/, "$1")
+          .split(glue2),
+        i,
+        j,
+        chr,
+        tmp,
+        key,
+        value,
+        bracket,
+        keys,
+        evalStr,
         fixStr = str => {
-          return decodeURIComponent(str).replace(/([\\"'])/g, "\\$1").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+          return decodeURIComponent(str)
+            .replace(/([\\"'])/g, "\\$1")
+            .replace(/\n/g, "\\n")
+            .replace(/\r/g, "\\r");
         };
       if (!array) {
         array = this.window;
@@ -608,7 +671,10 @@
               key = eval(evalStr + ".push([]);") - 1;
             }
             evalStr += `[${key}]`;
-            if (j !== keys.length - 1 && eval("typeof " + evalStr) === "undefined") {
+            if (
+              j !== keys.length - 1 &&
+              eval("typeof " + evalStr) === "undefined"
+            ) {
               eval(evalStr + " = [];");
             }
           }
@@ -796,27 +862,27 @@
         let promise_class = false;
         try {
           promise_class = require("jquery");
-        } catch (e) { }
+        } catch (e) {}
         if (promise_class) {
           return promise_class.Deferred();
         }
         try {
           promise_class = require("q");
-        } catch (e) { }
+        } catch (e) {}
         if (!promise_class) {
           try {
             promise_class = require("rsvp");
-          } catch (e) { }
+          } catch (e) {}
         }
         if (!promise_class) {
           try {
             promise_class = require("when");
-          } catch (e) { }
+          } catch (e) {}
         }
         if (promise_class) {
           try {
             return promise_class.defer();
-          } catch (e) { }
+          } catch (e) {}
         }
       }
       return false;
@@ -907,7 +973,6 @@
       return method;
     }
 
-
     /**
      * Maps called PHP magic method name to Twitter API method
      *
@@ -918,7 +983,9 @@
      */
     _mapFnToApiMethod(fn, apiparams) {
       let method = "",
-        param, i, j;
+        param,
+        i,
+        j;
 
       // replace _ by /
       method = this._mapFnInsertSlashes(fn);
@@ -936,7 +1003,9 @@
           method_template = method_template.split(param).join(":" + param_l);
           if (typeof apiparams[param_l] === "undefined") {
             for (j = 0; j < 26; j++) {
-              method_template = method_template.split(String.fromCharCode(65 + j)).join("_" + String.fromCharCode(97 + j));
+              method_template = method_template
+                .split(String.fromCharCode(65 + j))
+                .join("_" + String.fromCharCode(97 + j));
             }
             throw `To call the templated method "${method_template}", specify the parameter value for "${param_l}".`;
           }
@@ -947,13 +1016,16 @@
 
       // replace A-Z by _a-z
       for (i = 0; i < 26; i++) {
-        method = method.split(String.fromCharCode(65 + i)).join("_" + String.fromCharCode(97 + i));
-        method_template = method_template.split(String.fromCharCode(65 + i)).join("_" + String.fromCharCode(97 + i));
+        method = method
+          .split(String.fromCharCode(65 + i))
+          .join("_" + String.fromCharCode(97 + i));
+        method_template = method_template
+          .split(String.fromCharCode(65 + i))
+          .join("_" + String.fromCharCode(97 + i));
       }
 
       return [method, method_template];
     }
-
 
     /**
      * Detects HTTP method to use for API call
@@ -981,9 +1053,10 @@
 
       const apimethods = this.getApiMethods();
       for (let httpmethod in apimethods) {
-        if (apimethods.hasOwnProperty(httpmethod)
-          && apimethods[httpmethod].indexOf(method) > -1
-          ) {
+        if (
+          apimethods.hasOwnProperty(httpmethod) &&
+          apimethods[httpmethod].indexOf(method) > -1
+        ) {
           return httpmethod;
         }
       }
@@ -999,10 +1072,10 @@
      */
     _detectMultipart(method) {
       const multiparts = [
-      // Tweets
+        // Tweets
         "media/upload",
 
-      // Users
+        // Users
         "account/update_profile_image",
         "account/update_profile_banner"
       ];
@@ -1020,14 +1093,18 @@
      */
     _getSignature(httpmethod, method, keys, base_params) {
       // convert params to string
-      let base_string = "", key, value;
+      let base_string = "",
+        key,
+        value;
       for (let i = 0; i < keys.length; i++) {
         key = keys[i];
         value = base_params[key];
         base_string += `${key}=${this._url(value)}&`;
       }
       base_string = base_string.substring(0, base_string.length - 1);
-      return this._sha1(`${httpmethod}&${this._url(method)}&${this._url(base_string)}`);
+      return this._sha1(
+        `${httpmethod}&${this._url(method)}&${this._url(base_string)}`
+      );
     }
 
     /**
@@ -1077,7 +1154,12 @@
       }
       let keys = this._ksort(sign_base_params);
 
-      const signature = this._getSignature(httpmethod, method, keys, sign_base_params);
+      const signature = this._getSignature(
+        httpmethod,
+        method,
+        keys,
+        sign_base_params
+      );
 
       params = oauth_params;
       params.oauth_signature = signature;
@@ -1106,19 +1188,19 @@
 
       // only check specific parameters
       const possible_methods = [
-          // Tweets
-          "media/upload",
-          // Accounts
-          "account/update_profile_image",
-          "account/update_profile_banner"
-        ];
+        // Tweets
+        "media/upload",
+        // Accounts
+        "account/update_profile_image",
+        "account/update_profile_banner"
+      ];
       let possible_files = {
-          // Tweets
-          "media/upload": "media",
-          // Accounts
-          "account/update_profile_image": "image",
-          "account/update_profile_banner": "banner"
-        };
+        // Tweets
+        "media/upload": "media",
+        // Accounts
+        "account/update_profile_image": "image",
+        "account/update_profile_banner": "banner"
+      };
       // method might have files?
       if (possible_methods.indexOf(method) === -1) {
         return;
@@ -1133,8 +1215,7 @@
         if (!params.hasOwnProperty(key)) {
           continue;
         }
-        multipart_request +=
-          `--${multipart_border}\r\nContent-Disposition: form-data; name="${key}"`;
+        multipart_request += `--${multipart_border}\r\nContent-Disposition: form-data; name="${key}"`;
         if (possible_files.indexOf(key) === -1) {
           multipart_request += "\r\nContent-Transfer-Encoding: base64";
         }
@@ -1152,10 +1233,7 @@
      * @return bool Whether the method is defined in media API
      */
     _detectMedia(method) {
-      const medias = [
-        "media/metadata/create",
-        "media/upload"
-      ];
+      const medias = ["media/metadata/create", "media/upload"];
       return medias.indexOf(method) > -1;
     }
 
@@ -1221,20 +1299,32 @@
         parsed = JSON.parse(reply);
       } catch (e) {
         parsed = {};
+        // assume XML
+        if (reply.match(/^<\?xml/)) {
+          let errors;
+          if ((errors = reply.match(/<errors>(.+)<\/errors>/))) {
+            parsed.errors = {};
+            errors = errors[1].match(/<error [^<]+/g);
+            for (let i = 0; i < errors.length; i++) {
+              let error = errors[i].match(/code="(\d+)">(.+)/);
+              parsed.errors[error[1]] = error[2];
+            }
+          }
+          return parsed;
+        }
         // assume query format
         let elements = reply.split("&");
         for (let i = 0; i < elements.length; i++) {
-        let element = elements[i].split("=", 2);
-        if (element.length > 1) {
+          let element = elements[i].split("=", 2);
+          if (element.length > 1) {
             parsed[element[0]] = decodeURIComponent(element[1]);
-        } else {
+          } else {
             parsed[element[0]] = null;
-        }
+          }
         }
       }
       return parsed;
     }
-
 
     /**
      * Uncommon API methods
@@ -1245,7 +1335,11 @@
      *
      * @return object Promise
      */
-    oauth_authenticate(params = {}, callback = undefined, type = "authenticate") {
+    oauth_authenticate(
+      params = {},
+      callback = undefined,
+      type = "authenticate"
+    ) {
       const dfd = this._getDfd();
       if (typeof params.force_login === "undefined") {
         params.force_login = null;
@@ -1264,7 +1358,9 @@
         }
         throw error;
       }
-      let url = `${this._endpoint_oauth}oauth/${type}?oauth_token=${this._url(this._oauth_token)}`;
+      let url = `${this._endpoint_oauth}oauth/${type}?oauth_token=${this._url(
+        this._oauth_token
+      )}`;
       if (params.force_login === true) {
         url += "&force_login=1";
       }
@@ -1316,10 +1412,7 @@
       let url = this._endpoint_oauth + "oauth2/token";
 
       if (this._use_proxy) {
-        url = url.replace(
-          this._endpoint_base,
-          this._endpoint_proxy
-          );
+        url = url.replace(this._endpoint_base, this._endpoint_proxy);
       }
 
       const xml = this._getXmlRequestObject();
@@ -1330,19 +1423,22 @@
       xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xml.setRequestHeader(
         `${this._use_proxy ? "X-" : ""}Authorization`,
-        "Basic " + this._base64_encode(`${this._oauth_consumer_key}:${this._oauth_consumer_secret}`)
-        );
+        "Basic " +
+          this._base64_encode(
+            `${this._oauth_consumer_key}:${this._oauth_consumer_secret}`
+          )
+      );
 
       xml.onreadystatechange = () => {
         if (xml.readyState >= 4) {
           let httpstatus = 12027;
           try {
             httpstatus = xml.status;
-          } catch (e) { }
+          } catch (e) {}
           let response = "";
           try {
             response = xml.responseText;
-          } catch (e) { }
+          } catch (e) {}
           let reply = this._parseApiReply(response);
           reply.httpstatus = httpstatus;
           if (httpstatus === 200) {
@@ -1386,16 +1482,16 @@
      * @return mixed The API reply, encoded in the set return_format
      */
     _callApi(
-        httpmethod,
-        method,
-        params = {},
-        multipart = false,
-        app_only_auth = false,
-        callback = () => {}
-      ) {
+      httpmethod,
+      method,
+      params = {},
+      multipart = false,
+      app_only_auth = false,
+      callback = () => {}
+    ) {
       const dfd = this._getDfd();
 
-      let url         = this._getEndpoint(method),
+      let url = this._getEndpoint(method),
         authorization = null;
 
       const xml = this._getXmlRequestObject();
@@ -1414,13 +1510,9 @@
         }
 
         if (this._use_proxy) {
-          url_with_params = url_with_params.replace(
-            this._endpoint_base,
-            this._endpoint_proxy
-            ).replace(
-              this._endpoint_base_media,
-              this._endpoint_proxy
-              );
+          url_with_params = url_with_params
+            .replace(this._endpoint_base, this._endpoint_proxy)
+            .replace(this._endpoint_base_media, this._endpoint_proxy);
         }
         xml.open(httpmethod, url_with_params, true);
       } else {
@@ -1439,30 +1531,35 @@
           params = this._http_build_query(params);
         }
         post_fields = params;
-        if (this._use_proxy || multipart) { // force proxy for multipart base64
-          url = url.replace(
-            this._endpoint_base,
-            this._endpoint_proxy
-            ).replace(
-              this._endpoint_base_media,
-              this._endpoint_proxy
-              );
+        if (this._use_proxy || multipart) {
+          // force proxy for multipart base64
+          url = url
+            .replace(this._endpoint_base, this._endpoint_proxy)
+            .replace(this._endpoint_base_media, this._endpoint_proxy);
         }
         xml.open(httpmethod, url, true);
         if (multipart) {
-          xml.setRequestHeader("Content-Type", "multipart/form-data; boundary="
-            + post_fields.split("\r\n")[0].substring(2));
+          xml.setRequestHeader(
+            "Content-Type",
+            "multipart/form-data; boundary=" +
+              post_fields.split("\r\n")[0].substring(2)
+          );
         } else if (this._detectJsonBody(method)) {
           xml.setRequestHeader("Content-Type", "application/json");
         } else {
-          xml.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          xml.setRequestHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
         }
       }
       if (app_only_auth) {
-        if (this._oauth_consumer_key === null
-          && this._oauth_bearer_token === null
-          ) {
-          const error = "To make an app-only auth API request, consumer key or bearer token must be set.";
+        if (
+          this._oauth_consumer_key === null &&
+          this._oauth_bearer_token === null
+        ) {
+          const error =
+            "To make an app-only auth API request, consumer key or bearer token must be set.";
           if (dfd) {
             dfd.reject({ error });
             return this._getPromise(dfd);
@@ -1473,35 +1570,53 @@
         if (this._oauth_bearer_token === null) {
           if (dfd) {
             return this.oauth2_token().then(() => {
-              return this._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+              return this._callApi(
+                httpmethod,
+                method,
+                params,
+                multipart,
+                app_only_auth,
+                callback
+              );
             });
           }
           this.oauth2_token(() => {
-            this._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+            this._callApi(
+              httpmethod,
+              method,
+              params,
+              multipart,
+              app_only_auth,
+              callback
+            );
           });
           return;
         }
         authorization = "Bearer " + this._oauth_bearer_token;
       }
       if (authorization !== null) {
-        xml.setRequestHeader(`${this._use_proxy ? "X-" : ""}Authorization`, authorization);
+        xml.setRequestHeader(
+          `${this._use_proxy ? "X-" : ""}Authorization`,
+          authorization
+        );
       }
       xml.onreadystatechange = () => {
         if (xml.readyState >= 4) {
           let httpstatus = 12027;
           try {
             httpstatus = xml.status;
-          } catch (e) { }
+          } catch (e) {}
           let response = "";
           try {
             response = xml.responseText;
-          } catch (e) { }
+          } catch (e) {}
           let reply = this._parseApiReply(response);
           reply.httpstatus = httpstatus;
           let rate = null;
-          if (typeof xml.getResponseHeader !== "undefined"
-            && xml.getResponseHeader("x-rate-limit-limit") !== ""
-            ) {
+          if (
+            typeof xml.getResponseHeader !== "undefined" &&
+            xml.getResponseHeader("x-rate-limit-limit") !== ""
+          ) {
             rate = {
               limit: xml.getResponseHeader("x-rate-limit-limit"),
               remaining: xml.getResponseHeader("x-rate-limit-remaining"),
@@ -1576,24 +1691,25 @@
 
       // map function name to API method
       const [method, method_template] = this._mapFnToApiMethod(fn, apiparams),
-        httpmethod                    = this._detectMethod(method_template, apiparams),
-        multipart                     = this._detectMultipart(method_template);
+        httpmethod = this._detectMethod(method_template, apiparams),
+        multipart = this._detectMultipart(method_template);
 
       return this._callApi(
-          httpmethod,
-          method,
-          apiparams,
-          multipart,
-          app_only_auth,
-          callback
-        );
+        httpmethod,
+        method,
+        apiparams,
+        multipart,
+        app_only_auth,
+        callback
+      );
     }
-  };
+  }
 
-  if (typeof module === "object"
-    && module
-    && typeof module.exports === "object"
-    ) {
+  if (
+    typeof module === "object" &&
+    module &&
+    typeof module.exports === "object"
+  ) {
     // Expose codebird as module.exports in loaders that implement the Node
     // module pattern (including browserify). Do not create the global, since
     // the user will be storing it themselves locally, and globals are frowned
@@ -1601,8 +1717,7 @@
     module.exports = Codebird;
   } else {
     // Otherwise expose codebird to the global object as usual
-    if (typeof window === "object"
-      && window) {
+    if (typeof window === "object" && window) {
       window.Codebird = Codebird;
     }
 
@@ -1617,5 +1732,4 @@
       define("codebird", [], () => Codebird);
     }
   }
-
 })();
