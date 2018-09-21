@@ -180,10 +180,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     }, {
       key: "logout",
-      value: function logout() {
-        this._oauth_token = this._oauth_token_secret = null;
+      value: function logout(callback) {
+        var _this = this;
 
-        return true;
+        var dfd = this._getDfd();
+
+        if (!dfd && typeof callback === "undefined") {
+          callback = function callback() {};
+        }
+
+        this.__call("oauth_invalidateToken", {
+          access_key: this._oauth_token,
+          access_key_secret: this._oauth_token_secret
+        }).then(function () {
+          _this._oauth_token = _this._oauth_token_secret = null;
+          if (typeof callback === "function") {
+            callback(true);
+          }
+          if (dfd) {
+            dfd.resolve(true);
+          }
+        });
+
+        if (dfd) {
+          return this._getPromise(dfd);
+        }
       }
 
       /**
@@ -691,7 +712,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function getApiMethods() {
         var httpmethods = {
           GET: ["account/settings", "account/verify_credentials", "account_activity/all/:env_name/subscriptions", "account_activity/all/:env_name/subscriptions/list", "account_activity/all/:env_name/webhooks", "account_activity/all/webhooks", "account_activity/subscriptions/count", "account_activity/webhooks", "account_activity/webhooks/:webhook_id/subscriptions/all", "account_activity/webhooks/:webhook_id/subscriptions/all/list", "application/rate_limit_status", "blocks/ids", "blocks/list", "collections/entries", "collections/list", "collections/show", "custom_profiles/:id", "custom_profiles/list", "direct_messages/events/list", "direct_messages/events/show", "direct_messages/welcome_messages/list", "direct_messages/welcome_messages/rules/list", "direct_messages/welcome_messages/rules/show", "direct_messages/welcome_messages/show", "favorites/list", "feedback/events", "feedback/show/:id", "followers/ids", "followers/list", "friends/ids", "friends/list", "friendships/incoming", "friendships/lookup", "friendships/lookup", "friendships/no_retweets/ids", "friendships/outgoing", "friendships/show", "geo/id/:place_id", "geo/reverse_geocode", "geo/search", "help/configuration", "help/languages", "help/privacy", "help/tos", "lists/list", "lists/members", "lists/members/show", "lists/memberships", "lists/ownerships", "lists/show", "lists/statuses", "lists/subscribers", "lists/subscribers/show", "lists/subscriptions", "mutes/users/ids", "mutes/users/list", "oauth/authenticate", "oauth/authorize", "saved_searches/list", "saved_searches/show/:id", "search/tweets", "statuses/home_timeline", "statuses/mentions_timeline", "statuses/oembed", "statuses/retweeters/ids", "statuses/retweets/:id", "statuses/retweets_of_me", "statuses/sample", "statuses/show/:id", "statuses/user_timeline", "trends/available", "trends/closest", "trends/place", "users/profile_banner", "users/search", "users/show", "users/suggestions", "users/suggestions/:slug", "users/suggestions/:slug/members"],
-          POST: ["account/remove_profile_banner", "account/settings__post", "account/update_profile", "account/update_profile_banner", "account/update_profile_image", "account_activity/all/:env_name/subscriptions", "account_activity/all/:env_name/webhooks", "account_activity/webhooks", "account_activity/webhooks/:webhook_id/subscriptions/all", "blocks/create", "blocks/destroy", "collections/create", "collections/destroy", "collections/entries/add", "collections/entries/curate", "collections/entries/move", "collections/entries/remove", "collections/update", "custom_profiles/new", "direct_messages/events/new", "direct_messages/indicate_typing", "direct_messages/mark_read", "direct_messages/welcome_messages/new", "direct_messages/welcome_messages/rules/new", "favorites/create", "favorites/destroy", "feedback/create", "friendships/create", "friendships/destroy", "friendships/update", "lists/create", "lists/destroy", "lists/members/create", "lists/members/create_all", "lists/members/destroy", "lists/members/destroy_all", "lists/subscribers/create", "lists/subscribers/destroy", "lists/update", "media/metadata/create", "media/upload", "mutes/users/create", "mutes/users/destroy", "oauth/access_token", "oauth/request_token", "oauth2/invalidate_token", "oauth2/token", "saved_searches/create", "saved_searches/destroy/:id", "statuses/destroy/:id", "statuses/filter", "statuses/lookup", "statuses/retweet/:id", "statuses/unretweet/:id", "statuses/update", "users/lookup", "users/report_spam"]
+          POST: ["account/remove_profile_banner", "account/settings__post", "account/update_profile", "account/update_profile_banner", "account/update_profile_image", "account_activity/all/:env_name/subscriptions", "account_activity/all/:env_name/webhooks", "account_activity/webhooks", "account_activity/webhooks/:webhook_id/subscriptions/all", "blocks/create", "blocks/destroy", "collections/create", "collections/destroy", "collections/entries/add", "collections/entries/curate", "collections/entries/move", "collections/entries/remove", "collections/update", "custom_profiles/new", "direct_messages/events/new", "direct_messages/indicate_typing", "direct_messages/mark_read", "direct_messages/welcome_messages/new", "direct_messages/welcome_messages/rules/new", "favorites/create", "favorites/destroy", "feedback/create", "friendships/create", "friendships/destroy", "friendships/update", "lists/create", "lists/destroy", "lists/members/create", "lists/members/create_all", "lists/members/destroy", "lists/members/destroy_all", "lists/subscribers/create", "lists/subscribers/destroy", "lists/update", "media/metadata/create", "media/upload", "mutes/users/create", "mutes/users/destroy", "oauth/access_token", "oauth/invalidate_token", "oauth/request_token", "oauth2/invalidate_token", "oauth2/token", "saved_searches/create", "saved_searches/destroy/:id", "statuses/destroy/:id", "statuses/filter", "statuses/lookup", "statuses/retweet/:id", "statuses/unretweet/:id", "statuses/update", "users/lookup", "users/report_spam"]
         };
         return httpmethods;
       }
@@ -1150,7 +1171,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       key: "_getEndpoint",
       value: function _getEndpoint(method) {
         var url = void 0;
-        if (method.substring(0, 5) === "oauth") {
+        if (method.substring(0, 22) === "oauth/invalidate_token") {
+          url = this._endpoint + method + ".json";
+        } else if (method.substring(0, 5) === "oauth") {
           url = this._endpoint_oauth + method;
         } else if (this._detectMedia(method)) {
           url = this._endpoint_media + method + ".json";
@@ -1285,7 +1308,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "oauth2_token",
       value: function oauth2_token(callback) {
-        var _this = this;
+        var _this2 = this;
 
         var dfd = this._getDfd();
 
@@ -1327,10 +1350,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             try {
               response = xml.responseText;
             } catch (e) {}
-            var reply = _this._parseApiReply(response);
+            var reply = _this2._parseApiReply(response);
             reply.httpstatus = httpstatus;
             if (httpstatus === 200) {
-              _this.setBearerToken(reply.access_token);
+              _this2.setBearerToken(reply.access_token);
             }
             if (typeof callback === "function") {
               callback(reply);
@@ -1376,7 +1399,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         var multipart = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
-        var _this2 = this;
+        var _this3 = this;
 
         var app_only_auth = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
         var callback = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : function () {};
@@ -1447,11 +1470,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           if (this._oauth_bearer_token === null) {
             if (dfd) {
               return this.oauth2_token().then(function () {
-                return _this2._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+                return _this3._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
               });
             }
             this.oauth2_token(function () {
-              _this2._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
+              _this3._callApi(httpmethod, method, params, multipart, app_only_auth, callback);
             });
             return;
           }
@@ -1470,7 +1493,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             try {
               response = xml.responseText;
             } catch (e) {}
-            var reply = _this2._parseApiReply(response);
+            var reply = _this3._parseApiReply(response);
             reply.httpstatus = httpstatus;
             var rate = null;
             if (typeof xml.getResponseHeader !== "undefined" && xml.getResponseHeader("x-rate-limit-limit") !== "") {

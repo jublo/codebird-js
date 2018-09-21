@@ -58,3 +58,18 @@ test("Tests reply XML detection", function(t) {
       });
     });
 });
+
+test("Tests logout method", function(t) {
+  const cb = getCB(true);
+  t.plan(4);
+
+  cb.setToken("123", "456");
+
+  t.equal(cb.get("_oauth_token"), "123");
+  t.equal(cb.get("_oauth_token_secret"), "456");
+
+  return cb.logout().then(function() {
+    t.equal(cb.get("_oauth_token"), null);
+    t.equal(cb.get("_oauth_token_secret"), null);
+  });
+});

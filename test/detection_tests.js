@@ -4,57 +4,42 @@ const tape = require("tape"),
   CodebirdT = require("./codebirdt");
 
 function getCB() {
-  return new CodebirdT.default;
+  return new CodebirdT.default();
 }
 
-test("Tests _detectMethod", function (t) {
+test("Tests _detectMethod", function(t) {
   const cb = getCB();
 
-  t.throws(
-    function () {
-      cb.call("_detectMethod", ["non-existent", {}]);
-    },
-    "Can't find HTTP method to use for \"non-existent\"."
-  );
+  t.throws(function() {
+    cb.call("_detectMethod", ["non-existent", {}]);
+  }, 'Can\'t find HTTP method to use for "non-existent".');
 
   // forced httpmethod
   t.equal(
-    cb.call("_detectMethod", ["doesnt-matter", {httpmethod: "DELETE"}]),
+    cb.call("_detectMethod", ["doesnt-matter", { httpmethod: "DELETE" }]),
     "DELETE"
   );
 
   // normal detection
   t.equal(
-    cb.call("_detectMethod", ["account_activity/all/:env_name/subscriptions", {}]),
+    cb.call("_detectMethod", [
+      "account_activity/all/:env_name/subscriptions",
+      {}
+    ]),
     "GET"
   );
-  t.equal(
-    cb.call("_detectMethod", ["search/tweets", {}]),
-    "GET"
-  );
-  t.equal(
-    cb.call("_detectMethod", ["statuses/update", {}]),
-    "POST"
-  );
-  t.equal(
-    cb.call("_detectMethod", ["statuses/destroy/:id", {}]),
-    "POST"
-  );
+  t.equal(cb.call("_detectMethod", ["search/tweets", {}]), "GET");
+  t.equal(cb.call("_detectMethod", ["statuses/update", {}]), "POST");
+  t.equal(cb.call("_detectMethod", ["statuses/destroy/:id", {}]), "POST");
 
   // parameter-based detection
-  t.equal(
-    cb.call("_detectMethod", ["account/settings", {}]),
-    "GET"
-  );
-  t.equal(
-    cb.call("_detectMethod", ["account/settings", {test: 12}]),
-    "POST"
-  );
+  t.equal(cb.call("_detectMethod", ["account/settings", {}]), "GET");
+  t.equal(cb.call("_detectMethod", ["account/settings", { test: 12 }]), "POST");
 
   t.end();
 });
 
-test("Tests _detectMultipart", function (t) {
+test("Tests _detectMultipart", function(t) {
   const cb = getCB();
 
   t.false(cb.call("_detectMultipart", ["statuses/update"]));
@@ -63,7 +48,7 @@ test("Tests _detectMultipart", function (t) {
   t.end();
 });
 
-test("Tests _detectMedia", function (t) {
+test("Tests _detectMedia", function(t) {
   const cb = getCB();
 
   t.false(cb.call("_detectMedia", ["statuses/update"]));
@@ -72,7 +57,7 @@ test("Tests _detectMedia", function (t) {
   t.end();
 });
 
-test("Tests _getEndpoint", function (t) {
+test("Tests _getEndpoint", function(t) {
   const cb = getCB();
 
   t.equal(
@@ -82,6 +67,13 @@ test("Tests _getEndpoint", function (t) {
   t.equal(
     cb.call("_getEndpoint", ["oauth/authenticate", "oauth/authenticate"]),
     "https://api.twitter.com/oauth/authenticate"
+  );
+  t.equal(
+    cb.call("_getEndpoint", [
+      "oauth/invalidate_token",
+      "oauth/invalidate_token"
+    ]),
+    "https://api.twitter.com/1.1/oauth/invalidate_token.json"
   );
   t.equal(
     cb.call("_getEndpoint", ["oauth2/token", "oauth2/token"]),

@@ -21,6 +21,7 @@ codebird-js - changelog
 - Remove deprecated statuses/update_with_media method
 - Remove deprecated statuses/update_profile_background_image method
 + Detect XML error replies (re-implemented detection)
++ Add oauth/invalidate_token method
 
 2.6.0 (2015-04-08)
 + Allow to get the supported API methods as array

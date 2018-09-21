@@ -155,10 +155,29 @@
      *
      * @return bool
      */
-    logout() {
-      this._oauth_token = this._oauth_token_secret = null;
+    logout(callback) {
+      const dfd = this._getDfd();
 
-      return true;
+      if (!dfd && typeof callback === "undefined") {
+        callback = () => {};
+      }
+
+      this.__call("oauth_invalidateToken", {
+        access_key: this._oauth_token,
+        access_key_secret: this._oauth_token_secret
+      }).then(() => {
+        this._oauth_token = this._oauth_token_secret = null;
+        if (typeof callback === "function") {
+          callback(true);
+        }
+        if (dfd) {
+          dfd.resolve(true);
+        }
+      });
+
+      if (dfd) {
+        return this._getPromise(dfd);
+      }
     }
 
     /**
@@ -818,6 +837,7 @@
           "mutes/users/create",
           "mutes/users/destroy",
           "oauth/access_token",
+          "oauth/invalidate_token",
           "oauth/request_token",
           "oauth2/invalidate_token",
           "oauth2/token",
@@ -1268,7 +1288,9 @@
      */
     _getEndpoint(method) {
       let url;
-      if (method.substring(0, 5) === "oauth") {
+      if (method.substring(0, 22) === "oauth/invalidate_token") {
+        url = this._endpoint + method + ".json";
+      } else if (method.substring(0, 5) === "oauth") {
         url = this._endpoint_oauth + method;
       } else if (this._detectMedia(method)) {
         url = this._endpoint_media + method + ".json";

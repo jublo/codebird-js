@@ -137,7 +137,20 @@ In case you want to log out the current user (to log in a different user without
 creating a new Codebird object), just call the `logout()` method.
 
 ```javascript
-cb.logout();
+cb.logout().then(() => {
+  // user is now logged out
+});
+```
+
+Codebird also supports calling the oauth/invalidate_token method directly:
+
+```
+cb.__call("oauth_invalidateToken", {
+  access_key:        "1234",
+  access_key_secret: "5678"
+}).then(() => {
+  // tokens are now reset
+});
 ```
 
 ### Application-only auth
