@@ -17,7 +17,6 @@ import Codebird from "../codebird";
  * @package codebird-test
  */
 export default class CodebirdT extends Codebird {
-
   /**
    * Returns properties
    *
@@ -26,8 +25,8 @@ export default class CodebirdT extends Codebird {
    * @return mixed Property
    */
   get(property) {
-    if (typeof this.property !== "undefined") {
-      return this.property;
+    if (typeof this[property] !== "undefined") {
+      return this[property];
     }
     throw `Property ${property} is not defined.`;
   }
@@ -40,8 +39,8 @@ export default class CodebirdT extends Codebird {
    * @return mixed Property
    */
   getStatic(property) {
-    if (typeof CodebirdT.property !== "undefined") {
-      return CodebirdT.property;
+    if (typeof CodebirdT[property] !== "undefined") {
+      return CodebirdT[property];
     }
     throw `Static property ${property} is not defined.`;
   }
@@ -76,7 +75,7 @@ export default class CodebirdT extends Codebird {
     throw `Static method ${method} is not defined.`;
   }
 
-/*
+  /*
 // Unit testing code
     this.__test = {
     call: (name, params = []) => this[name].apply(this, params),
