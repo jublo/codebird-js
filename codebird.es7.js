@@ -971,7 +971,7 @@
      * @return string API method to call
      */
     _mapFnInsertSlashes(fn) {
-      return fn.split("_").join("/");
+      return fn.split("_").join("/").split(" ").join("_");
     }
 
     /**
