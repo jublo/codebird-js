@@ -1553,7 +1553,7 @@
           params = this._http_build_query(params);
         }
         post_fields = params;
-        if (this._use_proxy || multipart) {
+        if (this._use_proxy) {
           // force proxy for multipart base64
           url = url
             .replace(this._endpoint_base, this._endpoint_proxy)
